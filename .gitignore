@@ -19,6 +19,9 @@ var/
 # Serverless directories
 .serverless
 
+node_modules/
 venv/
 .vscode/
 node_modules/*
+secrets.json
+public_key

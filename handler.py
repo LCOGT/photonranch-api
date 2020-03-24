@@ -1,8 +1,10 @@
-import json, os, boto3, decimal, sys, time, datetime, re
+import json, os, boto3, decimal, sys, time, datetime, re, requests
 import psycopg2
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from botocore.client import Config
+
+from helpers import DecimalEncoder, _get_response, _get_body, _get_secret, get_db_connection
 
 
 BUCKET_NAME = 'photonranch-001'
@@ -13,50 +15,6 @@ S3_GET_TTL = 3600
 dynamodb_r = boto3.resource('dynamodb', REGION)
 ssm_c = boto3.client('ssm')
 
-
-
-# Helper class to convert a DynamoDB item to JSON.
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if o % 1 > 0:
-                return float(o)
-            else:
-                return int(o)
-        return super(DecimalEncoder, self).default(o)
-
-def _get_response(status_code, body):
-    if not isinstance(body, str):
-        body = json.dumps(body,cls=DecimalEncoder)
-    return {
-        "statusCode": status_code, 
-        "headers": {
-            # Required for CORS support to work
-            "Access-Control-Allow-Origin": "*",
-            # Required for cookies, authorization headers with HTTPS
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Headers": "*",
-        },
-        "body": body
-    }
-
-def _get_body(event):
-    try:
-        return json.loads(event.get("body", ""))
-    except:
-        print("event body could not be JSON decoded.")
-        return {}
-
-def _get_secret(key):
-    """
-    Some parameters are stored in AWS Systems Manager Parameter Store.
-    This replaces the .env variables we used to use with flask.
-    """
-    resp = ssm_c.get_parameter(
-    	Name=key,
-    	WithDecryption=True
-    )
-    return resp['Parameter']['Value']
 
 def _generate_image_packages(db_query, cursor):
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
@@ -269,20 +227,23 @@ def latest_images(event, context):
 
 
 def get_config(event, context):
+    print(json.dumps(event))
     site = event['pathParameters']['site']
     table = dynamodb_r.Table('site_configurations')
     config = table.get_item(Key={"site": site})
     return _get_response(200, config['Item'])
 def put_config(event, context):
+    print(json.dumps(event))
     site = event['pathParameters']['site']
     body = _get_body(event)
     table = dynamodb_r.Table('site_configurations')
     response = table.put_item(Item={
         "site": site,
-        "configuration": body['configuration']
+        "configuration": body
     })
     return _get_response(200,response)
 def all_config(event, context):
+    print(json.dumps(event))
     table = dynamodb_r.Table('site_configurations')
     response = table.scan()
     items = {}
@@ -320,6 +281,9 @@ def get_fits_header(event, context):
     return _get_response(200, result)
 
 def get_fits_01(event, context):
+    '''
+    Get the full raw (01) fits image url
+    '''
     base_filename = event['pathParameters']['baseFilename']
     site = base_filename[:3]
     key = f"{site}/raw_data/2019/{base_filename}-EX01.fits.bz2"
@@ -336,6 +300,9 @@ def get_fits_01(event, context):
     return _get_response(200, url)
 
 def get_fits_13(event, context):
+    '''
+    Get the smaller raw (13) fits image url
+    '''
     base_filename = event['pathParameters']['baseFilename']
     site = base_filename[:3]
     key = f"{site}/raw_data/2019/{base_filename}-EX13.fits.bz2"
@@ -587,12 +554,23 @@ def put_status(event, context):
     table = dynamodb_r.Table(table_name)
 
     status = table.put_item(Item=status_item)
+
+    # Also send status to the newer dynamodb table
+    url = f"https://status.photonranch.org/status/{site}/status"
+    payload = {
+        "status": _get_body(event),
+        "statusType": "deviceStatus",
+    }
+    print(f"payload: {payload}")
+    response = requests.post(url, data=json.dumps(payload))
+    print("alt status response: ")
+    print(response)
+
+
     return _get_response(200, {
         "site": site,
         "content": status
     })
-#def options_status(event, context): # for CORS
-    #return _get_response(200, '')
 
 if __name__=="__main__":
     print("hello")

@@ -15,28 +15,44 @@ plugins:
 
 custom:
 
+  # This is the 'variable' for the customDomain.basePath value, based on the stage.
+  # Run as `sls deploy --stage <stage_name>`
+  stage:
+    dev: api
+    test: test
+
   # Make sure to first run 'serverless create_domain'
   customDomain:
     domainName: 'api.photonranch.org'
-    basePath: 'api' 
+    basePath: ${self:custom.stage.${self:provider.stage}}
     stage: ${self:provider.stage}
     createRoute53Record: true
 
 provider:
   name: aws
-  stage: dev
+  stage: ${opt:stage, "dev"}
   runtime: python3.7
   region: us-east-1
-  #iamRoleStatements: 
-    #- Effect: Allow 
-      #Action: 'ssm.GetParameters'
-      #Resource: 
-        #- 'arn:aws:ssm:us-east-1:*:'
+  environment: 
+    AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
+    AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
+
   iamRoleStatements:
+    - Effect: Allow 
+      Action: 
+        - s3:GetObject
+        - s3:PutObject
+        - s3:ListBucket
+        - s3:ListBucketVersions
+      Resource: 
+        - "arn:aws:s3:::photonranch-001/*"
+        - "arn:aws:s3:::photonranch-001"
+
     - Effect: Allow
       Action:
         - ssm:GetParameter
       Resource: "arn:aws:ssm:${self:provider.region}:*:parameter/*"
+
     - Effect: Allow 
       Action: 
         - "dynamodb:PutItem"
@@ -47,6 +63,7 @@ provider:
         - "dynamodb:Query"
       Resource:
         - "arn:aws:dynamodb:${self:provider.region}:*:*"
+
     - Effect: Allow
       Action:
         - sqs:*
@@ -61,7 +78,7 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Access-Control-Allow-Origin'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
         ResponseType: DEFAULT_4XX
         RestApiId:
@@ -71,9 +88,9 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-        ResponseType: DEFAULT_4XX
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Access-Control-Allow-Origin'"
+        ResponseType: DEFAULT_5XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
     GatewayResponse:
@@ -105,11 +122,23 @@ functions:
     handler: handler.ping
     events:
       - http:
-          path: ping
+          path: ping/{pathParam}
           method: post
-          #authorizer:
-            #name: authorizerFunc
-            #resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!e
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Access-Control-Allow-Origin
+              - Access-Control-Allow-Credentials
   home:
     handler: handler.default
     events:
@@ -128,7 +157,7 @@ functions:
       - http:
           path: /{site}/download
           method: post
-    cors: true
+          cors: true
 
   latestImage:
     handler: handler.latest_image
@@ -136,14 +165,14 @@ functions:
       - http:
           path: /{site}/latest_image
           method: get
-    cors: true
+          cors: true
   latestKImages:
     handler: handler.latest_images
     events:
       - http:
           path: /{site}/latest_images/{k}
           method: get
-    cors: true
+          cors: true
 
   getConfig:
     handler: handler.get_config
@@ -151,28 +180,28 @@ functions:
       - http:
           path: /{site}/config
           method: get
-    cors: true
+          cors: true
   putConfig:
     handler: handler.put_config
     events:
       - http:
           path: /{site}/config
           method: put
-    cors: true
+          cors: true
   allConfig:
     handler: handler.all_config
     events:
       - http:
           path: /all/config
           method: get
-    cors: true
+          cors: true
   getFitsHeader:
     handler: handler.get_fits_header
     events:
       - http:
           path: fitsheader/{baseFilename}
           method: get
-    cors: true
+          cors: true
 
   getFits01:
     handler: handler.get_fits_01
@@ -180,14 +209,14 @@ functions:
       - http:
           path: fits01_url/{baseFilename}
           method: get
-    cors: true
+          cors: true
   getFits13:
     handler: handler.get_fits_13
     events:
       - http:
           path: fits13_url/{baseFilename}
           method: get
-    cors: true
+          cors: true
 
   filteredImageQuery:
     handler: handler.filtered_image_query
@@ -195,7 +224,7 @@ functions:
       - http:
           path: filtered_images
           method: get
-    cors: true
+          cors: true
 
   getImagesByUser:
     handler: handler.image_by_user
@@ -205,17 +234,17 @@ functions:
       - http:
           path: /image_by_user/{user_id}
           method: get
-    cors:
-      origin: '*'
-      headers:
-        - Content-Type
-        - X-Amz-Date
-        - Authorization
-        - X-Api-Key
-        - X-Amz-Security-Token
-        - X-Amz-User-Agent
-        - Access-Control-Allow-Origin
-        - Access-Control-Allow-Credentials
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Access-Control-Allow-Origin
+              - Access-Control-Allow-Credentials
 
   getCommand:
     handler: handler.get_command
@@ -223,21 +252,21 @@ functions:
       - http:
           path: /{site}/{mount}/command
           method: get
-    cors: true
+          cors: true
   postCommand:
     handler: handler.post_command
     events:
       - http:
           path: /{site}/{mount}/command
           method: post
-    cors: true
+          cors: true
   optionsCommand: # This is to fix CORS issues
     handler: handler.options_command
     events:
       - http:
           path: /{site}/{mount}/command
           method: options
-    cors: true
+          cors: true
 
   getStatus:
     handler: handler.get_status
@@ -245,11 +274,11 @@ functions:
       - http:
           path: /{site}/status
           method: get
-    cors: true
+          cors: true
   putStatus: # This is to fix CORS issues
     handler: handler.put_status
     events:
       - http:
           path: /{site}/status
           method: put
-    cors: true
+          cors: true
