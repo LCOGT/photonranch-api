@@ -484,6 +484,7 @@ def image_by_user(event, context):
     return _get_response(200, images)
 
 def get_command(event, context):
+    ''' DEPRECATED, see photonranch-jobs repository '''
     print(json.dumps(event))
     sqs_c = boto3.client('sqs', REGION)
     site = event['pathParameters']['site']
@@ -513,6 +514,7 @@ def get_command(event, context):
 
     return _get_response(200, 'Empy placeholder function')
 def post_command(event, context):
+    ''' DEPRECATED, see photonranch-jobs repository '''
     print(json.dumps(event))
     body = _get_body(event)
     body = json.dumps(body)
@@ -546,16 +548,13 @@ def get_status(event, context):
         "content": status['Item']
     })
 def put_status(event, context):
+
     status_item = _get_body(event)
     status_item["Type"] = "State"
 
     site = event['pathParameters']['site']
-    table_name = str(site)
-    table = dynamodb_r.Table(table_name)
 
-    status = table.put_item(Item=status_item)
-
-    # Also send status to the newer dynamodb table
+    # Send status to the newer dynamodb table
     url = f"https://status.photonranch.org/status/{site}/status"
     payload = {
         "status": _get_body(event),
@@ -567,9 +566,14 @@ def put_status(event, context):
     print(response)
 
 
+    # Send status to old table.
+    #table_name = str(site)
+    #table = dynamodb_r.Table(table_name)
+
+    #status = table.put_item(Item=status_item)
+
     return _get_response(200, {
         "site": site,
-        "content": status
     })
 
 if __name__=="__main__":

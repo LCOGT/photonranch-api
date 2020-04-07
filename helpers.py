@@ -1,6 +1,7 @@
 import boto3
 import json
 import psycopg2
+import decimal
 
 
 ssm_c = boto3.client('ssm')

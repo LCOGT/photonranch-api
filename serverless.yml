@@ -1,4 +1,5 @@
-org: photonadmin # Corresponds to the serverless.com account used for monitoring
+# serverless.yml
+org: photonadmin 
 app: photonranch
 
 service: photonranch-api
