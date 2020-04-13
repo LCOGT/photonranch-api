@@ -12,6 +12,11 @@ REGION = 'us-east-1'
 S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 
+db_host = _get_secret('db-host'),
+db_database = _get_secret('db-database'),
+db_user = _get_secret('db-user'),
+db_password = _get_secret('db-password')
+
 dynamodb_r = boto3.resource('dynamodb', REGION)
 ssm_c = boto3.client('ssm')
 
@@ -142,10 +147,10 @@ def latest_image(event, context):
     connection = None
     try:
         connection_params = {
-            'host': _get_secret('db-host'),
-            'database': _get_secret('db-database'),
-            'user': _get_secret('db-user'),
-            'password': _get_secret('db-password')
+            'host': db_host,
+            'database': db_database,
+            'user': db_user,
+            'password': db_password,
         }
         connection = psycopg2.connect(**connection_params)
         cursor = connection.cursor()
@@ -188,10 +193,10 @@ def latest_images(event, context):
     connection = None
     try:
         connection_params = {
-            'host': _get_secret('db-host'),
-            'database': _get_secret('db-database'),
-            'user': _get_secret('db-user'),
-            'password': _get_secret('db-password')
+            'host': db_host,
+            'database': db_database,
+            'user': db_user,
+            'password': db_password,
         }
         connection = psycopg2.connect(**connection_params)
         cursor = connection.cursor()
@@ -259,10 +264,10 @@ def get_fits_header(event, context):
     header = []
     connection = None
     connection_params = {
-        'host': _get_secret('db-host'),
-        'database': _get_secret('db-database'),
-        'user': _get_secret('db-user'),
-        'password': _get_secret('db-password')
+        'host': db_host,
+        'database': db_database,
+        'user': db_user,
+        'password': db_password,
     }
     connection = psycopg2.connect(**connection_params)
     cursor = connection.cursor()
@@ -325,10 +330,10 @@ def filtered_image_query(event, context):
 
     connection = None
     connection_params = {
-        'host': _get_secret('db-host'),
-        'database': _get_secret('db-database'),
-        'user': _get_secret('db-user'),
-        'password': _get_secret('db-password')
+        'host': db_host,
+        'database': db_database,
+        'user': db_user,
+        'password': db_password,
     }
     connection = psycopg2.connect(**connection_params)
     cursor = connection.cursor()
@@ -410,10 +415,10 @@ def image_by_user(event, context):
 
     connection = None
     connection_params = {
-        'host': _get_secret('db-host'),
-        'database': _get_secret('db-database'),
-        'user': _get_secret('db-user'),
-        'password': _get_secret('db-password')
+        'host': db_host,
+        'database': db_database,
+        'user': db_user,
+        'password': db_password,
     }
     connection = psycopg2.connect(**connection_params)
     cursor = connection.cursor()
@@ -578,8 +583,6 @@ def put_status(event, context):
 
 if __name__=="__main__":
     print("hello")
-    db_host = _get_secret('db-host')
-    print(db_host)
 
     streamHandlerEvent = {
         "Records": [
