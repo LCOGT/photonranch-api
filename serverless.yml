@@ -150,13 +150,13 @@ functions:
     handler: handler.upload
     events:
       - http:
-          path: /{site}/upload
+          path: /upload
           method: post
   download:
     handler: handler.download
     events:
       - http:
-          path: /{site}/download
+          path: /download
           method: post
           cors: true
 
@@ -189,6 +189,13 @@ functions:
           path: /{site}/config
           method: put
           cors: true
+  deleteConfig:
+    handler: handler.delete_config
+    events:
+      - http:
+          path: /{site}/config
+          method: delete
+          cors: true
   allConfig:
     handler: handler.all_config
     events:
@@ -204,21 +211,6 @@ functions:
           method: get
           cors: true
 
-  getFits01:
-    handler: handler.get_fits_01
-    events:
-      - http:
-          path: fits01_url/{baseFilename}
-          method: get
-          cors: true
-  getFits13:
-    handler: handler.get_fits_13
-    events:
-      - http:
-          path: fits13_url/{baseFilename}
-          method: get
-          cors: true
-
   filteredImageQuery:
     handler: handler.filtered_image_query
     events:
@@ -227,25 +219,26 @@ functions:
           method: get
           cors: true
 
-  getImagesByUser:
-    handler: handler.image_by_user
-    memorySize: 3008
-    timeout: 20
-    events:
-      - http:
-          path: /image_by_user/{user_id}
-          method: get
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - Access-Control-Allow-Origin
-              - Access-Control-Allow-Credentials
+# pending deletion
+  #getImagesByUser:
+    #handler: handler.image_by_user
+    #memorySize: 3008
+    #timeout: 20
+    #events:
+      #- http:
+          #path: /image_by_user/{user_id}
+          #method: get
+          #cors:
+            #origin: '*'
+            #headers:
+              #- Content-Type
+              #- X-Amz-Date
+              #- Authorization
+              #- X-Api-Key
+              #- X-Amz-Security-Token
+              #- X-Amz-User-Agent
+              #- Access-Control-Allow-Origin
+              #- Access-Control-Allow-Credentials
 
   getCommand:
     handler: handler.get_command
@@ -260,6 +253,10 @@ functions:
       - http:
           path: /{site}/{mount}/command
           method: post
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
           cors: true
   optionsCommand: # This is to fix CORS issues
     handler: handler.options_command
@@ -276,10 +273,52 @@ functions:
           path: /{site}/status
           method: get
           cors: true
-  putStatus: # This is to fix CORS issues
+  putStatus: 
     handler: handler.put_status
     events:
       - http:
           path: /{site}/status
           method: put
           cors: true
+
+  exampleQuery: 
+    handler: weather.exampleQuery
+    events:
+      - http:
+          path: /example-query
+          method: post
+          cors: true
+
+  weatherGraphQuery: 
+    handler: weather.weatherGraphQuery
+    events:
+      - http:
+          path: /weather/graph-data
+          method: post
+          cors: true
+
+  addWeatherStatus:
+    handler: weather.writeWeather
+    events:
+      - http:
+          path: /weather/write
+          method: post
+          cors: true
+
+  testEphem:
+    handler: handler.testEphem
+    events:
+      - http:
+          path: /testephem
+          method: post
+          cors: true
+  testSkyField:
+    handler: handler.testSkyField
+    events:
+      - http:
+          path: /testskyfield
+          method: post
+          cors: true
+
+
+  

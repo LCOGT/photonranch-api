@@ -12,9 +12,9 @@ REGION = 'us-east-1'
 S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 
-db_host = _get_secret('db-host'),
-db_database = _get_secret('db-database'),
-db_user = _get_secret('db-user'),
+db_host = _get_secret('db-host')
+db_database = _get_secret('db-database')
+db_user = _get_secret('db-user')
 db_password = _get_secret('db-password')
 
 dynamodb_r = boto3.resource('dynamodb', REGION)
@@ -31,8 +31,11 @@ def _generate_image_packages(db_query, cursor):
         'sort_date',
         'right_ascension',
         'declination',
+        'ex00_fits_exists',
         'ex01_fits_exists',
+        'ex10_fits_exists',
         'ex13_fits_exists',
+        'ex10_jpg_exists',
         'ex13_jpg_exists',
         'altitude',
         'azimuth',
@@ -61,20 +64,28 @@ def _generate_image_packages(db_query, cursor):
             base_filename = image_package['base_filename']
             site = image_package['site']
 
-            jpg13_url = ''
-            # Get urls to some of the images, if they exist
+            # Get url for the jpg
+            jpg_url = ''
             if image_package['ex13_jpg_exists']: 
-                full_jpg13_path = f"{site}/raw_data/2019/{base_filename}-EX13.jpg"
-                jpg13_url = s3.generate_presigned_url(
+                full_jpg13_path = f"data/{base_filename}-EX13.jpg"
+                jpg_url = s3.generate_presigned_url(
                     ClientMethod="get_object",
                     Params={"Bucket": BUCKET_NAME, "Key": full_jpg13_path},
                     ExpiresIn=S3_GET_TTL
                 )
-            image_package.update({'jpg13_url': jpg13_url})
+            elif image_package['ex10_jpg_exists']: 
+                full_jpg10_path = f"data/{base_filename}-EX10.jpg"
+                jpg_url = s3.generate_presigned_url(
+                    ClientMethod="get_object",
+                    Params={"Bucket": BUCKET_NAME, "Key": full_jpg10_path},
+                    ExpiresIn=S3_GET_TTL
+                )
+            image_package.update({'jpg_url':jpg_url})
 
-            image_packages.append(image_package)
+            if image_package['ex10_jpg_exists']: 
+                image_packages.append(image_package)
     except AttributeError:
-        print('There was an error in the image package generation process. Check that sttributes line up with query results.')
+        print('There was an error in the image package generation process. Check that attributes line up with query results.')
 
     return image_packages
 
@@ -87,15 +98,15 @@ def default(event, context):
 
 def upload(event, context): 
     """
-    A request for a presigned post url requires the name of the object
-    and the path at which it is stored. This is sent in a single string under
-    the key 'object_name' in the json-string body of the request.
+    A request for a presigned post url requires the name of the object.
+    This is sent in a single string under the key 'object_name' in the 
+    json-string body of the request.
 
     Example request body:
-    '{"object_name":"raw_data/2019/a_file.txt"}'
+    '{"object_name":"a_file.txt"}'
 
     This request will save an image into the main s3 bucket as:
-    MAIN_BUCKET_NAME/site/raw_data/2019/img001.fits
+    MAIN_BUCKET_NAME/data/a_file.txt
 
     * * *
 
@@ -110,8 +121,7 @@ def upload(event, context):
     """
     print(json.dumps(event))
     body = _get_body(event)
-    site = event['pathParameters']['site']
-    key = f"{site}/{body['object_name']}"
+    key = 'data/'+body['object_name']
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     url = json.dumps(s3.generate_presigned_post(
         Bucket = BUCKET_NAME,
@@ -124,8 +134,7 @@ def upload(event, context):
 def download(event, context): 
     print(json.dumps(event))
     body = _get_body(event)
-    site = event['pathParameters']['site']
-    key = f"{site}/{body['object_name']}"
+    key = "data/"+body['object_name']
     params = {
         "Bucket": BUCKET_NAME,
         "Key": key,
@@ -163,7 +172,13 @@ def latest_image(event, context):
     #latest_k_files = rds.get_last_modified_by_site(cursor, connection, site, k)
     sql = (
         "SELECT image_id, base_filename, site, capture_date, sort_date, right_ascension, declination, "
-        "ex01_fits_exists, ex13_fits_exists, ex13_jpg_exists, altitude, azimuth, filter_used, airmass, "
+        "ex00_fits_exists, " 
+        "ex01_fits_exists, " 
+        "ex10_fits_exists, " 
+        "ex13_fits_exists, " 
+        "ex10_jpg_exists, " 
+        "ex13_jpg_exists, " 
+        "altitude, azimuth, filter_used, airmass, "
         "exposure_time, created_user "
         "FROM images "
         "WHERE site = %s "
@@ -209,7 +224,13 @@ def latest_images(event, context):
     #latest_k_files = rds.get_last_modified_by_site(cursor, connection, site, k)
     sql = (
         "SELECT image_id, base_filename, site, capture_date, sort_date, right_ascension, declination, "
-        "ex01_fits_exists, ex13_fits_exists, ex13_jpg_exists, altitude, azimuth, filter_used, airmass, "
+        "ex00_fits_exists, " 
+        "ex01_fits_exists, " 
+        "ex10_fits_exists, " 
+        "ex13_fits_exists, " 
+        "ex10_jpg_exists, " 
+        "ex13_jpg_exists, " 
+        "altitude, azimuth, filter_used, airmass, "
         "exposure_time, created_user "
         "FROM images "
         "WHERE site = %s "
@@ -247,6 +268,13 @@ def put_config(event, context):
         "configuration": body
     })
     return _get_response(200,response)
+def delete_config(event, context):
+    print(json.dumps(event))
+    site = event['pathParameters']['site']
+    table = dynamodb_r.Table('site_configurations')
+    response = table.delete_item(Key={"site": site})
+    return _get_response(200,response)
+
 def all_config(event, context):
     print(json.dumps(event))
     table = dynamodb_r.Table('site_configurations')
@@ -285,43 +313,6 @@ def get_fits_header(event, context):
     result = json.loads(header[0])
     return _get_response(200, result)
 
-def get_fits_01(event, context):
-    '''
-    Get the full raw (01) fits image url
-    '''
-    base_filename = event['pathParameters']['baseFilename']
-    site = base_filename[:3]
-    key = f"{site}/raw_data/2019/{base_filename}-EX01.fits.bz2"
-    params = {
-        "Bucket": BUCKET_NAME,
-        "Key": key,
-    }
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = s3.generate_presigned_url(
-        ClientMethod='get_object',
-        Params=params,
-        ExpiresIn=S3_GET_TTL
-    )
-    return _get_response(200, url)
-
-def get_fits_13(event, context):
-    '''
-    Get the smaller raw (13) fits image url
-    '''
-    base_filename = event['pathParameters']['baseFilename']
-    site = base_filename[:3]
-    key = f"{site}/raw_data/2019/{base_filename}-EX13.fits.bz2"
-    params = {
-        "Bucket": BUCKET_NAME,
-        "Key": key,
-    }
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = s3.generate_presigned_url(
-        ClientMethod='get_object',
-        Params=params,
-        ExpiresIn=S3_GET_TTL
-    )
-    return _get_response(200, url)
 
 def filtered_image_query(event, context):
     print(json.dumps(event))
@@ -342,7 +333,13 @@ def filtered_image_query(event, context):
     #images = rds.filtered_images(cursor, filter_params)
     sql = [
     "SELECT image_id, base_filename, site, capture_date, sort_date, right_ascension, declination, "
-    "ex01_fits_exists, ex13_fits_exists, ex13_jpg_exists, altitude, azimuth, filter_used, airmass, "
+    "ex00_fits_exists, " 
+    "ex01_fits_exists, " 
+    "ex10_fits_exists, " 
+    "ex13_fits_exists, " 
+    "ex10_jpg_exists, " 
+    "ex13_jpg_exists, " 
+    "altitude, azimuth, filter_used, airmass, "
     "exposure_time, user_name "
 
     "FROM images img "
@@ -405,88 +402,89 @@ def filtered_image_query(event, context):
     
     return _get_response(200, images)
 
-def image_by_user(event, context):
-    print(json.dumps(event))
+# pending deletion
+#def image_by_user(event, context):
+    #print(json.dumps(event))
 
-    #filter_params = event['queryStringParameters']
-    filter_params = {}
+    ##filter_params = event['queryStringParameters']
+    #filter_params = {}
 
-    username = event['pathParameters']['user_id']
+    #username = event['pathParameters']['user_id']
 
-    connection = None
-    connection_params = {
-        'host': db_host,
-        'database': db_database,
-        'user': db_user,
-        'password': db_password,
-    }
-    connection = psycopg2.connect(**connection_params)
-    cursor = connection.cursor()
+    #connection = None
+    #connection_params = {
+        #'host': db_host,
+        #'database': db_database,
+        #'user': db_user,
+        #'password': db_password,
+    #}
+    #connection = psycopg2.connect(**connection_params)
+    #cursor = connection.cursor()
 
-    sql = [
-    "SELECT image_id, base_filename, site, capture_date, sort_date, right_ascension, declination, "
-    "ex01_fits_exists, ex13_fits_exists, ex13_jpg_exists, altitude, azimuth, filter_used, airmass, "
-    "exposure_time, user_name "
+    #sql = [
+    #"SELECT image_id, base_filename, site, capture_date, sort_date, right_ascension, declination, "
+    #"ex01_fits_exists, ex13_fits_exists, ex13_jpg_exists, altitude, azimuth, filter_used, airmass, "
+    #"exposure_time, user_name "
 
-    "FROM images img "
-    "INNER JOIN users usr "
-    "ON usr.user_id = img.created_user "
-    "WHERE usr.user_name = %s "
-    ]
+    #"FROM images img "
+    #"INNER JOIN users usr "
+    #"ON usr.user_id = img.created_user "
+    #"WHERE usr.user_name = %s "
+    #]
     
-    filename = filter_params.get('filename', None)
-    exposure_time_min = filter_params.get('exposure_time_min', None)
-    exposure_time_max = filter_params.get('exposure_time_max', None)
-    site = filter_params.get('site', None)
-    filter = filter_params.get('filter', None)
-    start_date = filter_params.get('start_date', None)
-    end_date = filter_params.get('end_date', None)
+    #filename = filter_params.get('filename', None)
+    #exposure_time_min = filter_params.get('exposure_time_min', None)
+    #exposure_time_max = filter_params.get('exposure_time_max', None)
+    #site = filter_params.get('site', None)
+    #filter = filter_params.get('filter', None)
+    #start_date = filter_params.get('start_date', None)
+    #end_date = filter_params.get('end_date', None)
 
 
-    # We need to query at least one parameter. 
-    params = [username, ]
+    ## We need to query at least one parameter. 
+    #params = [username, ]
 
-    if filename:
-        sql.append("AND base_filename=%s ")
-        params.append(filename)
+    #if filename:
+        #sql.append("AND base_filename=%s ")
+        #params.append(filename)
 
-    if exposure_time_min and exposure_time_max:
-        sql.append("AND exposure_time BETWEEN %s AND %s ")
-        params.append(exposure_time_min)
-        params.append(exposure_time_max)
-    elif exposure_time_min:
-        sql.append("AND exposure_time=%s ")
-        params.append(exposure_time_min)
+    #if exposure_time_min and exposure_time_max:
+        #sql.append("AND exposure_time BETWEEN %s AND %s ")
+        #params.append(exposure_time_min)
+        #params.append(exposure_time_max)
+    #elif exposure_time_min:
+        #sql.append("AND exposure_time=%s ")
+        #params.append(exposure_time_min)
 
-    if site:
-        sql.append("AND site= %s ")
-        params.append(site)
+    #if site:
+        #sql.append("AND site= %s ")
+        #params.append(site)
 
-    if filter:
-        sql.append("AND filter_used=%s ")
-        params.append(filter)
+    #if filter:
+        #sql.append("AND filter_used=%s ")
+        #params.append(filter)
 
-    if start_date and end_date:
-        sql.append("AND capture_date BETWEEN %s AND %s ")
-        params.append(start_date)
-        params.append(end_date)
+    #if start_date and end_date:
+        #sql.append("AND capture_date BETWEEN %s AND %s ")
+        #params.append(start_date)
+        #params.append(end_date)
 
-    sql.append("ORDER BY sort_date DESC ")
-    sql = ' '.join(sql)
-    params = tuple(params)
+    #sql.append("ORDER BY sort_date DESC ")
+    #sql = ' '.join(sql)
+    #params = tuple(params)
 
-    try:
-        cursor.execute(sql, params)
-        db_query = cursor.fetchall()
-        images = _generate_image_packages(db_query, cursor)
-    except (Exception, psycopg2.Error) as error :
-        print("Error while retrieving records:", error)
-        return _get_response(200,'error while retrieving records')
+    #try:
+        #cursor.execute(sql, params)
+        #db_query = cursor.fetchall()
+        #images = _generate_image_packages(db_query, cursor)
+    #except (Exception, psycopg2.Error) as error :
+        #print("Error while retrieving records:", error)
+        #return _get_response(200,'error while retrieving records')
 
-    if connection is not None:
-        connection.close()
+    #if connection is not None:
+        #connection.close()
     
-    return _get_response(200, images)
+    #return _get_response(200, images)
 
 def get_command(event, context):
     ''' DEPRECATED, see photonranch-jobs repository '''
@@ -580,6 +578,31 @@ def put_status(event, context):
     return _get_response(200, {
         "site": site,
     })
+
+
+import ephem
+def testEphem(event, context):
+    mars = ephem.Mars()
+    mars.compute('2008/1/1')
+    print(mars.ra)
+    print(mars.dec)
+    return _get_response(200, mars.ra)
+
+from skyfield.api import load
+def testSkyField(event, context):
+
+    planets = load('de421.bsp')
+    earth, mars = planets['earth'], planets['mars']
+
+    ts = load.timescale(builtin=True)
+    t = ts.now()
+    position = earth.at(t).observe(mars)
+    ra, dec, distance = position.radec()
+
+    print(ra)
+    print(dec)
+    print(distance)
+    return _get_response(200, [str(ra),str(dec),str(distance)])
 
 if __name__=="__main__":
     print("hello")

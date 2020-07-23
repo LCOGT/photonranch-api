@@ -28,27 +28,18 @@ def _get_response(status_code, body):
             # Required for cookies, authorization headers with HTTPS
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Headers": "*",
+            "Content-Type": "application/json",
         },
         "body": body
     }
 
 def _get_body(event):
     try:
-        return json.loads(event.get("body", ""))
+        return json.loads(event.get("body", ""), parse_float=decimal.Decimal)
     except:
         print("event body could not be JSON decoded.")
         return {}
 
-def _get_secret(key):
-    """
-    Some parameters are stored in AWS Systems Manager Parameter Store.
-    This replaces the .env variables we used to use with flask.
-    """
-    resp = ssm_c.get_parameter(
-    	Name=key,
-    	WithDecryption=True
-    )
-    return resp['Parameter']['Value']
 def _get_secret(key):
     """
     Some parameters are stored in AWS Systems Manager Parameter Store.
