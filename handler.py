@@ -4,21 +4,15 @@ from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from botocore.client import Config
 
+from helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
+from helpers import dynamodb_r, ssm_c
 from helpers import DecimalEncoder, _get_response, _get_body, _get_secret, get_db_connection
-
-
-BUCKET_NAME = 'photonranch-001'
-REGION = 'us-east-1'
-S3_PUT_TTL = 300
-S3_GET_TTL = 3600
 
 db_host = _get_secret('db-host')
 db_database = _get_secret('db-database')
 db_user = _get_secret('db-user')
 db_password = _get_secret('db-password')
 
-dynamodb_r = boto3.resource('dynamodb', REGION)
-ssm_c = boto3.client('ssm')
 
 
 def _generate_image_packages(db_query, cursor):

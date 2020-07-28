@@ -320,5 +320,13 @@ functions:
           method: post
           cors: true
 
+  siteEvents:
+    handler: events_handler.siteevents
+    events:
+      - http:
+          path: /events
+          method: get
+          cors: true
+
 
   

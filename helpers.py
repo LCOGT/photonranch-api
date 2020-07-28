@@ -4,6 +4,12 @@ import psycopg2
 import decimal
 
 
+BUCKET_NAME = 'photonranch-001'
+REGION = 'us-east-1'
+S3_PUT_TTL = 300
+S3_GET_TTL = 3600
+
+dynamodb_r = boto3.resource('dynamodb', REGION)
 ssm_c = boto3.client('ssm')
 
 
