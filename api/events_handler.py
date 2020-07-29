@@ -11,7 +11,7 @@ def _get_site_config(site):
     config = table.get_item(Key={"site": site})
     if "Item" not in config:
         raise LookupError("bad key")
-    print(config["Item"])
+    #print(config["Item"])
     #print(config["Item"]["configuration"]["events"]["Sun Rise"])
     return config["Item"]["configuration"]
 
@@ -56,6 +56,8 @@ if __name__=="__main__":
 
     import requests
     url = "https://api.photonranch.org/test/events?site=saf"
+    print(json.dumps(requests.get(url).json(), indent=2))
+    url = "https://api.photonranch.org/test/all/config"
     print(json.dumps(requests.get(url).json(), indent=2))
     #c = _get_site_config('saf')
     #print(c.keys())

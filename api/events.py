@@ -12,6 +12,10 @@ MORNBIASDARKDURATION = 90/1440          #1.5 min
 LONGESTSCREEN = (75/60)/1440            #1 min
 LONGESTDARK = (385/60)/1440             #6 min
 
+def function1(x):
+    ''' used to verify unit tests '''
+    return x
+
 class Events:
 
     def __init__(self, lat:float, lng:float, elevation:float, reference_ambient:float, reference_pressure:float):
@@ -130,7 +134,6 @@ class Events:
         sun.compute()
         moon = ephem.Moon()
         moon.compute()
-        #if loud: print('Sun: ', sun.ra, sun.dec, 'Moon: ', moon.ra, moon.dec)
         ptr = ephem.Observer()     #Photon Ranch
         ptr.lat = str(self.siteLatitude)
         ptr.lon = str(self.siteLongitude)
@@ -138,9 +141,7 @@ class Events:
         ptr.compute_pressure()
         ptr.temp = self.siteRefTemp
         sun.compute(ptr)
-        #if loud: print('Sun Now: ', sun.ra, sun.dec, sun.az, sun.alt, ptr.date)
         moon.compute(ptr)
-        # if loud: print('Moon Now: ', moon.ra, moon.dec, moon.az, moon.alt, ptr.date)
         return sun.ra, sun.dec, degrees(sun.alt), degrees(sun.az), moon.ra, moon.dec,\
             degrees(moon.alt), moon.size/3600
 
@@ -149,7 +150,6 @@ class Events:
         sun.compute()
         moon = ephem.Moon()
         moon.compute()
-        #if loud: print('Sun: ', sun.ra, sun.dec, 'Moon: ', moon.ra, moon.dec)
         ptr = ephem.Observer()     #Photon Ranch
         ptr.lat = str(self.siteLatitude)
         ptr.lon = str(self.siteLongitude)
@@ -157,17 +157,14 @@ class Events:
         ptr.compute_pressure()
         ptr.temp = self.siteRefTemp
         sun.compute(ptr)
-        #if loud: print('Sun Now: ', sun.ra, sun.dec, sun.az, sun.alt, ptr.date)
         moon.compute(ptr)
-        # if loud: print('Moon Now: ', moon.ra, moon.dec, moon.az, moon.alt, ptr.date)
         return  degrees(sun.az)
 
     def _calcEveFlatValues(self, ptr, sun, pWhen, skyFlatEnd, loud=False, now_spot=False):
+
         # NB This needs to deal withthe Moon being too close!
         ptr.date = pWhen
         sun.compute(ptr)
-        if loud: print('Sunset, sidtime:  ', pWhen, ptr.sidereal_time())
-        if loud: print('Eve Open  Sun:  ', sun.ra, sun.dec, sun.az, sun.alt)
         SunAz1 = degrees(sun.az) - 180
         while  SunAz1 < 0:
             SunAz1 += 360
@@ -176,62 +173,45 @@ class Events:
             SunAlt1 = liftAlt
         else:
             SunAlt1 = 180 - liftAlt
-        if loud: print('Flat spot at:  ', SunAz1, SunAlt1)
         FlatStartRa, FlatStartDec = ptr.radec_of(str(SunAz1), str(SunAlt1))
-        if loud: print('Ra/Dec of Flat spot:  ', FlatStartRa, FlatStartDec)
         ptr.date = skyFlatEnd
         sun.compute(ptr)
-        if loud: print('Flat End  Sun:  ', sun.ra, sun.dec, sun.az, sun.alt)#SunRa = float(sun.ra)
         SunAz2 = degrees(sun.az) - 180
         SunAlt2 =  degrees(sun.alt) + 105
         if SunAlt2 > 90.:
             SunAlt2 = 180 - degrees(sun.alt) + 105
-        if loud: print('Flatspot:  ', SunAz1, SunAlt1, SunAz2, SunAlt2)
         FlatEndRa, FlatEndDec = ptr.radec_of(str(SunAz2), str(SunAlt2))
-        if loud: print('Eve Flat:  ', FlatStartRa, FlatStartDec, FlatEndRa, FlatEndDec)
         span = 86400*(skyFlatEnd - pWhen)
-        if loud: print('Duration:  ', str(round(span/60, 2)) +   'min')
         RaDot = round(3600*degrees(FlatEndRa - FlatStartRa)/span, 4)
         DecDot = round(3600*degrees(FlatEndDec - FlatStartDec)/span, 4)
-        if loud: print('Eve Rates:  ', RaDot, DecDot)
         if now_spot:
-            if loud: print(type(FlatStartRa))
-            if loud: print('ReturningRa/Dec of Flat spot:  ', FlatStartRa, FlatStartDec)
             return  degrees(FlatStartRa)/15, degrees(FlatStartDec)
         else:
             return (degrees(FlatStartRa)/15, degrees(FlatStartDec), \
             degrees(FlatEndRa)/15, degrees(FlatEndDec), RaDot, DecDot)
 
     def _calcMornFlatValues(self, ptr, sun, pWhen, sunZ88Cl, sunrise, loud=False):
+
         ptr.date = pWhen
         sun.compute(ptr)
-        if loud: print()
-        if loud: print('Morn Flat Start, sidtime:  ', pWhen, ptr.sidereal_time())
-        if loud: print('Morn Flat Start Sun:  ', sun.ra, sun.dec, sun.az, sun.alt)
         SunAz1 = degrees(sun.az) + 180
         SunAlt1 = (degrees(sun.alt) + 105)
         if SunAlt1 > 90.:
             SunAlt1 = 180 -(degrees(sun.alt) + 105)
-        print('Flat spot at:  ', SunAz1, SunAlt1)
         FlatStartRa, FlatStartDec = ptr.radec_of(str(SunAz1), str(SunAlt1))
-        print('Ra/Dec of Flat spot:  ', FlatStartRa, FlatStartDec)
         ptr.date = sunZ88Cl
         sun.compute(ptr)
-        if loud: print('Flat End  Sun:  ', sun.ra, sun.dec, sun.az, sun.alt)#SunRa = float(sun.ra)
         SunAz2 = degrees(sun.az) + 180
         SunAlt2 = 180 -(degrees(sun.alt) + 105)
-        if loud: print('Flatspot:  ', SunAz1, SunAlt1, SunAz2, SunAlt2)
         FlatEndRa, FlatEndDec = ptr.radec_of(str(SunAz2), str(SunAlt2))
-        print('Morn Flat:  ', FlatStartRa, FlatStartDec, FlatEndRa, FlatEndDec)
         span = 86400*(sunrise - pWhen)
-        print('Duration:  ', str(round(span/60, 2)) +   'min')
         RaDot = round(3600*degrees(FlatEndRa - FlatStartRa)/span, 4)
         DecDot = round(3600*degrees(FlatEndDec - FlatStartDec)/span, 4)
-        print('Morn Rates:  ', RaDot, DecDot, '\n')
         return (degrees(FlatStartRa)/15, degrees(FlatStartDec), \
                 degrees(FlatEndRa)/15, degrees(FlatEndDec), RaDot, DecDot)
 
     def _sunPhaseAngle(self, offsetHrs=0.0):
+
         dayNow = ephem.now()
         ptr = ephem.Observer()     #Photon Ranch
         ptr.lat = str(self.siteLatitude)
@@ -252,9 +232,7 @@ class Events:
         maz = degrees(moon.az)
         mal = degrees(moon.alt)
 
-        if loud: print('Sun Now: ', saz, degrees(sun.alt))
         moon.compute(ptr)
-        if loud: print('Moon Now: ', degrees(moon.az), degrees(moon.alt))
         return round(saz, 2)
 
     #############################
@@ -271,7 +249,6 @@ class Events:
         #sun.compute(dayNow)
         moon = ephem.Moon()
         #moon.compute(dayNow)
-        #if loud: print('Sun: ', sun.ra, sun.dec, 'Moon: ', moon.ra, moon.dec)
         ptr = ephem.Observer()     #Photon Ranch
         ptr.date = dayNow
         ptr.lat = str(self.siteLatitude)
@@ -285,7 +262,6 @@ class Events:
         sunrise = ptr.next_rising(sun)
         ptr.horizon = '2'
         sun.compute(ptr)
-        #if loud: print('Sun 2: ', sun.ra, sun.dec, sun.az, sun.alt)
         ops_win_begin = sunset - 60/1440
         return (ops_win_begin, sunset, sunrise, ephem.now())
 
@@ -294,7 +270,6 @@ class Events:
         Return a tuple with the (alt, az) of the flattest part of the sky.
         '''
         ra, dec, sun_alt, sun_az, *other = self._sunNow()
-        print('Sun:  ', sun_az, sun_alt)
         sun_az2 = sun_az - 180.
         if sun_az2 < 0:
             sun_az2 += 360.
@@ -303,7 +278,6 @@ class Events:
             sun_alt2 = 180 - sun_alt2
         elif sun_alt2 <=90:
             sun_az2 = sun_az
-
         return(sun_az2, sun_alt2)
 
     def illuminationNow(self):
@@ -335,23 +309,19 @@ class Events:
         ephem.tomorrow = ephem.Date(dayNow + 1)
         dayStr = str(ephem.date).split()[0]
         dayStr = dayStr.split('/')
-        #print('Day String', dayStr)
         if len(dayStr[1]) == 1:
             dayStr[1] = '0' + dayStr[1]
         if len(dayStr[2]) == 1:
             dayStr[2] = '0' + dayStr[2]
-        #print('Day String', dayStr)
         self.day_directory = dayStr[0] + dayStr[1] + dayStr[2]
         day_str = self.day_directory
 
         dayStr = str(ephem.tomorrow).split()[0]
         dayStr = dayStr.split('/')
-        #print('Day String', dayStr)
         if len(dayStr[1]) == 1:
             dayStr[1] = '0' + dayStr[1]
         if len(dayStr[2]) == 1:
             dayStr[2] = '0' + dayStr[2]
-        #print('Day String', dayStr)
         self.day_tomorrow = dayStr[0] + dayStr[1] + dayStr[2]
 
         return self.day_directory
@@ -362,12 +332,10 @@ class Events:
         self.compute_day_directory() 
 
         # print('Events module loaded at: ', ephem.now(), round((ephem.now()), 4))
-        loud = False
         sun = ephem.Sun()
         #sun.compute(dayNow)
         moon = ephem.Moon()
         #moon.compute(dayNow)
-        if loud: print('Sun: ', sun.ra, sun.dec, 'Moon: ', moon.ra, moon.dec)
         ptr = ephem.Observer()     #Photon Ranch
         ptr.date = dayNow
         ptr.lat = str(self.siteLatitude)
@@ -381,33 +349,26 @@ class Events:
         sunrise = ptr.next_rising(sun)
         ptr.horizon = '2'
         sun.compute(ptr)
-        if loud: print('Sun 2: ', sun.ra, sun.dec, sun.az, sun.alt)
         ops_win_begin = sunset - 60/1440      # Needs to come from site config  NB 1 hour
         ptr.horizon = '-1.5'
         sun.compute(ptr)
-        if loud: print('Sun -6: ', sun.ra, sun.dec, sun.az, sun.alt)
         eve_skyFlatBegin = sunset -30/1440. #ptr.next_setting(sun)
         morn_skyFlatEnd = ptr.next_rising(sun)
         ptr.horizon = '-6'
         sun.compute(ptr)
-        if loud: print('Sun -6: ', sun.ra, sun.dec, sun.az, sun.alt)
         civilDusk = ptr.next_setting(sun)
         civilDawn = ptr.next_rising(sun)
         ptr.horizon = '-11.75'
         sun.compute(ptr)
-        if loud: print('Sun -14.9: ', sun.ra, sun.dec, sun.az, sun.alt)
         eve_skyFlatEnd = ptr.next_setting(sun)
         morn_skyFlatBegin = ptr.next_rising(sun)
         ptr.horizon = '-12'
         sun.compute(ptr)
-        if loud: print('Sun -12: ', sun.ra, sun.dec, sun.az, sun.alt)
         nauticalDusk = ptr.next_setting(sun)
         nauticalDawn = ptr.next_rising(sun)
 
         ptr.horizon = '-18'
         sun.compute(ptr)
-        if loud: print('Sun -18: ', sun.ra, sun.dec, sun.az, sun.alt)
-        if loud: print('Dark: ', sun.az, sun.alt)
         astroDark = ptr.next_setting(sun)
         astroEnd = ptr.next_rising(sun)
         duration = (astroEnd - astroDark)*24
@@ -415,8 +376,6 @@ class Events:
         moon.compute(ptr)
         sun=ephem.Sun()
         sun.compute(ptr)
-        if loud: print('Middle night  Sun:  ', sun.ra, sun.dec, sun.az, sun.alt)
-        if loud: print('Middle night Moon:  ', moon.ra, moon.dec)#, moon.az, moon.alt)
         mid_moon_ra = moon.ra
         mid_moon_dec = moon.dec
         mid_moon_phase = moon.phase
@@ -441,75 +400,59 @@ class Events:
         endMornBiasDark = beginMornBiasDark + MORNBIASDARKDURATION
         beginReductions = endMornBiasDark + LONGESTDARK
 
-        #  NB NB Should add sit time to this report.
-        print('Events module reporting for duty. \n')
-        print('Ephem date     :    ', dayNow)
-        print("Julian Day     :    ")
-        print("MJD            :    ")
-        print('Day_Directory  :    ', self.day_directory)
-        print('Next day       :    ', self.day_tomorrow)
-        print('Night Duration :    ', str(round(duration, 2)) + ' hr')
-        print('Moon Ra; Dec   :    ', round(mid_moon_ra, 2), ";  ", round(mid_moon_dec, 1))
-        print('Moon phase %   :    ', round(mid_moon_phase, 1), '%\n')
-        print("Key events for the evening, presented by the Solar System: \n")
-        evnt = [('Eve Bias Dark      ', ephem.Date(beginEveBiasDark)),
-                ('End Eve Bias Dark  ', ephem.Date(endEveBiasDark)),
-                ('Eve Scrn Flats     ', ephem.Date(beginEveScreenFlats)),
-                ('End Eve Scrn Flats ', ephem.Date(endEveScreenFlats)),
-                ('Ops Window Start   ', ephem.Date(ops_win_begin)),  #Enclosure may open.
-                ('Cool Down, Open    ', ephem.Date(ops_win_begin + 0.5/1440)),
-                ('Eve Sky Flats      ', ephem.Date(eve_skyFlatBegin)),
-                ('Sun Set            ', sunset),
-                ('Civil Dusk         ', civilDusk),
-                ('End Eve Sky Flats  ', eve_skyFlatEnd),
-                ('Clock & Auto Focus ', ephem.Date(eve_skyFlatEnd + 1/1440.)),
-                ('Naut Dusk          ', nauticalDusk),
-                ('Observing Begins   ', ephem.Date(nauticalDusk + 5/1440.)),
-                ('Astro Dark         ', astroDark),
-                ('Middle of Night    ', middleNight),
-                ('End Astro Dark     ', astroEnd),
-                ('Observing Ends     ', ephem.Date(nauticalDawn - 5/1440.)),
-                ('Final Clock & AF   ', ephem.Date(nauticalDawn - 4/1440.)),
-                ('Naut Dawn          ', nauticalDawn),
-                ('Morn Sky Flats     ', morn_skyFlatBegin),
-                ('Civil Dawn         ', civilDawn),
-                ('End Morn Sky Flats ', morn_skyFlatEnd),
-                ('Ops Window Closes  ', ephem.Date(morn_skyFlatEnd + 0.5/1440)),   #Enclosure must close
-                ('Sun Rise           ', sunrise),
-                ('Moon Rise          ', ptr.previous_rising(moon)),
-                ('Moon Transit       ', ptr.previous_transit(moon)),
-                ('Moon Set           ', ptr.previous_setting(moon)),
-                ('Moon Rise          ', ptr.next_rising(moon)),
-                ('Moon Transit       ', ptr.next_transit(moon)),
-                ('Moon Set           ', ptr.next_setting(moon))]
+        evnt = [
+            ('Eve Bias Dark', ephem.Date(beginEveBiasDark)),
+            ('End Eve Bias Dark', ephem.Date(endEveBiasDark)),
+            ('Eve Scrn Flats', ephem.Date(beginEveScreenFlats)),
+            ('End Eve Scrn Flats', ephem.Date(endEveScreenFlats)),
+            ('Ops Window Start', ephem.Date(ops_win_begin)),  #Enclosure may open.
+            ('Cool Down, Open', ephem.Date(ops_win_begin + 0.5/1440)),
+            ('Eve Sky Flats', ephem.Date(eve_skyFlatBegin)),
+            ('Sun Set', sunset),
+            ('Civil Dusk', civilDusk),
+            ('End Eve Sky Flats', eve_skyFlatEnd),
+            ('Clock & Auto Focus', ephem.Date(eve_skyFlatEnd + 1/1440.)),
+            ('Naut Dusk', nauticalDusk),
+            ('Observing Begins', ephem.Date(nauticalDusk + 5/1440.)),
+            ('Astro Dark', astroDark),
+            ('Middle of Night', middleNight),
+            ('End Astro Dark', astroEnd),
+            ('Observing Ends', ephem.Date(nauticalDawn - 5/1440.)),
+            ('Final Clock & AF', ephem.Date(nauticalDawn - 4/1440.)),
+            ('Naut Dawn', nauticalDawn),
+            ('Morn Sky Flats', morn_skyFlatBegin),
+            ('Civil Dawn', civilDawn),
+            ('End Morn Sky Flats', morn_skyFlatEnd),
+            ('Ops Window Closes', ephem.Date(morn_skyFlatEnd + 0.5/1440)),   #Enclosure must close
+            ('Sun Rise', sunrise),
+            ('Moon Rise', ptr.previous_rising(moon)),
+            ('Moon Transit', ptr.previous_transit(moon)),
+            ('Moon Set', ptr.previous_setting(moon)),
+            ('Moon Rise', ptr.next_rising(moon)),
+            ('Moon Transit', ptr.next_transit(moon)),
+            ('Moon Set', ptr.next_setting(moon)),
+        ]
 
-
-        #print("No report of post-close events is available yet. \n\n")
         evnt_sort = self._sortTuple(evnt)
+
         #Edit out rise and sets prior to or after operations.
-        while evnt_sort[0][0] != 'Eve Bias Dark      ':
+        while evnt_sort[0][0] != 'Eve Bias Dark':
             evnt_sort.pop(0)
+
         # while evnt_sort[-1][0] != 'Morn Sun >2 deg':  # Ditto, see above.
         #     evnt_sort.pop(-1)
 
-        while evnt_sort[-1][0] in ['Moon Rise          ', 'Moon Transit       ']:
+        while evnt_sort[-1][0] in ['Moon Rise', 'Moon Transit']:
             evnt_sort.pop(-1)
-        evnt_sort
-        #timezone = "  " + self.config['timezone'] + ": "
-        #offset = self.config['time_offset']
-        #for evnt in evnt_sort:
-            #print(evnt[0], 'UTC: ', evnt[1], timezone, ephem.Date(evnt[1] + float(offset)/24.))    # NB Additon of local times would be handy here.
+
+        # Convert list of tuples to dictionary
         event_dict = {}
         for item in evnt_sort:
-            event_dict[item[0].strip()]= item[1]
+            event_dict[item[0]] = item[1]
         event_dict['use_by'] = ephem.Date(sunrise + 4/24.)
-        event_dict['day_directory'] = self.compute_day_directory()
 
         return event_dict
 
-
-
-        #NB I notice some minor discrepancies in lunar timing. Should re-check all the dates and times wer 20200408
 
 
 if __name__=="__main__":

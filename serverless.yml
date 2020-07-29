@@ -141,19 +141,19 @@ functions:
               - Access-Control-Allow-Origin
               - Access-Control-Allow-Credentials
   home:
-    handler: handler.default
+    handler: api/handler.default
     events:
       - http:
           path: /
           method: get
   upload:
-    handler: handler.upload
+    handler: api/handler.upload
     events:
       - http:
           path: /upload
           method: post
   download:
-    handler: handler.download
+    handler: api/handler.download
     events:
       - http:
           path: /download
@@ -161,14 +161,14 @@ functions:
           cors: true
 
   latestImage:
-    handler: handler.latest_image
+    handler: api/handler.latest_image
     events:
       - http:
           path: /{site}/latest_image
           method: get
           cors: true
   latestKImages:
-    handler: handler.latest_images
+    handler: api/handler.latest_images
     events:
       - http:
           path: /{site}/latest_images/{k}
@@ -176,35 +176,35 @@ functions:
           cors: true
 
   getConfig:
-    handler: handler.get_config
+    handler: api/handler.get_config
     events:
       - http:
           path: /{site}/config
           method: get
           cors: true
   putConfig:
-    handler: handler.put_config
+    handler: api/handler.put_config
     events:
       - http:
           path: /{site}/config
           method: put
           cors: true
   deleteConfig:
-    handler: handler.delete_config
+    handler: api/handler.delete_config
     events:
       - http:
           path: /{site}/config
           method: delete
           cors: true
   allConfig:
-    handler: handler.all_config
+    handler: api/handler.all_config
     events:
       - http:
           path: /all/config
           method: get
           cors: true
   getFitsHeader:
-    handler: handler.get_fits_header
+    handler: api/handler.get_fits_header
     events:
       - http:
           path: fitsheader/{baseFilename}
@@ -212,7 +212,7 @@ functions:
           cors: true
 
   filteredImageQuery:
-    handler: handler.filtered_image_query
+    handler: api/handler.filtered_image_query
     events:
       - http:
           path: filtered_images
@@ -241,14 +241,14 @@ functions:
               #- Access-Control-Allow-Credentials
 
   getCommand:
-    handler: handler.get_command
+    handler: api/handler.get_command
     events:
       - http:
           path: /{site}/{mount}/command
           method: get
           cors: true
   postCommand:
-    handler: handler.post_command
+    handler: api/handler.post_command
     events:
       - http:
           path: /{site}/{mount}/command
@@ -259,7 +259,7 @@ functions:
             resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
           cors: true
   optionsCommand: # This is to fix CORS issues
-    handler: handler.options_command
+    handler: api/handler.options_command
     events:
       - http:
           path: /{site}/{mount}/command
@@ -267,14 +267,14 @@ functions:
           cors: true
 
   getStatus:
-    handler: handler.get_status
+    handler: api/handler.get_status
     events:
       - http:
           path: /{site}/status
           method: get
           cors: true
   putStatus: 
-    handler: handler.put_status
+    handler: api/handler.put_status
     events:
       - http:
           path: /{site}/status
@@ -282,7 +282,7 @@ functions:
           cors: true
 
   exampleQuery: 
-    handler: weather.exampleQuery
+    handler: api/weather.exampleQuery
     events:
       - http:
           path: /example-query
@@ -290,7 +290,7 @@ functions:
           cors: true
 
   weatherGraphQuery: 
-    handler: weather.weatherGraphQuery
+    handler: api/weather.weatherGraphQuery
     events:
       - http:
           path: /weather/graph-data
@@ -298,7 +298,7 @@ functions:
           cors: true
 
   addWeatherStatus:
-    handler: weather.writeWeather
+    handler: api/weather.writeWeather
     events:
       - http:
           path: /weather/write
@@ -306,14 +306,14 @@ functions:
           cors: true
 
   testEphem:
-    handler: handler.testEphem
+    handler: api/handler.testEphem
     events:
       - http:
           path: /testephem
           method: post
           cors: true
   testSkyField:
-    handler: handler.testSkyField
+    handler: api/handler.testSkyField
     events:
       - http:
           path: /testskyfield
@@ -321,7 +321,7 @@ functions:
           cors: true
 
   siteEvents:
-    handler: events_handler.siteevents
+    handler: api/events_handler.siteevents
     events:
       - http:
           path: /events
