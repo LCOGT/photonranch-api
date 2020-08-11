@@ -305,26 +305,34 @@ functions:
           method: post
           cors: true
 
-  testEphem:
-    handler: api/handler.testEphem
-    events:
-      - http:
-          path: /testephem
-          method: post
-          cors: true
-  testSkyField:
-    handler: api/handler.testSkyField
-    events:
-      - http:
-          path: /testskyfield
-          method: post
-          cors: true
+  #testEphem:
+    #handler: api/handler.testEphem
+    #events:
+      #- http:
+          #path: /testephem
+          #method: post
+          #cors: true
+  #testSkyField:
+    #handler: api/handler.testSkyField
+    #events:
+      #- http:
+          #path: /testskyfield
+          #method: post
+          #cors: true
 
   siteEvents:
     handler: api/events_handler.siteevents
     events:
       - http:
           path: /events
+          method: get
+          cors: true
+
+  siteEvents1:
+    handler: api/events_handler.siteevents1
+    events:
+      - http:
+          path: /events1
           method: get
           cors: true
 
