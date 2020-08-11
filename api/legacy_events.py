@@ -1,3 +1,7 @@
+'''
+This is code copied from the ptr-observatory repository (ptr_events.py).
+It has been mostly rewritten here using Skyfield (instead of ephem) in events.py.
+'''
 
 from math import * # TODO: remove this import
 import math

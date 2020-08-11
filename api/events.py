@@ -146,7 +146,16 @@ def getRiseSetTimes(siteContext, horizonAngle=0):
     return riseSetList
 
 def calcFlatVals(siteContext, t0, t1):
+    '''Get the flattest spots in the sky.
 
+    Args:
+        siteContext: dict containing site information. See _buildSiteContext().
+        t0 (skyfield time obj): time for calculating the starting flat spot.
+        t1 (skyfield time obj): time for calculatign the end flat spot. 
+
+    Returns:
+        dict: flat start/end ra/dec values, with ra in hours an dec in deg. 
+    '''
     eph = api.load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
@@ -205,7 +214,19 @@ def getMoonEvents(siteContext):
 
     return moonEvents
 
-def makeSiteEvents(lat, lng, time, timezone='America/Los_Angeles'):
+def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
+    ''' Compile all the events in to a single dictionary.
+
+    Args:
+        lat (float): site latitude in deg N
+        lng (float): site longitude in deg E
+        time (float): unix timestamp within the 24hr block (local noon-noon) 
+            when we want to get events.
+        timezone (str): tz database timezone name (ie. 'America/Los_Angeles')
+
+    Returns:
+        dict: event name as key, tai julian days (float) as value. 
+    '''
 
     site_context = _buildSiteContext(lat, lng, time, timezone)
 
@@ -292,8 +313,12 @@ def makeSiteEvents(lat, lng, time, timezone='America/Los_Angeles'):
 
     siteEvents = _sortDictOfTimeObjects(siteEvents)
 
-    for i in siteEvents:
-        print(i,(25-len(i))*' ','\t', siteEvents[i].astimezone(pytz.timezone('America/Los_Angeles')))
+    # Convert all times to TAI julian days
+    siteEvents = {k:t.tai for k, t in siteEvents.items()}
+
+
+    #for i in siteEvents:
+        #print(i,(25-len(i))*' ','\t', siteEvents[i].astimezone(pytz.timezone('America/Los_Angeles')))
 
     return siteEvents
 

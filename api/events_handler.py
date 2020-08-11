@@ -18,7 +18,7 @@ def _get_site_config(site):
     #print(config["Item"]["configuration"]["events"]["Sun Rise"])
     return config["Item"]["configuration"]
 
-def siteevents1(event, context):
+def legacy_siteevents(event, context):
 
     # Get the site included in the request
     query_params = event['queryStringParameters']
@@ -59,6 +59,11 @@ def siteevents(event, context):
     if "site" not in query_params.keys():
         return _get_response(400, "Missing 'site' query string request parameter.")
 
+    when = time.time() 
+    if "when" in query_params.keys():
+        when = float(query_params["when"])
+        
+
     # Get the site configuration so we can access lat, lng, elevation, etc.
     try:
         site_config = _get_site_config(query_params["site"])
@@ -72,56 +77,28 @@ def siteevents(event, context):
         elevation = float(site_config['elevation'])
         reference_ambient = float(site_config['reference_ambient'][0])
         reference_pressure = float(site_config['reference_pressure'][0])
+        timezone = site_config['TZ_database_name']
     except Exception as e:
         print(str(e))
         return _get_response(500, "Site config missing required parameters.\
             Please ensure it includes latitude, longitude, elevation, \
             reference_ambient, and reference_pressure.")
 
-    ts = api.load.timescale(builtin=True)
-    now = ts.now().tai
-    events_dict = events.makeSiteEvents(latitude,longitude,now,'America/Los_Angeles')
+    #ts = api.load.timescale(builtin=True)
+    #now = ts.now().tai
+    events_dict = events.makeSiteEvents(latitude,longitude,when,timezone)
 
     # This method returns a dict with all the items to return.
-    print(json.dumps(events_dict, default=str))
-    return _get_response(200, json.dumps(events_dict, default=str))
+    print(json.dumps(events_dict))
+    return _get_response(200, events_dict)
 
 
 if __name__=="__main__":
-    siteevents({"queryStringParameters": {"site": "wmd"}},{})
+    siteevents({"queryStringParameters": {"site": "saf", "when": "1597071473" }},{})
 
-
-    import requests
-    url = "https://api.photonranch.org/test/events?site=wmd"
-    print(json.dumps(requests.get(url).json(), indent=2))
-    #url = "https://api.photonranch.org/test/all/config"
+    #import requests
+    #url = "https://api.photonranch.org/test/events?site=wmd"
     #print(json.dumps(requests.get(url).json(), indent=2))
 
-    #c = _get_site_config('saf')
-    #print(c.keys())
-    #print(c['longitude'])
-    #print(c['elevation'])
-    #print(c['reference_ambient'])
-    #print(c['reference_pressure'])
-    #print(c['latitude'])
-
-    #class A(object):
-        #def foo(self, x):
-            #print("executing foo(%s, %s)" % (self, x))
-
-        #def bar(self):
-            #self.foo(1)
-            #self.class_foo(2)
-            #self.static_foo(3)
-
-        #@classmethod
-        #def class_foo(cls, x):
-            #print("executing class_foo(%s, %s)" % (cls, x))
-
-        #@staticmethod
-        #def static_foo(x):
-            #print ("executing static_foo(%s)" % x)
-
-    #a = A()
-
-    #a.bar()
+    #url1 = "https://api.photonranch.org/test/events?site=wmd&time=1595071473"
+    #print(json.dumps(requests.get(url1).json(), indent=2))

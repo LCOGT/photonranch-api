@@ -328,11 +328,11 @@ functions:
           method: get
           cors: true
 
-  siteEvents1:
-    handler: api/events_handler.siteevents1
+  legacySiteEvents:
+    handler: api/events_handler.legacy_siteevents
     events:
       - http:
-          path: /events1
+          path: /legacy_events
           method: get
           cors: true
 
