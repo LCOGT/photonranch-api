@@ -60,11 +60,11 @@ def siteevents(event, context):
         error = { "error": "Missing 'site' query string request parameter." }
         return _get_response(400, error)
 
+    # Calculate events for current day unless another time is specified.
     when = time.time() 
     if "when" in query_params.keys():
         when = float(query_params["when"])
         
-
     # Get the site configuration so we can access lat, lng, elevation, etc.
     try:
         site_config = _get_site_config(query_params["site"])
@@ -95,11 +95,8 @@ def siteevents(event, context):
         }
         return _get_response(500, error)
 
-    #ts = api.load.timescale(builtin=True)
-    #now = ts.now().tai
-    events_dict = events.makeSiteEvents(latitude,longitude,when,timezone)
-
-    # This method returns a dict with all the items to return.
+    # This method returns a dict with all the events to return.
+    events_dict = events.make_site_events(latitude,longitude,when,timezone)
     print(json.dumps(events_dict))
     return _get_response(200, events_dict)
 

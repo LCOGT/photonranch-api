@@ -8,22 +8,22 @@ import pytz
 
 from legacy_events import Events
 
-def _getCalibrationFrameDurations():
+def _get_calibration_frame_durations():
     # Get these from config eventually
     return {
-        "screenFlatDuration": 1.5/24,
-        "biasDarkDuration": 8/24,
-        "mornBiasDarkDuration": (1.5/60)/24,
-        "longestScreen": (75/60)/1440,
-        "longestDark": (385/60)/1440,
+        "screen_flat_duration": 1.5/24,
+        "bias_dark_duration": 8/24,
+        "morn_bias_dark_duration": (1.5/60)/24,
+        "longest_screen": (75/60)/1440,
+        "longest_dark": (385/60)/1440,
     }
 
-def _addTime(timeObject, days:float):
+def _add_time(timeObject, days:float):
     '''Return the skyfield Time object plus some number of days.'''
-    ts = api.load.timescale(builtin=True)
-    return ts.tai_jd(timeObject.tai + days)
+    timescale = api.load.timescale(builtin=True)
+    return timescale.tai_jd(timeObject.tai + days)
 
-def _sortDictOfTimeObjects(unsorted):
+def _sort_dict_of_time_objects(unsorted):
     '''Return dict with keys sorted according to the order of their time values.
 
     Though python dicts do not explicitly support order, they are typically 
@@ -43,7 +43,7 @@ def _sortDictOfTimeObjects(unsorted):
         sortedDict[i[0]] = i[1]
     return sortedDict
 
-def _buildSiteContext(lat:float, lng:float, time:float, timezone='America/Los_Angeles'):
+def _build_site_context(lat:float, lng:float, time:float, timezone='America/Los_Angeles'):
     '''Return the geo information specific to the observatory.
 
     This information is used in many of the site-events-related functions.
@@ -59,23 +59,23 @@ def _buildSiteContext(lat:float, lng:float, time:float, timezone='America/Los_An
                 ephemeris file. 
     '''
 
-    ts = api.load.timescale(builtin=True)
+    timescale = api.load.timescale(builtin=True)
     eph = api.load('de421.bsp')
 
-    time = _getLocalNoon(timezone,time)
+    time = _get_local_noon(timezone,time)
 
-    t0 = ts.tai_jd(time)
-    t1 = ts.tai_jd(time + 1)
+    t0 = timescale.tai_jd(time)
+    t1 = timescale.tai_jd(time + 1)
     observatory = api.Topos(latitude_degrees=lat, longitude_degrees=lng)
-    siteContext = {
-        "dayStart": t0,
-        "dayEnd": t1,
+    site_context = {
+        "day_start": t0,
+        "day_end": t1,
         "observatory": observatory,
         "eph": eph
     }
-    return siteContext
+    return site_context
 
-def _getTzOffset(timezone:str, timestamp:float) -> float:
+def _get_tz_offset(timezone:str, timestamp:float) -> float:
     '''Gets the current UTC offset (hours) for the given timezone.
     
     Args:
@@ -91,7 +91,7 @@ def _getTzOffset(timezone:str, timestamp:float) -> float:
     offset = ((utc_offset.days * 86400) + (utc_offset.seconds)) / 3600
     return offset
 
-def _getLocalNoon(timezone:str, time:float) -> float:
+def _get_local_noon(timezone:str, time:float) -> float:
     '''Gets the local noon preceeding the given time, in julian days 
     
     May show unexpected behavior around DST transitions.
@@ -106,9 +106,9 @@ def _getLocalNoon(timezone:str, time:float) -> float:
     ts = api.load.timescale(builtin=True)
     #unix_time = ts.tai_jd(time).utc_datetime().timestamp()
     timeObj = ts.from_datetime(datetime.fromtimestamp(time, tz=pytz.timezone('utc')))
-    offset_days = _getTzOffset(timezone, time) / 24
-    localNoon = int(timeObj.tai + offset_days) - offset_days
-    return localNoon
+    offset_days = _get_tz_offset(timezone, time) / 24
+    local_noon = int(timeObj.tai + offset_days) - offset_days
+    return local_noon
 
 def daylength(ephemeris, topos, degrees):
     """Build a function of time that returns the daylength.
@@ -128,25 +128,25 @@ def daylength(ephemeris, topos, degrees):
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
 
-def getRiseSetTimes(siteContext, horizonAngle=0):
+def get_rise_set_times(site_context, horizonAngle=0):
 
-    riseSet, isRise = almanac.find_discrete(
-        siteContext['dayStart'],
-        siteContext['dayEnd'],
-        daylength(siteContext['eph'], siteContext['observatory'], horizonAngle)
+    rise_set, is_rise = almanac.find_discrete(
+        site_context['day_start'],
+        site_context['day_end'],
+        daylength(site_context['eph'], site_context['observatory'], horizonAngle)
     )
     
-    riseSetList = list(riseSet)
+    rise_set_list = list(rise_set)
 
     # order list so rise comes before set. 
-    if isRise[1]: riseSetList.reverse()
-    return riseSetList
+    if is_rise[1]: rise_set_list.reverse()
+    return rise_set_list
 
-def calcFlatVals(siteContext, t0, t1):
+def calc_flat_vals(site_context, t0, t1):
     '''Get the flattest spots in the sky.
 
     Args:
-        siteContext: dict containing site information. See _buildSiteContext().
+        site_context: dict containing site information. See _build_site_context().
         t0 (skyfield time obj): time for calculating the starting flat spot.
         t1 (skyfield time obj): time for calculatign the end flat spot. 
 
@@ -156,7 +156,7 @@ def calcFlatVals(siteContext, t0, t1):
     eph = api.load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
-    obs = earth + siteContext['observatory']
+    obs = earth + site_context['observatory']
 
     sun_alt_0, sun_az_0, _ = obs.at(t0).observe(sun).apparent().altaz()
     sun_az_0 = sun_az_0.degrees
@@ -182,36 +182,36 @@ def calcFlatVals(siteContext, t0, t1):
     ra_dot = round((flat_end_ra._degrees - flat_start_ra._degrees) / span, 4)
     dec_dot = round((flat_end_dec._degrees - flat_start_dec._degrees) / span, 4)
 
-    flatVals = {
-        "flatStartRa": flat_start_ra.hours,
-        "flatStartDec": flat_start_dec._degrees,
-        "flatEndRa": flat_end_ra.hours,
-        "flatEndDec": flat_end_dec._degrees,
-        "raDot": ra_dot,
-        "decDot": dec_dot,
+    flat_vals = {
+        "flat_start_ra": flat_start_ra.hours,
+        "flat_start_dec": flat_start_dec._degrees,
+        "flat_end_ra": flat_end_ra.hours,
+        "flat_end_dec": flat_end_dec._degrees,
+        "ra_dot": ra_dot,
+        "dec_dot": dec_dot,
     }
-    return flatVals
+    return flat_vals
 
-def getMoonEvents(siteContext):
+def get_moon_events(site_context):
 
-    t0 = siteContext['dayStart']
-    t1 = siteContext['dayEnd']
-    eph = siteContext['eph']
+    t0 = site_context['day_start']
+    t1 = site_context['day_end']
+    eph = site_context['eph']
     moon = eph['Moon']
 
-    f = almanac.risings_and_settings(eph, moon, siteContext['observatory'])
-    times, isRise = almanac.find_discrete(t0, t1, f)
+    f = almanac.risings_and_settings(eph, moon, site_context['observatory'])
+    times, is_rise = almanac.find_discrete(t0, t1, f)
 
-    moonEvents = {}
-    for t, r in zip(times, isRise):
+    moon_events = {}
+    for t, r in zip(times, is_rise):
         if r:
-            moonEvents['moonRise'] = t
+            moon_events['moonrise'] = t
         else:
-            moonEvents['moonSet'] = t
+            moon_events['moonset'] = t
 
-    return moonEvents
+    return moon_events
 
-def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
+def make_site_events(lat:float, lng:float, time:float, timezone:str) -> dict:
     ''' Compile all the events in to a single dictionary.
 
     Args:
@@ -225,49 +225,49 @@ def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
         dict: event name as key, tai julian days (float) as value. 
     '''
 
-    site_context = _buildSiteContext(lat, lng, time, timezone)
+    site_context = _build_site_context(lat, lng, time, timezone)
 
-    cal_frame_durations = _getCalibrationFrameDurations()
-    screen_flat_duration = cal_frame_durations['screenFlatDuration']
-    bias_dark_duration = cal_frame_durations['biasDarkDuration']
-    morn_bias_dark_duration = cal_frame_durations['mornBiasDarkDuration']
-    longest_screen = cal_frame_durations['longestScreen']
-    longest_dark = cal_frame_durations['longestDark']
+    cal_frame_durations = _get_calibration_frame_durations()
+    screen_flat_duration = cal_frame_durations['screen_flat_duration']
+    bias_dark_duration = cal_frame_durations['bias_dark_duration']
+    morn_bias_dark_duration = cal_frame_durations['morn_bias_dark_duration']
+    longest_screen = cal_frame_durations['longest_screen']
+    longest_dark = cal_frame_durations['longest_dark']
 
-    sunrise, sunset = getRiseSetTimes(site_context, 0.25)
-    civil_dawn, civil_dusk = getRiseSetTimes(site_context, 6)
-    nautical_dawn, nautical_dusk = getRiseSetTimes(site_context, 12)
-    astro_dawn, astro_dusk = getRiseSetTimes(site_context, 18)
+    sunrise, sunset = get_rise_set_times(site_context, 0.25)
+    civil_dawn, civil_dusk = get_rise_set_times(site_context, 6)
+    nautical_dawn, nautical_dusk = get_rise_set_times(site_context, 12)
+    astro_dawn, astro_dusk = get_rise_set_times(site_context, 18)
 
-    ops_win_begin = _addTime(sunset, -1/24)
+    ops_win_begin = _add_time(sunset, -1/24)
 
     # Skyflat Times
-    morn_sky_flat_end, _ = getRiseSetTimes(site_context, 1.5)
-    eve_sky_flat_begin = _addTime(sunset, -0.5/24)
-    morn_sky_flat_begin, eve_sky_flat_end = getRiseSetTimes(site_context, 11.75)
+    morn_sky_flat_end, _ = get_rise_set_times(site_context, 1.5)
+    eve_sky_flat_begin = _add_time(sunset, -0.5/24)
+    morn_sky_flat_begin, eve_sky_flat_end = get_rise_set_times(site_context, 11.75)
 
-    morn_flat_vals = calcFlatVals(site_context, ops_win_begin, eve_sky_flat_end)
-    eve_flat_vals = calcFlatVals(site_context, morn_sky_flat_begin, sunrise)
+    morn_flat_vals = calc_flat_vals(site_context, ops_win_begin, eve_sky_flat_end)
+    eve_flat_vals = calc_flat_vals(site_context, morn_sky_flat_begin, sunrise)
 
-    end_eve_screenflats = _addTime(ops_win_begin, -longest_screen)
-    begin_eve_screenflats = _addTime(end_eve_screenflats, -screen_flat_duration)
-    end_eve_bias_dark = _addTime(begin_eve_screenflats, -longest_dark)
-    begin_eve_bias_dark = _addTime(end_eve_bias_dark, -bias_dark_duration)
+    end_eve_screenflats = _add_time(ops_win_begin, -longest_screen)
+    begin_eve_screenflats = _add_time(end_eve_screenflats, -screen_flat_duration)
+    end_eve_bias_dark = _add_time(begin_eve_screenflats, -longest_dark)
+    begin_eve_bias_dark = _add_time(end_eve_bias_dark, -bias_dark_duration)
 
-    begin_morn_screenflats = _addTime(sunrise, 4/1440)
-    end_morn_screenflats = _addTime(begin_morn_screenflats, screen_flat_duration)
-    begin_morn_bias_dark = _addTime(end_morn_screenflats, longest_screen)
-    end_morn_bias_dark = _addTime(begin_morn_bias_dark, morn_bias_dark_duration)
-    begin_reductions = _addTime(end_morn_bias_dark, longest_dark)
+    begin_morn_screenflats = _add_time(sunrise, 4/1440)
+    end_morn_screenflats = _add_time(begin_morn_screenflats, screen_flat_duration)
+    begin_morn_bias_dark = _add_time(end_morn_screenflats, longest_screen)
+    end_morn_bias_dark = _add_time(begin_morn_bias_dark, morn_bias_dark_duration)
+    begin_reductions = _add_time(end_morn_bias_dark, longest_dark)
 
-    observing_begins = _addTime(nautical_dusk, 5/1440)
-    observing_ends = _addTime(nautical_dawn, -5/1440)
+    observing_begins = _add_time(nautical_dusk, 5/1440)
+    observing_ends = _add_time(nautical_dawn, -5/1440)
 
-    moon_events = getMoonEvents(site_context)
+    moon_events = get_moon_events(site_context)
 
-    midnight = _addTime(sunset, 0.5 * (sunrise.tai - sunset.tai))  
+    midnight = _add_time(sunset, 0.5 * (sunrise.tai - sunset.tai))  
 
-    siteEvents = {
+    site_events = {
 
         "Eve Bias Dark": begin_eve_bias_dark,
         "End Eve Bias Dark": end_eve_bias_dark,
@@ -279,13 +279,13 @@ def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
         "Observing Begins": observing_begins,
         "Observing Ends": observing_ends,
 
-        "Cool Down, Open": _addTime(ops_win_begin, 0.5/1440),
+        "Cool Down, Open": _add_time(ops_win_begin, 0.5/1440),
 
         "Eve Sky Flats": eve_sky_flat_begin,
         "Sun Set": sunset,
         "Civil Dusk": civil_dusk,
         "End Eve Sky Flats": eve_sky_flat_end,
-        "Clock & Auto Focus": _addTime(eve_sky_flat_end, 1/1440),
+        "Clock & Auto Focus": _add_time(eve_sky_flat_end, 1/1440),
         "Naut Dusk": nautical_dusk,
         
         "Astro Dark": astro_dusk,
@@ -293,37 +293,35 @@ def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
         "Middle of Night": midnight,
 
         "End Astro Dark": astro_dawn,
-        "Final Clock & Auto Focus": _addTime(nautical_dawn, -4/1440),
+        "Final Clock & Auto Focus": _add_time(nautical_dawn, -4/1440),
         "Naut Dawn": nautical_dawn,
         "Morn Sky Flats": morn_sky_flat_begin,
         "Civil Dawn": civil_dawn,
         "End Morn Sky Flats": morn_sky_flat_end,
-        "Ops Window Closes": _addTime(morn_sky_flat_end, 0.5/1440), # margin time to close
+        "Ops Window Closes": _add_time(morn_sky_flat_end, 0.5/1440), # margin time to close
         "Sunrise": sunrise,
     }
 
     # Add these events conditionally because they might not exist.
-    if 'moonRise' in moon_events:
-        siteEvents['Moon Rise'] = moon_events['moonRise']
-    if 'moonSet' in moon_events:
-        siteEvents['Moon Set'] = moon_events['moonSet']
+    if 'moonrise' in moon_events:
+        site_events['Moon Rise'] = moon_events['moonrise']
+    if 'moonset' in moon_events:
+        site_events['Moon Set'] = moon_events['moonset']
 
-    siteEvents = _sortDictOfTimeObjects(siteEvents)
+
+    # Sort dictionary by value (for nicer printing only; optional).
+    site_events = _sort_dict_of_time_objects(site_events)
 
     # Convert all times to TAI julian days
-    siteEvents = {k:t.tai for k, t in siteEvents.items()}
+    site_events = {k:t.tai for k, t in site_events.items()}
 
-
-    #for i in siteEvents:
-        #print(i,(25-len(i))*' ','\t', siteEvents[i].astimezone(pytz.timezone('America/Los_Angeles')))
-
-    return siteEvents
+    return site_events
 
 if __name__=="__main__":
 
     ts = api.load.timescale(builtin=True)
-    print(_getLocalNoon('America/Los_Angeles', time.time()))
+    print(_get_local_noon('America/Los_Angeles', time.time()))
     #_getTwilightTimes(34, -119, ts.now().tai)
-    makeSiteEvents(34, -119, time.time())
+    make_site_events(34, -119, time.time())
     e = Events(34, -119, 0,0,0)
     e.display_events()
