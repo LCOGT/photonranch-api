@@ -1,9 +1,11 @@
 
-import random, datetime, json, time, requests, sys, os
+import random, datetime, json, time, requests, sys, os, pytz
 from legacy_events import Events
 
 from skyfield import api, almanac
 import events
+
+from pytz.exceptions import UnknownTimeZoneError
 
 from helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from helpers import dynamodb_r, ssm_c
@@ -83,7 +85,7 @@ def siteevents(event, context):
         elevation = float(site_config['elevation'])
         reference_ambient = float(site_config['reference_ambient'][0])
         reference_pressure = float(site_config['reference_pressure'][0])
-        timezone = site_config['TZ_database_name']
+        tz_name = site_config['TZ_database_name']
     except Exception as e:
         print(str(e))
         error = {
@@ -95,8 +97,18 @@ def siteevents(event, context):
         }
         return _get_response(500, error)
 
+    # Make sure the timezone is valid
+    try: 
+        tz = pytz.timezone(tz_name)
+    except UnknownTimeZoneError as e:
+        error = {
+            "error": f"Invalid timezone name from site config: {str(e)}"
+        }
+        return _get_response(500, error)
+
+
     # This method returns a dict with all the events to return.
-    events_dict = events.make_site_events(latitude,longitude,when,timezone)
+    events_dict = events.make_site_events(latitude,longitude,when,tz_name)
     print(json.dumps(events_dict))
     return _get_response(200, events_dict)
 
