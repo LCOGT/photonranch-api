@@ -22,9 +22,6 @@ def ok_time_err():
     ''' Define 5 minutes as an acceptable error in event times '''
     return (5/60)/24
 
-def test_foo():
-    assert events.foo(2) == 3
-
 def test_getCalibrationFrameDurations_structure():
     calFrameDurations = events._getCalibrationFrameDurations()
     requiredKeys = set(["screenFlatDuration", 

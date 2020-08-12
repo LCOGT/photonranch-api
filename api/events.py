@@ -8,9 +8,6 @@ import pytz
 
 from legacy_events import Events
 
-def foo(x):
-    return x + 1
-
 def _getCalibrationFrameDurations():
     # Get these from config eventually
     return {
@@ -322,55 +319,6 @@ def makeSiteEvents(lat:float, lng:float, time:float, timezone:str) -> dict:
 
     return siteEvents
 
-
-def _getTwilightTimes(lat, lng, time, timezone='America/Los_Angeles'):
-    ''' Gets twilight start/end times (civil, nautical, astro).
-
-    Twilight events will be returned from the 24 hour window starting with the
-    astronomical day (local noon to noon) containing the given time. 
-
-    Args:
-        time (float): TAI time in julian days 
-
-    Returns:
-        dict: entries like "civilDawn": 2459062.4128560526, where the time value 
-            is TAI time in julian days.
-
-    '''
-    ts = api.load.timescale(builtin=True)
-    eph = api.load('de421.bsp')
-
-    time = _getLocalNoon(timezone,time)
-
-    t0 = ts.tai_jd(time)
-    t1 = ts.tai_jd(time + 1)
-    observatory = api.Topos(latitude_degrees=lat, longitude_degrees=lng)
-    #f = almanac.dark_twilight_day(eph, observatory)
-    #t, y = almanac.find_discrete(t0, t1, f)
-
-    sunEvents, isDawn = almanac.find_discrete(t0, t1,
-        daylength(eph, observatory, 0))
-    civilTwilight, isCivilDawn = almanac.find_discrete(t0, t1,
-        daylength(eph, observatory, 6))
-    nauticalTwilight, isNauticalDawn = almanac.find_discrete(t0, t1,
-        daylength(eph, observatory, 12))
-    astroTwilight, isAstroDawn = almanac.find_discrete(t0, t1,
-        daylength(eph, observatory, 18))
-
-    twilight = {}
-    twilight['sunset'] = sunEvents[0]
-    twilight['sunrise'] = sunEvents[1]
-    twilight['civilDusk'] = civilTwilight[0]
-    twilight['civilDawn'] = civilTwilight[1]
-    twilight['nauticalDusk'] = nauticalTwilight[0]
-    twilight['nauticalDawn'] = nauticalTwilight[1]
-    twilight['astroDusk'] = astroTwilight[0]
-    twilight['astroDawn'] = astroTwilight[1]
-        
-    print(twilight)
-    return twilight
-
-
 if __name__=="__main__":
 
     ts = api.load.timescale(builtin=True)
@@ -379,36 +327,3 @@ if __name__=="__main__":
     makeSiteEvents(34, -119, time.time())
     e = Events(34, -119, 0,0,0)
     e.display_events()
-
-
-def _getDayStart(lat:float, lng:float, time:float): 
-    ''' Gets the start of the local day (astro noon).
-    NOTE: UNUSED!!!
-
-    The start of the local day is the astronomical noon preceeding the 
-    given time. 
-
-    Args:
-        lat (float): latitude
-        lng (float): longitude
-        time (float): unix timestamp (seconds)
-
-    Returns:
-        float: terrestrial time in julian days
-    '''
-
-    ts = api.load.timescale(builtin=True)
-    jd = ts.from_datetime(datetime.fromtimestamp(time, tz=timezone.utc))
-
-    intDay = int(jd.tt)
-    dayFrac = jd.tt - intDay
-
-    if dayFrac < 0.20833:
-        dayNow = intDay - 0.55
-    else:
-        dayNow = intDay + 0.45
-
-    #print(dayNow)
-    print(ts.tt_jd(dayNow).utc_datetime())
-
-    return dayNow

@@ -57,7 +57,8 @@ def siteevents(event, context):
     # Get the site included in the request
     query_params = event['queryStringParameters']
     if "site" not in query_params.keys():
-        return _get_response(400, "Missing 'site' query string request parameter.")
+        error = { "error": "Missing 'site' query string request parameter." }
+        return _get_response(400, error)
 
     when = time.time() 
     if "when" in query_params.keys():
@@ -69,6 +70,11 @@ def siteevents(event, context):
         site_config = _get_site_config(query_params["site"])
     except LookupError as e:
         print("Error: bad sitecode. Couldn't get site config.")
+        error = {
+            "error": "The specified sitecode did not match any config file."
+        }
+        return _get_response(500, error)
+
 
     # Get the parameters we want from the config, used to init the events class.
     try:
@@ -80,9 +86,14 @@ def siteevents(event, context):
         timezone = site_config['TZ_database_name']
     except Exception as e:
         print(str(e))
-        return _get_response(500, "Site config missing required parameters.\
-            Please ensure it includes latitude, longitude, elevation, \
-            reference_ambient, and reference_pressure.")
+        error = {
+            "error": (
+                "Site config missing required parameters. "
+                "Please ensure it includes latitude, longitude, elevation, "
+                "reference_ambient, reference_pressure, and TZ_database_name."
+            )
+        }
+        return _get_response(500, error)
 
     #ts = api.load.timescale(builtin=True)
     #now = ts.now().tai
