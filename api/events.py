@@ -39,8 +39,8 @@ def _sort_dict_of_time_objects(unsorted):
     unsortedList = [(x, unsorted[x]) for x in unsorted]
     sortedList = sorted(unsortedList, key=lambda x: x[1].tai)
     sortedDict = {}
-    for i in sortedList:
-        sortedDict[i[0]] = i[1]
+    for item in sortedList:
+        sortedDict[item[0]] = item[1]
     return sortedDict
 
 def _build_site_context(lat:float, lng:float, time:float, timezone='America/Los_Angeles'):
@@ -104,10 +104,9 @@ def _get_local_noon(timezone:str, time:float) -> float:
         float: TAI in julian days denoting local noon.
     '''
     ts = api.load.timescale(builtin=True)
-    #unix_time = ts.tai_jd(time).utc_datetime().timestamp()
-    timeObj = ts.from_datetime(datetime.fromtimestamp(time, tz=pytz.timezone('utc')))
+    time_obj = ts.from_datetime(datetime.fromtimestamp(time, tz=pytz.timezone('utc')))
     offset_days = _get_tz_offset(timezone, time) / 24
-    local_noon = int(timeObj.tai + offset_days) - offset_days
+    local_noon = int(time_obj.tai + offset_days) - offset_days
     return local_noon
 
 def daylength(ephemeris, topos, degrees):

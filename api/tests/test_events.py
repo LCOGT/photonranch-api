@@ -8,8 +8,6 @@ from datetime import datetime
 import pytz
 
 import events
-from legacy_events import Events
-
 
 @pytest.fixture
 def ts():
