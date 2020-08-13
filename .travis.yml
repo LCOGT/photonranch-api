@@ -3,7 +3,9 @@ python:
   - "3.7"
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt coverage coveralls pytest-cov
 # command to run tests
 script:
-  - pytest
+  - pytest --cov=api api/tests
+
+after_success: coveralls
