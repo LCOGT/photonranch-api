@@ -1,5 +1,9 @@
 # Photon Ranch API
 
+[![Build Status](https://travis-ci.com/LCOGT/photonranch-api.svg?branch=master)](https://travis-ci.com/LCOGT/photonranch-api)
+[![Coverage Status](https://coveralls.io/repos/github/LCOGT/photonranch-api/badge.svg?branch=feature/add-travis)](https://coveralls.io/github/LCOGT/photonranch-api?branch=feature/add-travis)
+
+
 This is the api used to talk with photon ranch services running in AWS. All communication between observatory sites and the web interface take place here, including sending/receiving commands, status, and handling data.
 
 This is a serverless api, deployed with the Serverless framework which creates python functions running in AWS Lambda behind endpoints in an API Gateway.
