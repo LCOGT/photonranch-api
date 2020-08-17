@@ -163,6 +163,9 @@ def calc_flat_vals(site_context, t0, t1):
     Returns:
         dict: flat start/end ra/dec values, with ra in hours an dec in deg.
     """
+
+    # NOTE: astropy might be a better package here.
+
     eph = api.load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
@@ -248,16 +251,16 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
     longest_screen = cal_frame_durations['longest_screen']
     longest_dark = cal_frame_durations['longest_dark']
 
+    # final arg in these functions is degrees below the horizon.
     sunrise, sunset = get_rise_set_times(site_context, 0.25)
     civil_dawn, civil_dusk = get_rise_set_times(site_context, 6)
     nautical_dawn, nautical_dusk = get_rise_set_times(site_context, 12)
     astro_dawn, astro_dusk = get_rise_set_times(site_context, 18)
 
-    ops_win_begin = _add_time(sunset, -1/24)
+    ops_win_begin = _add_time(sunset, -1/24)  # one hour before sunset
 
-    # Skyflat Times
-    morn_sky_flat_end, _ = get_rise_set_times(site_context, 1.5)
-    eve_sky_flat_begin = _add_time(sunset, -0.5/24)
+    morn_sky_flat_end, _ = get_rise_set_times(site_context, 1.5)  
+    eve_sky_flat_begin = _add_time(sunset, -0.5/24)  # half hr before sunset
     morn_sky_flat_begin, eve_sky_flat_end = get_rise_set_times(site_context, 11.75)
 
     morn_flat_vals = calc_flat_vals(site_context, ops_win_begin, eve_sky_flat_end)
@@ -268,14 +271,14 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
     end_eve_bias_dark = _add_time(begin_eve_screenflats, -longest_dark)
     begin_eve_bias_dark = _add_time(end_eve_bias_dark, -bias_dark_duration)
 
-    begin_morn_screenflats = _add_time(sunrise, 4/1440)
+    begin_morn_screenflats = _add_time(sunrise, 4/1440)  # 4 min after sunrise
     end_morn_screenflats = _add_time(begin_morn_screenflats, screen_flat_duration)
     begin_morn_bias_dark = _add_time(end_morn_screenflats, longest_screen)
     end_morn_bias_dark = _add_time(begin_morn_bias_dark, morn_bias_dark_duration)
     begin_reductions = _add_time(end_morn_bias_dark, longest_dark)
 
-    observing_begins = _add_time(nautical_dusk, 5/1440)
-    observing_ends = _add_time(nautical_dawn, -5/1440)
+    observing_begins = _add_time(nautical_dusk, 5/1440)  # 5 min after naut dusk
+    observing_ends = _add_time(nautical_dawn, -5/1440)  # 5 min before naut dawn
 
     moon_events = get_moon_events(site_context)
 
@@ -287,31 +290,35 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
         "End Eve Bias Dark": end_eve_bias_dark,
         "Eve Scrn Flats": begin_eve_screenflats,
         "End Eve Scrn Flats": end_eve_screenflats,
-
         "Ops Window Start": ops_win_begin,
-
         "Observing Begins": observing_begins,
         "Observing Ends": observing_ends,
 
+        # 0.5  minutes after ops window begins
         "Cool Down, Open": _add_time(ops_win_begin, 0.5/1440),
 
         "Eve Sky Flats": eve_sky_flat_begin,
         "Sun Set": sunset,
         "Civil Dusk": civil_dusk,
         "End Eve Sky Flats": eve_sky_flat_end,
+        
+        # one minute after eve skyflat time ends
         "Clock & Auto Focus": _add_time(eve_sky_flat_end, 1/1440),
-        "Naut Dusk": nautical_dusk,
-        
-        "Astro Dark": astro_dusk,
-        
-        "Middle of Night": midnight,
 
+        "Naut Dusk": nautical_dusk,
+        "Astro Dark": astro_dusk,
+        "Middle of Night": midnight,
         "End Astro Dark": astro_dawn,
+
+        # four minutes before nautical dawn
         "Final Clock & Auto Focus": _add_time(nautical_dawn, -4/1440),
+
         "Naut Dawn": nautical_dawn,
         "Morn Sky Flats": morn_sky_flat_begin,
         "Civil Dawn": civil_dawn,
         "End Morn Sky Flats": morn_sky_flat_end,
+
+        # 0.5 minutes after morning skyflats end
         "Ops Window Closes": _add_time(morn_sky_flat_end, 0.5/1440), # margin time to close
         "Sunrise": sunrise,
     }

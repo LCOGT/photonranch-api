@@ -4,6 +4,8 @@ from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from botocore.client import Config
 
+# TODO: change from relative import to specifying the full path. 
+# see issue: https://github.com/LCOGT/photonranch-api/issues/3
 from helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from helpers import dynamodb_r, ssm_c
 from helpers import DecimalEncoder, _get_response, _get_body, _get_secret, get_db_connection

@@ -1,11 +1,11 @@
 import boto3
+import os
 import json
 import psycopg2
 import decimal
 
-
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
-REGION = os.environ['AWS_REGION']
+REGION = os.environ['REGION']
 S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 

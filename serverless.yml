@@ -36,7 +36,7 @@ provider:
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
-    AWS_REGION: ${self:provider.region}
+    REGION: ${self:provider.region}
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
