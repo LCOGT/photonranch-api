@@ -35,6 +35,8 @@ provider:
   runtime: python3.7
   region: us-east-1
   environment: 
+    S3_BUCKET_NAME: 'photonranch-001'
+    AWS_REGION: ${self:provider.region}
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
@@ -305,21 +307,6 @@ functions:
           method: post
           cors: true
 
-  #testEphem:
-    #handler: api/handler.testEphem
-    #events:
-      #- http:
-          #path: /testephem
-          #method: post
-          #cors: true
-  #testSkyField:
-    #handler: api/handler.testSkyField
-    #events:
-      #- http:
-          #path: /testskyfield
-          #method: post
-          #cors: true
-
   siteEvents:
     handler: api/events_handler.siteevents
     events:
@@ -327,14 +314,3 @@ functions:
           path: /events
           method: get
           cors: true
-
-  legacySiteEvents:
-    handler: api/events_handler.legacy_siteevents
-    events:
-      - http:
-          path: /legacy_events
-          method: get
-          cors: true
-
-
-  

@@ -7,7 +7,7 @@ import datetime, time
 from datetime import datetime
 import pytz
 
-import events
+from api import events
 
 @pytest.fixture
 def ts():

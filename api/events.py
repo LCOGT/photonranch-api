@@ -6,9 +6,6 @@ from datetime import datetime, timezone
 import time
 import pytz
 
-from legacy_events import Events
-
-
 def _get_calibration_frame_durations():
 
     # Get these from config eventually
@@ -332,13 +329,3 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
     site_events = {k:t.tai for k, t in site_events.items()}
 
     return site_events
-
-
-if __name__=="__main__":
-
-    ts = api.load.timescale(builtin=True)
-    print(_get_local_noon('America/Los_Angeles', time.time()))
-    #_getTwilightTimes(34, -119, ts.now().tai)
-    make_site_events(34, -119, time.time())
-    e = Events(34, -119, 0,0,0)
-    e.display_events()

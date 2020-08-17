@@ -26,6 +26,7 @@ node_modules/*
 secrets.json
 public_key
 __pycache__
+*.pyc
 .pytest_cache
 
 events_notes.txt

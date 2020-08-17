@@ -4,8 +4,8 @@ import psycopg2
 import decimal
 
 
-BUCKET_NAME = 'photonranch-001'
-REGION = 'us-east-1'
+BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+REGION = os.environ['AWS_REGION']
 S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 

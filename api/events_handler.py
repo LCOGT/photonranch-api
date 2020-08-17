@@ -1,9 +1,8 @@
 
 import random, datetime, json, time, requests, sys, os, pytz
-from legacy_events import Events
 
 from skyfield import api, almanac
-import events
+from api import events
 
 from pytz.exceptions import UnknownTimeZoneError
 
@@ -19,40 +18,6 @@ def _get_site_config(site):
     #print(config["Item"])
     #print(config["Item"]["configuration"]["events"]["Sun Rise"])
     return config["Item"]["configuration"]
-
-def legacy_siteevents(event, context):
-
-    # Get the site included in the request
-    query_params = event['queryStringParameters']
-    if "site" not in query_params.keys():
-        return _get_response(400, "Missing 'site' query string request parameter.")
-
-    # Get the site configuration so we can access lat, lng, elevation, etc.
-    try:
-        site_config = _get_site_config(query_params["site"])
-    except LookupError as e:
-        print("Error: bad sitecode. Couldn't get site config.")
-
-    # Get the parameters we want from the config, used to init the events class.
-    try:
-        latitude = float(site_config['latitude'])
-        longitude = float(site_config['longitude'])
-        elevation = float(site_config['elevation'])
-        reference_ambient = float(site_config['reference_ambient'][0])
-        reference_pressure = float(site_config['reference_pressure'][0])
-    except Exception as e:
-        print(str(e))
-        return _get_response(500, "Site config missing required parameters.\
-            Please ensure it includes latitude, longitude, elevation, \
-            reference_ambient, and reference_pressure.")
-
-    # Create the events class which does the calculations.
-    e = Events(latitude, longitude, elevation, reference_ambient, reference_pressure)
-
-    # This method returns a dict with all the items to return.
-    events_dict = e.display_events()
-    print(json.dumps(events_dict))
-    return _get_response(200, events_dict)
 
 def siteevents(event, context):
 
@@ -111,14 +76,3 @@ def siteevents(event, context):
     events_dict = events.make_site_events(latitude,longitude,when,tz_name)
     print(json.dumps(events_dict))
     return _get_response(200, events_dict)
-
-
-if __name__=="__main__":
-    siteevents({"queryStringParameters": {"site": "saf", "when": "1597071473" }},{})
-
-    #import requests
-    #url = "https://api.photonranch.org/test/events?site=wmd"
-    #print(json.dumps(requests.get(url).json(), indent=2))
-
-    #url1 = "https://api.photonranch.org/test/events?site=wmd&time=1595071473"
-    #print(json.dumps(requests.get(url1).json(), indent=2))

@@ -13,8 +13,6 @@ db_database = _get_secret('db-database')
 db_user = _get_secret('db-user')
 db_password = _get_secret('db-password')
 
-
-
 def _generate_image_packages(db_query, cursor):
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     attributes = [
