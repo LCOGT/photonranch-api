@@ -22,13 +22,13 @@ def _get_calibration_frame_durations():
 
 
 def _add_time(timeObject, days: float):
-    '''Return the skyfield Time object plus some number of days.'''
+    """Return the skyfield Time object plus some number of days."""
     timescale = api.load.timescale(builtin=True)
     return timescale.tai_jd(timeObject.tai + days)
 
 
 def _sort_dict_of_time_objects(unsorted):
-    '''Return dict with items sorted by the order of their time values.
+    """Return dict with items sorted by the order of their time values.
 
     Though python dicts do not explicitly support order, they are typically
     printed with the same order that keys were added. This method simply makes
@@ -40,7 +40,7 @@ def _sort_dict_of_time_objects(unsorted):
     Returns:
         dict: same keys and values as input, but ordered by increasing
             time value.
-    '''
+    """
     unsortedList = [(x, unsorted[x]) for x in unsorted]
     sortedList = sorted(unsortedList, key=lambda x: x[1].tai)
     sortedDict = {}
@@ -50,7 +50,7 @@ def _sort_dict_of_time_objects(unsorted):
 
 
 def _build_site_context(lat: float, lng: float, time: float, timezone: str):
-    '''Return the geo information specific to the observatory.
+    """Return the geo information specific to the observatory.
 
     This information is used in many of the site-events-related functions.
 
@@ -63,7 +63,7 @@ def _build_site_context(lat: float, lng: float, time: float, timezone: str):
     Returns:
         dict: skyfield objects for the start/end of day times, observatory, and
                 ephemeris file.
-    '''
+    """
 
     timescale = api.load.timescale(builtin=True)
     eph = api.load('de421.bsp')
@@ -83,7 +83,7 @@ def _build_site_context(lat: float, lng: float, time: float, timezone: str):
 
 
 def _get_tz_offset(timezone: str, timestamp: float) -> float:
-    '''Gets the current UTC offset (hours) for the given timezone.
+    """Gets the current UTC offset (hours) for the given timezone.
 
     Args:
         timezone (str): timezone name, ie. 'America/Los_Angeles'
@@ -92,7 +92,7 @@ def _get_tz_offset(timezone: str, timestamp: float) -> float:
 
     Returns:
         float: hours (+ or -) from UTC time
-    '''
+    """
     tz = pytz.timezone(timezone)
     utc_offset = datetime.fromtimestamp(timestamp, tz=tz).utcoffset()
     offset = ((utc_offset.days * 86400) + (utc_offset.seconds)) / 3600
@@ -100,7 +100,7 @@ def _get_tz_offset(timezone: str, timestamp: float) -> float:
 
 
 def _get_local_noon(timezone: str, time: float) -> float:
-    '''Gets the local noon preceeding the given time, in julian days
+    """Gets the local noon preceeding the given time, in julian days
 
     May show unexpected behavior around DST transitions.
 
@@ -110,7 +110,7 @@ def _get_local_noon(timezone: str, time: float) -> float:
 
     Returns:
         float: TAI in julian days denoting local noon.
-    '''
+    """
     ts = api.load.timescale(builtin=True)
     utc_timezone = pytz.timezone('utc')
     time_obj = ts.from_datetime(datetime.fromtimestamp(time, tz=utc_timezone))
@@ -156,7 +156,7 @@ def get_rise_set_times(site_context, horizonAngle=0):
 
 
 def calc_flat_vals(site_context, t0, t1):
-    '''Get the flattest spots in the sky.
+    """Get the flattest spots in the sky.
 
     Args:
         site_context: dict with site information. See _build_site_context().
@@ -165,7 +165,7 @@ def calc_flat_vals(site_context, t0, t1):
 
     Returns:
         dict: flat start/end ra/dec values, with ra in hours an dec in deg.
-    '''
+    """
     eph = api.load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
@@ -229,7 +229,7 @@ def get_moon_events(site_context):
 
 
 def make_site_events(lat: float, lng: float, time: float, timezone: str):
-    ''' Compile all the events in to a single dictionary.
+    """ Compile all the events in to a single dictionary.
 
     Args:
         lat (float): site latitude in deg N
@@ -240,7 +240,7 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
 
     Returns:
         dict: event name as key, tai julian days (float) as value. 
-    '''
+    """
 
     site_context = _build_site_context(lat, lng, time, timezone)
 
