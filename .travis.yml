@@ -4,19 +4,9 @@ python:
 #branches:
   #only:
     #- master
-before_install:
-  - nvm install 6
-  - node --version
-  - npm --version
 install:
-  - npm install -g serverless
   - pip install -r requirements.txt coverage coveralls pytest-cov
 script:
   - pytest --cov=api api/tests
-  - echo $AWS_ACCESS_KEY_ID
 
 after_success: coveralls
-env:
-  global:
-  - secure: W22sslvQHOtHmXWGbB/Ixy5LzxOW5U0pLrFYYYxdGpplHEKTr4CPePCuv6J/8pn7fF0dipCZTnOkI+f8itUIikQFbj+nqpyeVvjCxF8BgdE4JXt/G5PAOVn48hsPQ9LC9/Stn6hJoFfW7Op7T6v5uqaplqkPjKt34x+mOAoYsP44p5i6SVftiytiBLzca7EaFOeGTS4rrx+vAmMKoVh/S6DeqYvv5J4xympOD5Tj1tmkKot9PSwLNKtRFBPvdP31lqAFZTZX0t+oAVbNPhQTC82Bm/BbyIQ8A5XB5ljO+Kdwlvq4jWlyegSlUfhCtRrzrKyumZiWjUNYeatPIQdKH7d/NAo0OE6+quQBk0O+aUmEdCW7UdAbR2253b4osZfhmq1ZKFOnfYroOl5igJ86/IpBnHzIfUTj3ALWJbjYk9SnWSei9lrQKg3yumgpFGQarsuXnFKdyJG+AENEamULPcdfbYnRlOIZUWGKU4DsZ2h6ObR7vE3iMV8xcLzcyXS1dBiW66ybZfIUe6kVo7FOvvGChBYyV2KCRiSkP1wgd1mtWweKcMb6ZINCQwdB7MwIVatVG1uW1mCLN/J/yJQjYrgR7xXdrqzmNSePtv4sIVzfQNcoi0nsrQf4oZDtPO9OsBk3eV3AojD3QrPw9sU4GJm6CBkBZ5/5t5Ah3OqOndY=
-  - secure: RGLN2mDj/y5+iKAimJ7poXcqdJZkTIfTjc7hSjwu0ARyJlGnmgF0XYrmRgi5cPpiTUqtGSaEfV9YUFMNfF+kAwciCdnczU5TtIRCovFxLnQA09ycmdcF+fXqdO8OXiDuW5OGR3lPfOrT8wATGAR6eZz09T6JevMFPRNn53nEaGLLmQXIOpY4szpsAd95XXMp2ckvmLbLZ3TrWSfgsDnKI/AtqQN85DUYk4MZ7ROZAx9LeW2aeAMLth3CrasC74M8FZAvPk954XvuauywlST+3h/ivwTucc5/3vksb/V6HxYvTwHM7ft1eIYOa+Kr5RtfVH/byQ+lW6Jw2NIFq/bbQEex72xVStZNiStwe/1TtCW490XnTHm8oFEUpRybCR5z/muTvhv/CL768BYF+1/5iSHjiQPMZfHgAJulJ92dP6ABietM0VRdgnLj1BpAlgV4MXcbPL5sQDUYnfEpmwRWASCf9aOdmJRu73TEsxJo7Y53to8SZt8jbYin9VOV3GYpY9ZTXuUu10dPNXGRxt0ig1/6Ei/8UdJaS5FRQEZC5y1dYUgYKgysWWHeHxBHfcVJMRmvPQErhrcgDUuqXRUdPCcn5aazp4dFA19kg63MckG7WEk81xvMM+aXZ10txP/F7uHFyslsrIVZM7nKfjM+s8RzaJVsQLIDchQHxG9zG1s=
