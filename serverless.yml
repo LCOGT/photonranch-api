@@ -11,9 +11,8 @@ package:
 
 plugins:
   - serverless-python-requirements
-  #- serverless-dynamodb-pitr
   - serverless-domain-manager
-
+  - serverless-prune-plugin
 custom:
 
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
@@ -162,14 +161,7 @@ functions:
           method: post
           cors: true
 
-  latestImage:
-    handler: api/handler.latest_image
-    events:
-      - http:
-          path: /{site}/latest_image
-          method: get
-          cors: true
-  latestKImages:
+  latestImages:
     handler: api/handler.latest_images
     events:
       - http:
@@ -241,47 +233,6 @@ functions:
               #- X-Amz-User-Agent
               #- Access-Control-Allow-Origin
               #- Access-Control-Allow-Credentials
-
-  getCommand:
-    handler: api/handler.get_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: get
-          cors: true
-  postCommand:
-    handler: api/handler.post_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
-          cors: true
-  optionsCommand: # This is to fix CORS issues
-    handler: api/handler.options_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: options
-          cors: true
-
-  getStatus:
-    handler: api/handler.get_status
-    events:
-      - http:
-          path: /{site}/status
-          method: get
-          cors: true
-  putStatus: 
-    handler: api/handler.put_status
-    events:
-      - http:
-          path: /{site}/status
-          method: put
-          cors: true
 
   exampleQuery: 
     handler: api/weather.exampleQuery
