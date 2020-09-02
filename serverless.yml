@@ -265,3 +265,19 @@ functions:
           path: /events
           method: get
           cors: true
+
+  getStatus:
+    handler: api/handler.get_status
+    events:
+      - http:
+          path: /{site}/status
+          method: get
+          cors: true
+
+  putStatus: 
+    handler: api/handler.put_status
+    events:
+      - http:
+          path: /{site}/status
+          method: put
+          cors: true

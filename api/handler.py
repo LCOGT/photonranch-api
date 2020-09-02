@@ -385,3 +385,43 @@ def filtered_image_query(event, context):
         connection.close()
     
     return _get_response(200, images)
+
+def get_status(event, context):
+    site = event['pathParameters']['site']
+    table_name = str(site)
+    key = {"Type": "State"}
+    table = dynamodb_r.Table(table_name)
+    status =table.get_item(Key=key)
+    return _get_response(200, {
+        "site": site,
+        "content": status['Item']
+    })
+def put_status(event, context):
+
+    status_item = _get_body(event)
+    status_item["Type"] = "State"
+
+    site = event['pathParameters']['site']
+
+    # Send status to the newer dynamodb table
+    url = f"https://status.photonranch.org/status/{site}/status"
+    payload = {
+        "status": _get_body(event),
+        "statusType": "deviceStatus",
+    }
+    print(f"payload: {payload}")
+    data = json.dumps(payload, cls=DecimalEncoder)
+    response = requests.post(url, data=json.dumps(payload))
+    print("alt status response: ")
+    print(response)
+
+
+    # Send status to old table.
+    #table_name = str(site)
+    #table = dynamodb_r.Table(table_name)
+
+    #status = table.put_item(Item=status_item)
+
+    return _get_response(200, {
+        "site": site,
+    })
