@@ -7,6 +7,7 @@ python:
 install:
   - pip install -r requirements.txt coverage coveralls pytest-cov
 script:
-  - pytest --cov=api api/tests/unit
+  - python -m pytest -q api/tests/unit --cov=api
+
 
 after_success: coveralls
