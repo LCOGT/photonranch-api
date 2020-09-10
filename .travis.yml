@@ -9,5 +9,4 @@ install:
 script:
   - python -m pytest -q api/tests/unit --cov=api
 
-
 after_success: coveralls
