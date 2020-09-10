@@ -161,6 +161,16 @@ functions:
           method: post
           cors: true
 
+  # Image package for a single image
+  getImage:
+    handler: api/handler.get_image
+    events:
+      - http:
+          path: image/{base_filename}
+          method: get
+          cors: true
+
+  # List of image packages for last k images at the given site
   latestImages:
     handler: api/handler.latest_images
     events:
@@ -213,27 +223,8 @@ functions:
           method: get
           cors: true
 
-# pending deletion
-  #getImagesByUser:
-    #handler: handler.image_by_user
-    #memorySize: 3008
-    #timeout: 20
-    #events:
-      #- http:
-          #path: /image_by_user/{user_id}
-          #method: get
-          #cors:
-            #origin: '*'
-            #headers:
-              #- Content-Type
-              #- X-Amz-Date
-              #- Authorization
-              #- X-Api-Key
-              #- X-Amz-Security-Token
-              #- X-Amz-User-Agent
-              #- Access-Control-Allow-Origin
-              #- Access-Control-Allow-Credentials
 
+  # Weather database stuff
   exampleQuery: 
     handler: api/weather.exampleQuery
     events:
