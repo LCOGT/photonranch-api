@@ -17,7 +17,7 @@ def base_url():
     return "https://api.photonranch.org/test"
 
 @pytest.mark.skip(reason="Haven't added a way to add auth in tests.")
-def test_ping(base_url):
+def test_dummy_requires_auth(base_url):
     url = f"{base_url}/ping/hello"
     response = requests.post(url)
     assert response.status_code == HTTPStatus.OK
@@ -92,7 +92,7 @@ def test_all_config(base_url):
     response = requests.get(url)
     assert response.status_code == HTTPStatus.OK
 
-def test_get_fits_header(base_url):
+def test_get_fits_header_from_db(base_url):
     base_filename = "saf-sq01-20200830-00001258"
     url = f"{base_url}/fitsheader/{base_filename}"
     response = requests.get(url)

@@ -1,24 +1,40 @@
-import json, os, boto3, decimal, sys, time, datetime, re, requests
+
+import json 
+import os 
+import boto3 
+import decimal 
+import sys 
+import time 
+import datetime 
+import re 
+import requests
 import psycopg2
+import logging
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from botocore.client import Config
 
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from api.helpers import dynamodb_r, ssm_c
-from api.helpers import DecimalEncoder, _get_response, _get_body, _get_secret, get_db_connection
+from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
 
 db_host = _get_secret('db-host')
 db_database = _get_secret('db-database')
 db_user = _get_secret('db-user')
 db_password = _get_secret('db-password')
 
-def ping(event, context):
-    print(json.dumps(event))
-    return _get_response(200, "pong")
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+
+def dummy_requires_auth(event, context):
+    """ No purpose other than testing auth functionality """
+    log.info(json.dumps(event, indent=2))
+
+    return http_response(200, "auth successful")
 
 def default(event, context):
-    return _get_response(200, "New photon ranch API")
+    log.info(json.dumps(event, indent=2))
+    return http_response(200, "New photon ranch API")
 
 def upload(event, context): 
     """
@@ -40,23 +56,23 @@ def upload(event, context):
         files = {'file': (object_name, f)}
         http_response = requests.post(response['url'], data=response['fields'], files=files)
     # If successful, returns HTTP status code 204
-    logging.info(f'File upload HTTP status code: {http_response.status_code}')
+    log.info(f'File upload HTTP status code: {http_response.status_code}')
 
     """
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     body = _get_body(event)
-    key = 'data/'+body['object_name']
+    key = 'data/' + body['object_name']
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     url = json.dumps(s3.generate_presigned_post(
         Bucket = BUCKET_NAME,
         Key = key,
         ExpiresIn = S3_PUT_TTL
     ))
-    print(f"Presigned upload url: {url}")
-    return _get_response(200, url)
+    logger.info(f"Presigned upload url: {url}")
+    return http_response(200, url)
 
 def download(event, context): 
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     body = _get_body(event)
     key = "data/"+body['object_name']
     params = {
@@ -69,8 +85,8 @@ def download(event, context):
         Params=params,
         ExpiresIn=S3_GET_TTL
     )
-    print(f"Presigned download url: {url}")
-    return _get_response(200, str(url))
+    log.info(f"Presigned download url: {url}")
+    return http_response(200, str(url))
 
 
 # TODO: refactor this function so that it produces an image package for a 
@@ -151,13 +167,14 @@ def _generate_image_packages(db_query, cursor):
                 image_packages.append(image_package)
 
     except AttributeError:
-        print(('There was an error in the image package generation process. '
+        log.exception(('There was an error in the image package generation process. '
             'Check that attributes line up with query results.'))
 
     return image_packages
 
 def get_image(event, context):
     """ This endpoint returns the image package for the requested file. """
+    log.info(json.dumps(event, indent=2))
 
     # The requested file
     base_filename = event['pathParameters']['base_filename'] 
@@ -175,8 +192,8 @@ def get_image(event, context):
         cursor = connection.cursor()
     except (Exception, psycopg2.DatabaseError) as error:
         error_msg = f"Problem connecting to the database. {error}"
-        print(error_msg)
-        return _get_response(500, error_msg)
+        log.exception("Exception occurred, problem connecting to database") 
+        return http_response(500, error_msg)
         
     # Build the sql query
     sql = (
@@ -211,19 +228,20 @@ def get_image(event, context):
         cursor.execute(sql, sql_data)
         db_query = cursor.fetchall()
     except (Exception, psycopg2.Error) as error :
-        print("Error while retrieving records:", error)
         if connection is not None:
             connection.close()
 
         error_msg = f"Problem with database query: {error}"
-        return _get_response(500, error_msg)
+        log.exception("problem with db query")
+        return http_response(500, error_msg)
 
     image_packages = _generate_image_packages(db_query, cursor)
 
     # When the query returns nothing.
     if len(image_packages) == 0: 
         error_msg = f"Database query for {base_filename} returned empty."
-        return _get_response(404, error_msg)
+        log.error(error_msg)
+        return http_response(404, error_msg)
 
     if connection is not None:
         connection.close()
@@ -231,12 +249,13 @@ def get_image(event, context):
     # There should only be one image from the query matching the base_filename. 
     image_package = image_packages[0]
 
-    return _get_response(200, image_package)
+    return http_response(200, image_package)
 
 def latest_images(event, context):
     ''' 
     Get the k most recent images in a site's s3 directory.
     '''
+    log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     k = event['pathParameters']['k'] # number of images to return 
 
@@ -253,8 +272,7 @@ def latest_images(event, context):
         connection = psycopg2.connect(**connection_params)
         cursor = connection.cursor()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(f"Connection to database failed.")
-        print(error)
+        log.exception("Connection to database failed.")
         return json.dumps([])
         
     sql = (
@@ -303,15 +321,15 @@ def latest_images(event, context):
         db_query = cursor.fetchall()
         images = _generate_image_packages(db_query, cursor)
     except (Exception, psycopg2.Error) as error :
-        print("Error while retrieving records:", error)
+        log.exception("Error while retrieving db records")
 
     if connection is not None:
         connection.close()
 
-    return _get_response(200, images)
+    return http_response(200, images)
 
 def filtered_image_query(event, context):
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
 
     filter_params = event['queryStringParameters']
 
@@ -390,22 +408,22 @@ def filtered_image_query(event, context):
         db_query = cursor.fetchall()
         images = _generate_image_packages(db_query, cursor)
     except (Exception, psycopg2.Error) as error :
-        print("Error while retrieving records:", error)
-        return _get_response(500, error)
+        log.exception("Error while retrieving records")
+        return http_response(500, error)
 
     if connection is not None:
         connection.close()
     
-    return _get_response(200, images)
+    return http_response(200, images)
 
 def get_config(event, context):
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     table = dynamodb_r.Table('site_configurations')
     config = table.get_item(Key={"site": site})
-    return _get_response(200, config['Item'])
+    return http_response(200, config['Item'])
 def put_config(event, context):
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     body = _get_body(event)
     table = dynamodb_r.Table('site_configurations')
@@ -413,26 +431,26 @@ def put_config(event, context):
         "site": site,
         "configuration": body
     })
-    return _get_response(200,response)
+    return http_response(200,response)
 def delete_config(event, context):
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     table = dynamodb_r.Table('site_configurations')
     response = table.delete_item(Key={"site": site})
-    return _get_response(200,response)
+    return http_response(200,response)
 
 def all_config(event, context):
-    print(json.dumps(event))
+    log.info(json.dumps(event, indent=2))
     table = dynamodb_r.Table('site_configurations')
     response = table.scan()
     items = {}
     for entry in response['Items']: 
         items[entry['site']] = entry['configuration']
-    return _get_response(200,items)
+    return http_response(200,items)
 
-def get_fits_header(event, context):
+def get_fits_header_from_db(event, context):
     # TODO: Clean this up!
-    #site = event['pathParameters']['site']
+    log.info(json.dumps(event, indent=2))
     base_filename = event['pathParameters']['baseFilename']
     site = base_filename[:3]
     header = []
@@ -454,22 +472,26 @@ def get_fits_header(event, context):
         else: 
             result = []
     except (Exception, psycopg2.Error) as error :
-        print("Error while retrieving records:", error)
-        return _get_response(500, "Unable to retrieve header.")
+        log.exception("error while retrieving records")
+        return http_response(500, "Unable to retrieve header.")
     result = json.loads(header[0])
-    return _get_response(200, result)
+    return http_response(200, result)
 
 def get_status(event, context):
+    # TODO: change site code to use the new endpoint directly, not this one.
+    log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     table_name = str(site)
     key = {"Type": "State"}
     table = dynamodb_r.Table(table_name)
     status =table.get_item(Key=key)
-    return _get_response(200, {
+    return http_response(200, {
         "site": site,
         "content": status['Item']
     })
 def put_status(event, context):
+    # TODO: change site code to use the new endpoint directly, not this one.
+    log.info(json.dumps(event, indent=2))
 
     status_item = _get_body(event)
     status_item["Type"] = "State"
@@ -482,19 +504,11 @@ def put_status(event, context):
         "status": _get_body(event),
         "statusType": "deviceStatus",
     }
-    print(f"payload: {payload}")
+    log.info(f"Payload: {payload}")
     data = json.dumps(payload, cls=DecimalEncoder)
     response = requests.post(url, data=data)
-    print("alt status response: ")
-    print(response)
+    log.info(f"Status endpoint response: {response}")
 
-
-    # Send status to old table.
-    #table_name = str(site)
-    #table = dynamodb_r.Table(table_name)
-
-    #status = table.put_item(Item=status_item)
-
-    return _get_response(200, {
+    return http_response(200, {
         "site": site,
     })

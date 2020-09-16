@@ -1,13 +1,16 @@
+import logging
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 import random, datetime, json, time, requests
-from helpers import _get_secret, _get_response, _get_body, DecimalEncoder
+from helpers import _get_secret, http_response, _get_body, DecimalEncoder
+
+log = logging.getLogger()
+log.setLevel(logging.INFO)
 
 bucket = _get_secret('influxdb-testbucket')
 weather_bucket = _get_secret('influxdb-bucket-weather')
 org = _get_secret('influxdb-org') 
 token = _get_secret('influxdb-token-serverless_api_fullaccess_token')
-print(token)
 
 client = influxdb_client.InfluxDBClient(
     url="https://us-west-2-1.aws.cloud2.influxdata.com",
@@ -29,7 +32,7 @@ def exampleWrite1(event, context):
         .time(datetime.datetime.utcnow())
 
     write_api.write(bucket=bucket, org=org, record=example_record)
-    return _get_response(200, 'success')
+    return http_response(200, 'success')
 
 def exampleWrite2():
     bucket_name = "weather"
@@ -66,9 +69,9 @@ def exampleWrite2():
         entry_time = int(time.time())
         line_data = _formatLineProtocol(measurement, tagDict, fieldDict, entry_time)
         res = requests.post(url=url, data=line_data, headers=header)
-        print(url)
-        print(line_data)
-        print(res)
+        log.info(f"url: {url}")
+        log.info(f"line_data: {line_data}"")
+        log.info(f"response: {res}")
         time.sleep(10)
 
 def writeWeather(event,context):
@@ -112,11 +115,11 @@ def writeWeather(event,context):
     res = requests.post(url=url, data=line_data, headers=header)
 
     if res.status_code == 204:
-        return _get_response(200, "Success")
+        return http_response(200, "Success")
     
     else:
         error_msg = f"Could not write to database. Error code {res.status_code}."
-        return _get_response(400, error_msg)
+        return http_response(400, error_msg)
 
 def _formatLineProtocol(measurementName, tagDict, fieldDict, timestamp):
     line = measurementName
@@ -166,8 +169,8 @@ def weatherGraphQuery(event, context):
         "field_name": field
     }
     res = json.dumps(data, cls=DecimalEncoder)
-    print(res)
-    return _get_response(200, res)
+    log.debug(res)
+    return http_response(200, res)
 
 def weatherQuery(event, context):
     body = _get_body(event)
@@ -193,14 +196,13 @@ def exampleQuery(event, context):
         for record in table.records:
             results.append([record.get_value(), record.get_field()])
 
-    print(results)
+    log.info(results)
     res = json.dumps(results, cls=DecimalEncoder)
-    return _get_response(200, res)
+    return http_response(200, res)
 
 if __name__=="__main__": 
     import requests
     url = "https://api.photonranch.org/test/weather/write"
-    #print(requests.post(url).json())
 
     data = json.dumps({
         "weatherData": {
@@ -222,12 +224,6 @@ if __name__=="__main__":
         "site": "tst",
         "timestamp_s": int(time.time())
     })
-
-    #print(requests.post(url, data))
-
-
-    #exampleWrite2()
-    #print(requests.post("https://api.photonranch.org/test/example-query").json())
 
     query = f'from(bucket:"weather")\
     |> range(start: -24h)\
@@ -265,4 +261,4 @@ if __name__=="__main__":
             results[field]['val'].append(record.get_value())
             results[field]['time'].append(record.get_time().timestamp())
 
-    print(json.dumps(results))
+    log.info(json.dumps(results))

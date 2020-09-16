@@ -120,11 +120,11 @@ functions:
   authorizerFunc: 
     handler: authorizer.auth
     cors: true
-  ping:
-    handler: handler.ping
+  dummyRequiresAuth:
+    handler: handler.dummy_requires_auth
     events:
       - http:
-          path: ping/{pathParam}
+          path: /dummy-requires-auth
           method: post
           authorizer:
             name: authorizerFunc
@@ -170,7 +170,7 @@ functions:
           method: get
           cors: true
 
-  # List of image packages for last k images at the given site
+  # List of image packages for last k images at the given site 
   latestImages:
     handler: api/handler.latest_images
     events:
@@ -208,7 +208,7 @@ functions:
           method: get
           cors: true
   getFitsHeader:
-    handler: api/handler.get_fits_header
+    handler: api/handler.get_fits_header_from_db
     events:
       - http:
           path: fitsheader/{baseFilename}
