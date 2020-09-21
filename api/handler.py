@@ -68,13 +68,13 @@ def upload(event, context):
         Key = key,
         ExpiresIn = S3_PUT_TTL
     ))
-    logger.info(f"Presigned upload url: {url}")
+    log.info(f"Presigned upload url: {url}")
     return http_response(200, url)
 
 def download(event, context): 
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
-    key = "data/"+body['object_name']
+    key = "data/" + body['object_name']
     params = {
         "Bucket": BUCKET_NAME,
         "Key": key,
@@ -169,6 +169,7 @@ def _generate_image_packages(db_query, cursor):
     except AttributeError:
         log.exception(('There was an error in the image package generation process. '
             'Check that attributes line up with query results.'))
+        raise
 
     return image_packages
 
@@ -354,7 +355,7 @@ def filtered_image_query(event, context):
     "ex10_jpg_exists, " 
     "ex13_jpg_exists, " 
     "altitude, azimuth, filter_used, airmass, "
-    "exposure_time, username, user_id"
+    "exposure_time, username, user_id "
 
     "FROM images img "
     "INNER JOIN users usr "
@@ -420,18 +421,18 @@ def get_config(event, context):
     log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     table = dynamodb_r.Table('site_configurations')
-    config = table.get_item(Key={"site": site})
+    config = table.get_item(Key = { "site": site })
     return http_response(200, config['Item'])
 def put_config(event, context):
     log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']
     body = _get_body(event)
     table = dynamodb_r.Table('site_configurations')
-    response = table.put_item(Item={
+    response = table.put_item(Item = {
         "site": site,
         "configuration": body
     })
-    return http_response(200,response)
+    return http_response(200, response)
 def delete_config(event, context):
     log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']

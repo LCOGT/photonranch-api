@@ -33,6 +33,7 @@ node_modules/
 
 # Scratch work / notes
 events_notes.txt
+scratch.py
 
 # Config files
 secrets.json
