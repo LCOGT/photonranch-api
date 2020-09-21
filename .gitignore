@@ -1,6 +1,7 @@
 # Distribution / packaging
 .Python
 env/
+venv/
 build/
 develop-eggs/
 dist/
@@ -19,14 +20,21 @@ var/
 # Serverless directories
 .serverless
 
-node_modules/
-venv/
-.vscode/
-node_modules/*
-secrets.json
-public_key
+# pycache
 __pycache__
 *.pyc
 .pytest_cache
 
+# Node modules 
+node_modules/
+
+# vscode
+.vscode/
+
+# Scratch work / notes
 events_notes.txt
+scratch.py
+
+# Config files
+secrets.json
+public_key

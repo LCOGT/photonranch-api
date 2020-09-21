@@ -3,6 +3,7 @@ import os
 import json
 import psycopg2
 import decimal
+import logging
 
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 REGION = os.environ['REGION']
@@ -12,18 +13,20 @@ S3_GET_TTL = 3600
 dynamodb_r = boto3.resource('dynamodb', REGION)
 ssm_c = boto3.client('ssm')
 
+log = logging.getLogger()
+log.setLevel(logging.INFO)
 
 # Helper class to convert a DynamoDB item to JSON.
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
-            if o % 1 > 0:
+            if o % 1 != 0:
                 return float(o)
             else:
                 return int(o)
         return super(DecimalEncoder, self).default(o)
 
-def _get_response(status_code, body):
+def http_response(status_code, body):
     if not isinstance(body, str):
         body = json.dumps(body,cls=DecimalEncoder)
     return {
@@ -43,7 +46,7 @@ def _get_body(event):
     try:
         return json.loads(event.get("body", ""), parse_float=decimal.Decimal)
     except:
-        print("event body could not be JSON decoded.")
+        log.exception("event body could not be JSON decoded.")
         return {}
 
 def _get_secret(key):

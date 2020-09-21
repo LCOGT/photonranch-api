@@ -11,9 +11,8 @@ package:
 
 plugins:
   - serverless-python-requirements
-  #- serverless-dynamodb-pitr
   - serverless-domain-manager
-
+  - serverless-prune-plugin
 custom:
 
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
@@ -121,11 +120,11 @@ functions:
   authorizerFunc: 
     handler: authorizer.auth
     cors: true
-  ping:
-    handler: handler.ping
+  dummyRequiresAuth:
+    handler: handler.dummy_requires_auth
     events:
       - http:
-          path: ping/{pathParam}
+          path: /dummy-requires-auth
           method: post
           authorizer:
             name: authorizerFunc
@@ -162,14 +161,17 @@ functions:
           method: post
           cors: true
 
-  latestImage:
-    handler: api/handler.latest_image
+  # Image package for a single image
+  getImage:
+    handler: api/handler.get_image
     events:
       - http:
-          path: /{site}/latest_image
+          path: image/{base_filename}
           method: get
           cors: true
-  latestKImages:
+
+  # List of image packages for last k images at the given site 
+  latestImages:
     handler: api/handler.latest_images
     events:
       - http:
@@ -206,7 +208,7 @@ functions:
           method: get
           cors: true
   getFitsHeader:
-    handler: api/handler.get_fits_header
+    handler: api/handler.get_fits_header_from_db
     events:
       - http:
           path: fitsheader/{baseFilename}
@@ -221,68 +223,8 @@ functions:
           method: get
           cors: true
 
-# pending deletion
-  #getImagesByUser:
-    #handler: handler.image_by_user
-    #memorySize: 3008
-    #timeout: 20
-    #events:
-      #- http:
-          #path: /image_by_user/{user_id}
-          #method: get
-          #cors:
-            #origin: '*'
-            #headers:
-              #- Content-Type
-              #- X-Amz-Date
-              #- Authorization
-              #- X-Api-Key
-              #- X-Amz-Security-Token
-              #- X-Amz-User-Agent
-              #- Access-Control-Allow-Origin
-              #- Access-Control-Allow-Credentials
 
-  getCommand:
-    handler: api/handler.get_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: get
-          cors: true
-  postCommand:
-    handler: api/handler.post_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
-          cors: true
-  optionsCommand: # This is to fix CORS issues
-    handler: api/handler.options_command
-    events:
-      - http:
-          path: /{site}/{mount}/command
-          method: options
-          cors: true
-
-  getStatus:
-    handler: api/handler.get_status
-    events:
-      - http:
-          path: /{site}/status
-          method: get
-          cors: true
-  putStatus: 
-    handler: api/handler.put_status
-    events:
-      - http:
-          path: /{site}/status
-          method: put
-          cors: true
-
+  # Weather database stuff
   exampleQuery: 
     handler: api/weather.exampleQuery
     events:
@@ -313,4 +255,20 @@ functions:
       - http:
           path: /events
           method: get
+          cors: true
+
+  getStatus:
+    handler: api/handler.get_status
+    events:
+      - http:
+          path: /{site}/status
+          method: get
+          cors: true
+
+  putStatus: 
+    handler: api/handler.put_status
+    events:
+      - http:
+          path: /{site}/status
+          method: put
           cors: true
