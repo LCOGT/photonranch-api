@@ -2,7 +2,8 @@ language: python
 python:
 - '3.7'
 before_install:
-- "./aws_credentials.sh"
+- chmod +x aws_credentials.sh
+- ./aws_credentials.sh
 install:
 - pip install -r requirements.txt coveralls
 script:
