@@ -13,7 +13,7 @@ S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 
 dynamodb_r = boto3.resource('dynamodb', REGION)
-ssm_c = boto3.client('ssm')
+ssm_c = boto3.client('ssm', region_name=REGION)
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
