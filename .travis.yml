@@ -3,7 +3,7 @@ python:
 - '3.7'
 install:
 - pip install -r requirements.txt coveralls
-- pip install --user awscli
+- pip install awscli
 script:
 - python -m pytest -q api/tests/unit --cov=api
 after_success: coveralls
