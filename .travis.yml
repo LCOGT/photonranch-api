@@ -1,13 +1,9 @@
 language: python
 python:
 - '3.7'
-before_install:
-- 'curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"'
-- 'unzip awscli-bundle.zip'
-- './awscli-bundle/install -b ~/bin/aws'
-- 'export PATH=~/bin:$PATH'
 install:
 - pip install -r requirements.txt coveralls
+- pip install --user awscli
 script:
 - python -m pytest -q api/tests/unit --cov=api
 after_success: coveralls
