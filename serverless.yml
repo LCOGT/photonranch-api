@@ -8,6 +8,8 @@ package:
   exclude:
     - venv/**
     - node_modules/**
+    - .pytest_cache/**
+    - .vscode/**
 
 plugins:
   - serverless-python-requirements
@@ -27,6 +29,12 @@ custom:
     basePath: ${self:custom.stage.${self:provider.stage}}
     stage: ${self:provider.stage}
     createRoute53Record: true
+
+  # This is to reduce the size of the deployment
+  pythonRequirements:
+    useDownloadCache: false
+    useStaticCache: false
+    slim: true
 
 provider:
   name: aws
@@ -162,22 +170,52 @@ functions:
           cors: true
 
   # Image package for a single image
-  getImage:
-    handler: api/handler.get_image
+  get_image_by_filename:
+    #handler: api/handler.get_image
+    handler: api/db.get_image_by_filename_handler
+    layers:
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
     events:
       - http:
-          path: image/{base_filename}
+          path: /image/{base_filename}
           method: get
           cors: true
 
   # List of image packages for last k images at the given site 
   latestImages:
-    handler: api/handler.latest_images
+    #handler: api/handler.latest_images
+    handler: api/db.get_latest_site_images_handler
+    layers:
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
     events:
       - http:
-          path: /{site}/latest_images/{k}
+          #path: /{site}/latest_images/{k}
+          path: /{site}/latest_images/{number_of_images}
           method: get
           cors: true
+
+  getFitsHeader:
+    #handler: api/handler.get_fits_header_from_db
+    handler: api/db.get_fits_header_from_db_handler
+    layers:
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+    events:
+      - http:
+          path: /fitsheader/{base_filename}
+          method: get
+          cors: true
+
+  filteredImageQuery:
+    #handler: api/handler.filtered_image_query
+    handler: api/db.filtered_images_query_handler
+    layers:
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+    events:
+      - http:
+          path: /filtered_images
+          method: get
+          cors: true
+
 
   getConfig:
     handler: api/handler.get_config
@@ -207,22 +245,6 @@ functions:
           path: /all/config
           method: get
           cors: true
-  getFitsHeader:
-    handler: api/handler.get_fits_header_from_db
-    events:
-      - http:
-          path: fitsheader/{baseFilename}
-          method: get
-          cors: true
-
-  filteredImageQuery:
-    handler: api/handler.filtered_image_query
-    events:
-      - http:
-          path: filtered_images
-          method: get
-          cors: true
-
 
   # Weather database stuff
   exampleQuery: 
