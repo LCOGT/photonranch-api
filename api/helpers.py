@@ -5,13 +5,15 @@ import psycopg2
 import decimal
 import logging
 
+from botocore.client import Config
+
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 REGION = os.environ['REGION']
 S3_PUT_TTL = 300
 S3_GET_TTL = 3600
 
 dynamodb_r = boto3.resource('dynamodb', REGION)
-ssm_c = boto3.client('ssm')
+ssm_c = boto3.client('ssm', region_name=REGION)
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
@@ -69,3 +71,18 @@ def get_db_connection():
     }
     connection = psycopg2.connect(**connection_params)
     return connection
+
+
+def get_s3_image_path(base_filename, ex_value, file_extension):
+    full_filename = f"{base_filename}-{ex_value}.{file_extension}"
+    path = f"data/{full_filename}"
+    return path
+
+def get_s3_file_url(path, ttl=604800):
+    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
+    url = s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={"Bucket": BUCKET_NAME, "Key": path},
+        ExpiresIn=ttl
+    )
+    return url
