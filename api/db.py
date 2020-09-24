@@ -154,8 +154,7 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
             .limit(number_of_images)\
             .all()
         session.expunge_all()
-    image_pkgs = [i.get_image_pkg() for i in images]
-    print(json.dumps(image_pkgs, indent=2))
+    image_pkgs = [image.get_image_pkg() for image in images]
     return image_pkgs
 
 
@@ -172,13 +171,9 @@ def get_fits_header_from_db(db_address, base_filename):
 
     """
     with get_session(db_address=db_address) as session:
-        try: 
-            header = session.query(Image.header)\
-                .filter(Image.base_filename==base_filename)\
-                .one()
-        except:
-            logger.exception("Error getting fits header from db")
-            raise
+        header = session.query(Image.header)\
+            .filter(Image.base_filename==base_filename)\
+            .one()
     header_dict = json.loads(header[0])
     return header_dict
 
@@ -201,17 +196,13 @@ def filtered_images_query(db_address: str, query_filters: list):
     # Add the condition that the jpg must exist
     query_filters.append(Image.ex10_jpg_exists.is_(True))
     with get_session(db_address=db_address) as session:
-        try: 
-            images = session.query(Image)\
-                .order_by(Image.sort_date.desc())\
-                .filter(*query_filters)\
-                .limit(100)\
-                .all()
-            session.expunge_all()
-        except Exception as e:
-            logger.exception("Error in filtered images query.")
-            raise
-    image_pkgs = [i.get_image_pkg() for i in images]
+        images = session.query(Image)\
+            .order_by(Image.sort_date.desc())\
+            .filter(*query_filters)\
+            .limit(100)\
+            .all()
+        session.expunge_all()
+    image_pkgs = [image.get_image_pkg() for image in images]
     return image_pkgs
 
 
@@ -234,12 +225,9 @@ def get_image_by_filename(db_address, base_filename):
         Image.ex10_jpg_exists.is_(True)       # the jpg must exist
     ]
     with get_session(db_address=db_address) as session:
-        try: 
-            image = session.query(Image)\
-                .filter(Image.base_filename==base_filename)\
-                .one()
-        except Exception as e:
-            raise 
+        image = session.query(Image)\
+            .filter(*query_filters)\
+            .one()
         return image.get_image_pkg()
 
 
@@ -323,7 +311,11 @@ def filtered_images_query_handler(event, context):
     try: 
         images = filtered_images_query(DB_ADDRESS, query_filters)
     except ArgumentError:
-        error_msg = "Bad query filter."
+        error_msg = "Invalid query filter. "
         logger.exception(error_msg)
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
+    except Exception as e:
+        logger.exception("Error in filter images query. ")
+        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+
     return http_response(HTTPStatus.OK, images)
