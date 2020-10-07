@@ -1,10 +1,19 @@
 
-import random, datetime, json, time, requests, sys, os, pytz, logging
+import random 
+import datetime
+import json
+import time
+import requests
+import sys
+import os
+import logging
 
+import pytz
 from skyfield import api, almanac
 from pytz.exceptions import UnknownTimeZoneError
 
-from api import events
+from api.events import make_site_events
+from api.events import get_moon_riseset_illum
 from helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from helpers import dynamodb_r, ssm_c
 from helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
@@ -18,6 +27,33 @@ def _get_site_config(site):
     if "Item" not in config:
         raise LookupError("bad key")
     return config["Item"]["configuration"]
+
+
+def get_moon_riseset_illum_handler(event, context):
+
+    query_params = event['queryStringParameters']
+
+    lat = float(query_params['lat'])
+    lng = float(query_params['lng'])
+    start = query_params['start']
+    end = query_params['end']
+
+    try: 
+        moon_riseset_illum = get_moon_riseset_illum(lat, lng, start, end)
+    except ValueError as e:
+        error_msg = (
+            "Error with format of start/end times. "
+            "Format should be like: '2020-12-31T01:00:00Z. "
+        )
+        log.exception(error_msg)
+        return http_response(404, error_msg)
+    except Exception as e:
+        error_msg = "Error while calculating moon rise set illum values."
+        log.exception(error_msg)
+        return http_response(404, error_msg)
+
+    return http_response(200, moon_riseset_illum)
+
 
 def siteevents(event, context):
 
@@ -73,6 +109,6 @@ def siteevents(event, context):
 
 
     # This method returns a dict with all the events to return.
-    events_dict = events.make_site_events(latitude,longitude,when,tz_name)
+    events_dict = make_site_events(latitude,longitude,when,tz_name)
     log.info(json.dumps(events_dict))
     return http_response(200, events_dict)

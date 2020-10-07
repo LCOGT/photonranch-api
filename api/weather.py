@@ -70,7 +70,7 @@ def exampleWrite2():
         line_data = _formatLineProtocol(measurement, tagDict, fieldDict, entry_time)
         res = requests.post(url=url, data=line_data, headers=header)
         log.info(f"url: {url}")
-        log.info(f"line_data: {line_data}"")
+        log.info(f"line_data: {line_data}")
         log.info(f"response: {res}")
         time.sleep(10)
 

@@ -8,6 +8,7 @@
     "serverless-plugin-existing-s3": "^2.4.0"
   },
   "devDependencies": {
+    "aws-sdk": "^2.768.0",
     "serverless-dotenv-plugin": "^2.1.1",
     "serverless-prune-plugin": "^1.4.3",
     "serverless-python-requirements": "^5.0.0"

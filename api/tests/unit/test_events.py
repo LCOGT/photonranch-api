@@ -1,5 +1,6 @@
 import pytest
 
+import skyfield
 from skyfield import api, almanac
 from skyfield.nutationlib import iau2000b
 
@@ -9,16 +10,19 @@ import pytz
 
 from api import events
 
+
 @pytest.fixture
 def ts():
     '''Get the skyfield timescale for building Time objects'''
     ts = api.load.timescale(builtin=True)
     return ts 
 
+
 @pytest.fixture
 def ok_time_err():
     ''' Define 5 minutes as an acceptable error in event times '''
     return (5/60)/24
+
 
 def test_get_calibration_frame_durations_structure():
     cal_frame_durations = events._get_calibration_frame_durations()
@@ -29,15 +33,31 @@ def test_get_calibration_frame_durations_structure():
                        "longest_dark"])
     assert set(cal_frame_durations.keys()) == required_keys
 
+
 def test_add_time_positive(ts):
     julian_date = 2458800
     time_obj = ts.tai_jd(julian_date)
     assert events._add_time(time_obj, 1).tai == julian_date + 1
 
+
 def test_add_time_negative(ts):
     julian_date = 2458800
     time_obj = ts.tai_jd(julian_date)
     assert events._add_time(time_obj, -1).tai == julian_date - 1
+
+
+def test_skyfieldtime_from_utciso_good():
+    good_timestring = "2020-12-31T01:00:00Z"
+    skyfield_time = events.skyfieldtime_from_utciso(good_timestring)
+    print(type(skyfield_time))
+    assert type(skyfield_time) == skyfield.timelib.Time
+
+
+def test_skyfieldtime_from_utciso_bad():
+    bad_timestring = "2020-12-31T01:00:00"  # missing timezone
+    with pytest.raises(ValueError):
+        skyfield_time = events.skyfieldtime_from_utciso(bad_timestring)
+    
 
 def test_sort_dict_of_time_objects(ts):
     # Create dicts of Skyfield time objects
@@ -52,6 +72,7 @@ def test_sort_dict_of_time_objects(ts):
         "three": ts.tai_jd(3),
     }
     assert events._sort_dict_of_time_objects(unsorted_dict).keys() == sorted_dict.keys()
+
 
 def test_build_site_context_structure():
     args = {
@@ -68,22 +89,27 @@ def test_build_site_context_structure():
     ])
     assert set(site_context.keys()) == required_keys
 
+
 def test_get_tz_offset_withDST():
     timezone = 'America/Los_Angeles'
     offset_when = datetime(2020,6,1).timestamp()
     offset_solution_with_dst = -7
     assert events._get_tz_offset(timezone, offset_when) == offset_solution_with_dst
 
+
 def test_get_tz_offset_no_DST():
     timezone = 'America/Los_Angeles'
     offset_when = datetime(2020,1,1).timestamp()
     offset_solution_no_dst = -8
     assert events._get_tz_offset(timezone, offset_when) == offset_solution_no_dst
+
+
 def test_get_tz_offset_no_DST_2():
     timezone = 'Australia/Perth'
     offsetWhen = datetime(2020,1,1).timestamp()
     offset_solution_no_dst = 8
     assert events._get_tz_offset(timezone, offsetWhen) == offset_solution_no_dst
+
 
 def test_get_local_noon_1159(ts):
     tz_name="Australia/Perth"
@@ -92,12 +118,14 @@ def test_get_local_noon_1159(ts):
     local_noon = ts.tai_jd(events._get_local_noon(tz_name, time))
     assert local_noon.tai_calendar()[2] == 4 # should be previous calendar day
 
+
 def test_get_local_noon_1200(ts):
     tz_name="Australia/Perth"
     tz = pytz.timezone(tz_name)
     time = tz.localize(datetime(2020, 6, 5, 12 )).timestamp()
     local_noon = ts.tai_jd(events._get_local_noon(tz_name, time))
     assert local_noon.tai_calendar()[2] == 5 # should keep same calendar day
+
 
 def test_get_rise_set_times(ts, ok_time_err):
     # Test cases from https://www.timeanddate.com/moon/@34,-119
@@ -118,6 +146,7 @@ def test_get_rise_set_times(ts, ok_time_err):
     print(rise_err, set_err)
     assert rise_err < ok_time_err and set_err < ok_time_err
 
+
 def test_get_rise_set_times_2(ts, ok_time_err):
     # Test cases from https://www.timeanddate.com/moon/@34,-119
     tz_name = 'Australia/Perth'
@@ -137,6 +166,7 @@ def test_get_rise_set_times_2(ts, ok_time_err):
     set_err = abs(riseSetTimes[1].tai - set_time.tai)
     print(rise_err, set_err)
     assert rise_err < ok_time_err and set_err < ok_time_err
+
 
 def test_calc_flat_vals_1(ts): 
     # calcMornFlatValues
@@ -169,6 +199,7 @@ def test_calc_flat_vals_1(ts):
     assert abs(flat_vals['flat_end_ra'] - flat_end_ra) < threshold
     assert abs(flat_vals['flat_end_dec'] - flat_end_dec) < threshold
 
+
 def test_calc_flat_vals_2(ts): 
     # calcEveFlatValues
 
@@ -199,6 +230,7 @@ def test_calc_flat_vals_2(ts):
     assert abs(flat_vals['flat_end_ra'] - flat_end_ra) < threshold
     assert abs(flat_vals['flat_end_dec'] - flat_end_dec) < threshold
 
+
 def test_get_moon_events_1(ts, ok_time_err):
     # Test cases from https://www.timeanddate.com/moon/@34,-119
     tz = pytz.timezone('America/Los_Angeles')
@@ -216,6 +248,7 @@ def test_get_moon_events_1(ts, ok_time_err):
     set_err = abs(moon_events['moonset'].tai - set_time.tai)
     assert rise_err < ok_time_err and set_err < ok_time_err
 
+
 def test_get_moon_events_2(ts, ok_time_err):
     # Test cases from https://www.timeanddate.com/moon/@34,-119
     tz = pytz.timezone('America/Los_Angeles')
@@ -232,6 +265,42 @@ def test_get_moon_events_2(ts, ok_time_err):
     rise_err = abs(moon_events['moonrise'].tai - rise_time.tai)
     set_err = abs(moon_events['moonset'].tai - set_time.tai)
     assert rise_err < ok_time_err and set_err < ok_time_err
+
+
+def test_get_moon_riseset_illum_empty():
+    lat = 34
+    lng = -119
+    start = "2020-10-01T01:00:00Z"
+    end = "2020-10-01T02:00:00Z"
+    moon_riseset_illum = events.get_moon_riseset_illum(lat, lng, start, end)
+    assert len(moon_riseset_illum) == 0
+
+
+def test_get_moon_riseset_illum_bad_times():
+    lat = 34
+    lng = -119
+    start = "2020-10-01T01:00:00Z"
+    end = "2020-10-01T02:00:00Z"
+    moon_riseset_illum = events.get_moon_riseset_illum(lat, lng, start, end)
+    assert len(moon_riseset_illum) == 0
+
+
+def test_get_moon_riseset_illum_good():
+    lat = 34
+    lng = -119
+    # should have one full rise/set cycle between these times.
+    # Source: https://www.timeanddate.com/moon/usa/santa-barbara
+    start = "2020-10-02T02:00:00Z"
+    end = "2020-10-02T15:00:00Z"
+    result = events.get_moon_riseset_illum(lat, lng, start, end)
+    rise_time = result[0]['rise']
+    transit_time = result[0]['transit']
+    set_time = result[0]['set']
+    print('rise: \t\t',rise_time)
+    print('transit: \t',transit_time)
+    print('set: \t\t', set_time)
+    assert rise_time < transit_time and transit_time < set_time
+
 
 def test_make_site_events():
     required_keys = set(["Eve Bias Dark", 

@@ -1,10 +1,14 @@
+from datetime import datetime, timezone
+import time
+
+import ephem
+import pytz
 import skyfield
 from skyfield import api, almanac
 from skyfield.nutationlib import iau2000b
+from skyfield.api import utc
 
-from datetime import datetime, timezone
-import time
-import pytz
+TIMESCALE = api.load.timescale(builtin=True)
 
 def _get_calibration_frame_durations():
 
@@ -23,6 +27,11 @@ def _add_time(timeObject, days: float):
     timescale = api.load.timescale(builtin=True)
     return timescale.tai_jd(timeObject.tai + days)
 
+def skyfieldtime_from_utciso(iso_str):
+    """ Convert a utc iso string to a skyfield time object. """
+    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%SZ")
+    dt = dt.replace(tzinfo=utc)
+    return TIMESCALE.from_datetime(dt)
 
 def _sort_dict_of_time_objects(unsorted):
     """Return dict with items sorted by the order of their time values.
@@ -44,7 +53,6 @@ def _sort_dict_of_time_objects(unsorted):
     for item in sortedList:
         sortedDict[item[0]] = item[1]
     return sortedDict
-
 
 def _build_site_context(lat: float, lng: float, time: float, timezone: str):
     """Return the geo information specific to the observatory.
@@ -226,6 +234,77 @@ def get_moon_events(site_context):
             moon_events['moonset'] = t
 
     return moon_events
+
+
+def get_next_moon_transit(lat, lng, time): 
+    obs = ephem.Observer() 
+    obs.lat, obs.lon = str(lat), str(lng)
+    obs.date = time
+    transit_time = obs.next_transit(ephem.Moon()).datetime()
+    transit_time = transit_time.replace(tzinfo=utc)
+    return transit_time
+
+
+def get_moon_riseset_illum(lat, lng, start, end):
+    """ Calculate moon rise/set times and illumination.
+
+    Args:
+        lat (float): latitude of the observing location, degrees N.
+        lng (float): longitude of hte observing location, degrees E.
+        start (str): utc iso time string (like 2020-12-31T01:00:00Z)
+        start (str): utc iso time string 
+
+    Returns:
+        list of dict: each dict contains 
+            "rise": utc iso time string, 
+            "set": utc iso time string,
+            "illumination": [0,1] value for illum. percent at transit time.
+    """
+
+    eph = api.load('de421.bsp')
+    obs = api.Topos(latitude_degrees=lat, longitude_degrees=lng)
+
+    # Convert time strings to skyfield time objects
+    t0 = skyfieldtime_from_utciso(start)
+    t1 = skyfieldtime_from_utciso(end)
+
+    is_rise_func = almanac.risings_and_settings(eph, eph['moon'], obs)
+    times, is_rise = almanac.find_discrete(t0, t1, is_rise_func)
+    
+    times = list(times)
+    is_rise = list(is_rise)
+    
+    risesets = []  # list to return
+    
+    # We want pairs of corresponding rise, set times. 
+    # So remove starting 'set' times or ending 'rise' times. 
+    if is_rise and not is_rise[0]:
+        times.pop(0)
+        is_rise.pop(0)
+    if is_rise and is_rise[-1]:
+        times.pop()
+        is_rise.pop()
+
+    # Add each rise, set pair as an object in our list to return.
+    # Also include illumination at rise time as a float in [0, 1]
+    # Remove rise/set pairs from the source list as they are processed. 
+    # Do this until the list is empty. 
+    while len(times):
+
+        rise_time = times.pop(0) 
+        set_time = times.pop(0)
+
+        transit_time = get_next_moon_transit(lat, lng, rise_time.utc_datetime())
+        transit_time = TIMESCALE.from_datetime(transit_time)
+
+        risesets.append({
+            "illumination": almanac.fraction_illuminated(eph, 'moon', transit_time),
+            "rise": rise_time.utc_iso(),
+            "set": set_time.utc_iso(),
+            "transit": transit_time.utc_iso()
+        })
+        
+    return risesets
 
 
 def make_site_events(lat: float, lng: float, time: float, timezone: str):

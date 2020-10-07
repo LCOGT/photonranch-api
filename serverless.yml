@@ -36,6 +36,13 @@ custom:
     useStaticCache: false
     slim: true
 
+  # serverless prune plugin
+  # automatically prunes function versions older than the last 3
+  # this prevents the lambda function from exceeding storage limits. 
+  prune:
+    automatic: true
+    number: 3
+
 provider:
   name: aws
   stage: ${opt:stage, "dev"}
@@ -276,6 +283,14 @@ functions:
     events:
       - http:
           path: /events
+          method: get
+          cors: true
+
+  moonRiseSetIllum:
+    handler: api/events_handler.get_moon_riseset_illum_handler
+    events:
+      - http:
+          path: /events/moon/rise-set-illum
           method: get
           cors: true
 
