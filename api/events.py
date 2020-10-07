@@ -237,6 +237,20 @@ def get_moon_events(site_context):
 
 
 def get_next_moon_transit(lat, lng, time): 
+    """ Get the next moon transit of the meridian for the location and time.
+
+    This method uses ephem instead of skyfield, because skyfield does not have
+    a simple way to calculate transits. 
+
+    Args:
+        lat (float): latitude N, in degrees. Note: str is also fine.
+        lng (float): longitude E, in degrees. Note: str is also fine.
+        time (datetime): python datetime; transit will be the next one after
+            this time. 
+
+    Returns: 
+        datetime: python datetime object with utc timezone.
+    """
     obs = ephem.Observer() 
     obs.lat, obs.lon = str(lat), str(lng)
     obs.date = time

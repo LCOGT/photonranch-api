@@ -3,6 +3,7 @@ import pytest
 import skyfield
 from skyfield import api, almanac
 from skyfield.nutationlib import iau2000b
+from skyfield.api import utc
 
 import datetime, time
 from datetime import datetime
@@ -301,6 +302,14 @@ def test_get_moon_riseset_illum_good():
     print('set: \t\t', set_time)
     assert rise_time < transit_time and transit_time < set_time
 
+
+def test_get_next_moon_transit():
+    lat = 34
+    lng = -119
+    observer_time = datetime.now()
+    observer_time = observer_time.replace(tzinfo=utc)
+    transit_time = events.get_next_moon_transit(lat, lng, observer_time)
+    assert transit_time > observer_time
 
 def test_make_site_events():
     required_keys = set(["Eve Bias Dark", 
