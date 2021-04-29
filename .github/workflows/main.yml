@@ -3,6 +3,7 @@
 # Learn more: https://maxkostinevich.com/blog/how-to-deploy-serverless-applications-using-github-actions/
 #
 
+
 name: Deploy Test Stage
 on:
   push:
@@ -12,16 +13,7 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '10.x'
-    - name: Install Serverless Framework
-      run: npm install -g serverless
-    - name: Install NPM dependencies
-      run: npm install
-    - name: Serverless AWS authentication
-      run: sls config credentials --provider aws --key ${{ secrets.SLS_AWS_ACCESS_KEY_ID }} --secret ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+
     - name: Create public_key file
       run: | 
         cat > public_key << EOF
@@ -30,6 +22,7 @@ jobs:
         -----END CERTIFICATE-----
         
         EOF
+
     - name: Create Auth0 secrets file
       run: |
         cat > secrets.json << EOF
@@ -37,5 +30,16 @@ jobs:
           "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}"
         }
         EOF
-    - name: Deploy Lambda functions
-      run: sls deploy --stage test
+
+    - uses: actions/checkout@master
+    - name: npm install
+      uses: actions/npm@master
+      with:
+        args: install
+    - name: serverless deploy
+      uses: serverless/github-action@master
+      with:
+        args: deploy --stage test
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
