@@ -22,7 +22,6 @@ jobs:
         -----END CERTIFICATE-----
         
         EOF
-
     - name: Create Auth0 secrets file
       run: |
         cat > secrets.json << EOF
@@ -30,13 +29,12 @@ jobs:
           "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}"
         }
         EOF
-
     - uses: actions/checkout@master
     - name: npm install
       uses: actions/npm@master
       with:
         args: install
-    - name: serverless deploy
+    - name: Serverless
       uses: jackdcasey/github-action@python3.8-nodejs13
       with:
         args: deploy --stage test
