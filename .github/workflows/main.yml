@@ -35,7 +35,7 @@ jobs:
         python-version: 3.7  # Update with your python version
 
     - name: Serverless Deploy
-      uses: dhollerbach/github-action-serverless-with-python-requirements@master
+      uses: dhollerbach/github-action-serverless-with-python-requirements@2.0
       with:
         args: '--stage test'
       env:
