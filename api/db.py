@@ -62,6 +62,7 @@ class Image(Base):
     fits_01_exists    = Column(Boolean)
     fits_10_exists    = Column(Boolean)
     jpg_medium_exists = Column(Boolean)
+    jpg_small_exists  = Column(Boolean)
 
     altitude          = Column(Float)
     azimuth           = Column(Float)
@@ -103,6 +104,7 @@ class Image(Base):
             "fits_01_exists": self.fits_01_exists,
             "fits_10_exists": self.fits_10_exists,
             "jpg_medium_exists": self.jpg_medium_exists,
+            "jpg_small_exists": self.jpg_small_exists,
 
             "username": self.username,
             "user_id": self.user_id,
@@ -118,6 +120,12 @@ class Image(Base):
             path = get_s3_image_path(self.base_filename, self.data_type, "10", "jpg")
             url = get_s3_file_url(path)
             package["jpg_url"] = url
+
+        package["jpg_thumbnail_url"] = ""
+        if self.jpg_small_exists:
+            path = get_s3_image_path(self.base_filename, self.data_type, "11", "jpg")
+            url = get_s3_file_url(path)
+            package["jpg_thumbnail_url"] = url
 
         return package
 
@@ -230,6 +238,23 @@ def get_image_by_filename(db_address, base_filename):
         return image.get_image_pkg()
 
 
+def remove_image_by_filename(base_filename):
+    """ Remove an entire row represented by the data's base filename.
+
+    Args:
+        base_filename (str): identifies what to delete. 
+            Example: wmd-ea03-20190621-00000007
+    """
+
+    with get_session(db_address=DB_ADDRESS) as session:
+        Image.query\
+            .filter(Image.base_filename == base_filename)\
+            .delete()
+        session.commit()
+
+
+
+
 #####################################################
 ##############    Endpoint Handlers    ##############
 #####################################################
@@ -318,3 +343,17 @@ def filtered_images_query_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
 
     return http_response(HTTPStatus.OK, images)
+
+
+
+def remove_image_by_filename_handler(event, context):
+    base_filename = event['pathParameters']['base_filename']
+
+    try: 
+        remove_image_by_filename(base_filename)
+    except Exception as e:
+        error_msg = f"Could not delete {base_filename}. Error: {e}"
+        logger.exception(error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+
+    return http_response(HTTPStatus.OK, image)

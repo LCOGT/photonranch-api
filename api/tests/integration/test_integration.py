@@ -14,7 +14,7 @@ from api import handler
 
 VALID_FILTER_REQUEST_EVENT = {
     "queryStringParameters": {
-        "site": "wmd",
+        "site": "mrc",
         "filter": "up",
         "start_date": "2020-08-30+12",
         "filename": "-"
@@ -70,14 +70,14 @@ def test_get_image_invalid_filename(base_url):
 
 
 def test_latest_images_no_user(base_url):
-    site = "wmd"
+    site = "mrc"
     url = f"{base_url}/{site}/latest_images/1"
     response = requests.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
 def test_latest_images_fake_user(base_url):
-    site = "wmd"
+    site = "mrc"
     query_params = {
         "userid": "fake user id"
     }
@@ -89,7 +89,7 @@ def test_latest_images_fake_user(base_url):
 def test_filtered_image_query(base_url):
     url = f"{base_url}/filtered_images"
     params = {
-        "site": "wmd",
+        "site": "mrc",
         "filter": "up",
         "start_date": "2020-08-30+12",
     }
@@ -105,7 +105,7 @@ def test_get_fits_header_from_db(base_url):
 
 
 def test_get_config(base_url):
-    site = "wmd"
+    site = "mrc"
     url = f"{base_url}/{site}/config"
     response = requests.get(url)
     assert response.status_code == HTTPStatus.OK
@@ -156,7 +156,7 @@ def test_add_weather_status(base_url):
 
 
 def test_site_events(base_url):
-    site = "wmd"
+    site = "mrc"
     url = f"{base_url}/events?site={site}"
     response = requests.get(url)
     assert response.status_code == HTTPStatus.OK

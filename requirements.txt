@@ -1,5 +1,4 @@
 attrs==19.3.0
-boto==2.49.0
 boto3==1.9.134
 botocore==1.12.188
 certifi==2019.6.16
@@ -23,6 +22,7 @@ msgpack==0.6.1
 numpy==1.19.1
 packaging==20.4
 pluggy==0.13.1
+psycopg2==2.8.6
 psycopg2-binary==2.8.4
 py==1.9.0
 pycparser==2.20
