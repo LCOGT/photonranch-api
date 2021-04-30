@@ -12,7 +12,7 @@ jobs:
 
     - name: Create public_key file
       run: | 
-        cat > public_key << EOF
+        cat > photonranch-api/public_key << EOF
         -----BEGIN CERTIFICATE-----
         ${{ secrets.AUTH0_PUBLIC_KEY }}
         -----END CERTIFICATE-----
@@ -21,7 +21,7 @@ jobs:
         
     - name: Create Auth0 secrets file
       run: |
-        cat > secrets.json << EOF
+        cat > photonranch-api/secrets.json << EOF
         {
           "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}"
         }
