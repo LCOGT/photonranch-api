@@ -18,6 +18,7 @@ jobs:
         -----END CERTIFICATE-----
         
         EOF
+        
     - name: Create Auth0 secrets file
       run: |
         cat > secrets.json << EOF
