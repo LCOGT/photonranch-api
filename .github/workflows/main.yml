@@ -42,5 +42,4 @@ jobs:
       with:
         args: '--stage test'
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+        SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
