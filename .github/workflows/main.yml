@@ -4,14 +4,14 @@ on:
     branches:
       - test-deploy
 jobs:
-  deploy-dev:
+  deploy-test:
     runs-on: ubuntu-latest
     steps:
     
     - uses: actions/checkout@v1
 
     - name: Create public_key file
-      run: | 
+      run: |
         cat > /home/runner/work/photonranch-api/photonranch-api/public_key << EOF
         -----BEGIN CERTIFICATE-----
         ${{ secrets.AUTH0_PUBLIC_KEY }}
