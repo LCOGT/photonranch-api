@@ -36,7 +36,7 @@ def dummy_requires_auth(event, context):
 
 def default(event, context):
     log.info(json.dumps(event, indent=2))
-    return http_response(HTTPStatus.OK, "New photon ranch API, test-deploy")
+    return http_response(HTTPStatus.OK, "New photon ranch API")
 
 
 def upload(event, context): 
