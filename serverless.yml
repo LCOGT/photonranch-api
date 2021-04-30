@@ -202,7 +202,6 @@ functions:
           cors: true
 
   getFitsHeader:
-    #handler: api/handler.get_fits_header_from_db
     handler: api/db.get_fits_header_from_db_handler
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
@@ -213,7 +212,6 @@ functions:
           cors: true
 
   filteredImageQuery:
-    #handler: api/handler.filtered_image_query
     handler: api/db.filtered_images_query_handler
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
@@ -222,7 +220,6 @@ functions:
           path: /filtered_images
           method: get
           cors: true
-
 
   getConfig:
     handler: api/handler.get_config
