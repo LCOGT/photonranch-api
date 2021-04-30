@@ -27,6 +27,14 @@ jobs:
         }
         EOF
 
+    - name: Create AWS credentials file
+      run: |
+        cat > ~/.aws/credentials << EOF
+        [default]
+        aws_access_key_id=${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key=${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+        EOF
+
     - name: Set up Node
       uses: actions/setup-node@v1
       with:
