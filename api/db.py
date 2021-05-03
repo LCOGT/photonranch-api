@@ -50,27 +50,28 @@ def get_session(db_address):
 class Image(Base):
     __tablename__ = 'images'
 
-    image_id         = Column(Integer, primary_key=True)
-    base_filename    = Column(String)
-    site             = Column(String)
-    capture_date     = Column(DateTime, default=datetime.utcnow)
-    sort_date        = Column(DateTime, default=datetime.utcnow)
-    right_ascension  = Column(Float)
-    declination      = Column(Float)
-    ex00_fits_exists = Column(Boolean)
-    ex01_fits_exists = Column(Boolean)
-    ex10_fits_exists = Column(Boolean)
-    ex13_fits_exists = Column(Boolean)
-    ex10_jpg_exists  = Column(Boolean)
-    ex13_jpg_exists  = Column(Boolean)
-    altitude         = Column(Float)
-    azimuth          = Column(Float)
-    filter_used      = Column(String)
-    airmass          = Column(Float)
-    exposure_time    = Column(Float)
-    username         = Column(String)
-    user_id          = Column(String)
-    header           = Column(String)
+    image_id          = Column(Integer, primary_key=True)
+    base_filename     = Column(String)
+    data_type         = Column(String)
+    site              = Column(String)
+    capture_date      = Column(DateTime, default=datetime.utcnow)
+    sort_date         = Column(DateTime, default=datetime.utcnow)
+    right_ascension   = Column(Float)
+    declination       = Column(Float)
+
+    fits_01_exists    = Column(Boolean)
+    fits_10_exists    = Column(Boolean)
+    jpg_medium_exists = Column(Boolean)
+    jpg_small_exists  = Column(Boolean)
+
+    altitude          = Column(Float)
+    azimuth           = Column(Float)
+    filter_used       = Column(String)
+    airmass           = Column(Float)
+    exposure_time     = Column(Float)
+    username          = Column(String)
+    user_id           = Column(String)
+    header            = Column(String)
 
     def __init__(self, base_filename):
         self.base_filename = base_filename
@@ -89,6 +90,7 @@ class Image(Base):
         package = {
             "image_id": self.image_id,
             "base_filename": self.base_filename,
+            "data_type": self.data_type,
             "site": self.site, 
 
             "exposure_time": self.exposure_time,
@@ -99,11 +101,10 @@ class Image(Base):
             "altitude": self.altitude,
             "airmass": self.airmass,
 
-            "ex01_fits_exists": self.ex01_fits_exists,
-            "ex10_fits_exists": self.ex10_fits_exists,
-            "ex10_jpg_exists": self.ex10_jpg_exists,
-            "ex13_jpg_exists": self.ex13_jpg_exists,
-            "ex00_fits_exists": self.ex00_fits_exists,
+            "fits_01_exists": self.fits_01_exists,
+            "fits_10_exists": self.fits_10_exists,
+            "jpg_medium_exists": self.jpg_medium_exists,
+            "jpg_small_exists": self.jpg_small_exists,
 
             "username": self.username,
             "user_id": self.user_id,
@@ -115,10 +116,16 @@ class Image(Base):
 
         # Include a url to the jpg
         package["jpg_url"] = ""
-        if self.ex10_jpg_exists:
-            path = get_s3_image_path(self.base_filename, "EX10", "jpg")
+        if self.jpg_medium_exists:
+            path = get_s3_image_path(self.base_filename, self.data_type, "10", "jpg")
             url = get_s3_file_url(path)
             package["jpg_url"] = url
+
+        package["jpg_thumbnail_url"] = ""
+        if self.jpg_small_exists:
+            path = get_s3_image_path(self.base_filename, self.data_type, "11", "jpg")
+            url = get_s3_file_url(path)
+            package["jpg_thumbnail_url"] = url
 
         return package
 
@@ -142,7 +149,7 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
     # Filter by site, and by user_id if provided.
     query_filters = [
         Image.site==site,
-        Image.ex10_jpg_exists.is_(True) # the jpg preview must exist
+        Image.jpg_medium_exists.is_(True) # the jpg preview must exist
     ]
     if user_id:
         query_filters.append(Image.user_id==user_id)
@@ -194,7 +201,7 @@ def filtered_images_query(db_address: str, query_filters: list):
 
     """
     # Add the condition that the jpg must exist
-    query_filters.append(Image.ex10_jpg_exists.is_(True))
+    query_filters.append(Image.jpg_medium_exists.is_(True))
     with get_session(db_address=db_address) as session:
         images = session.query(Image)\
             .order_by(Image.sort_date.desc())\
@@ -222,13 +229,30 @@ def get_image_by_filename(db_address, base_filename):
     """
     query_filters = [
         Image.base_filename == base_filename, # match filenames
-        Image.ex10_jpg_exists.is_(True)       # the jpg must exist
+        Image.jpg_medium_exists.is_(True)       # the jpg must exist
     ]
     with get_session(db_address=db_address) as session:
         image = session.query(Image)\
             .filter(*query_filters)\
             .one()
         return image.get_image_pkg()
+
+
+def remove_image_by_filename(base_filename):
+    """ Remove an entire row represented by the data's base filename.
+
+    Args:
+        base_filename (str): identifies what to delete. 
+            Example: wmd-ea03-20190621-00000007
+    """
+
+    with get_session(db_address=DB_ADDRESS) as session:
+        Image.query\
+            .filter(Image.base_filename == base_filename)\
+            .delete()
+        session.commit()
+
+
 
 
 #####################################################
@@ -319,3 +343,17 @@ def filtered_images_query_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
 
     return http_response(HTTPStatus.OK, images)
+
+
+
+def remove_image_by_filename_handler(event, context):
+    base_filename = event['pathParameters']['base_filename']
+
+    try: 
+        remove_image_by_filename(base_filename)
+    except Exception as e:
+        error_msg = f"Could not delete {base_filename}. Error: {e}"
+        logger.exception(error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+
+    return http_response(HTTPStatus.OK, image)

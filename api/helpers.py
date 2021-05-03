@@ -73,8 +73,8 @@ def get_db_connection():
     return connection
 
 
-def get_s3_image_path(base_filename, ex_value, file_extension):
-    full_filename = f"{base_filename}-{ex_value}.{file_extension}"
+def get_s3_image_path(base_filename, datatype, reduction_level, file_extension):
+    full_filename = f"{base_filename}-{datatype}{reduction_level}.{file_extension}"
     path = f"data/{full_filename}"
     return path
 
