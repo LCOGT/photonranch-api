@@ -27,6 +27,8 @@ db_password = _get_secret('db-password')
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
+info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
+
 def dummy_requires_auth(event, context):
     """ No purpose other than testing auth functionality """
     log.info(json.dumps(event, indent=2))
@@ -64,7 +66,24 @@ def upload(event, context):
     """
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
-    key = 'data/' + body['object_name']
+    
+    # retrieve and validate the s3_directory
+    s3_directory = body.get('s3_directory', 'data')
+    if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
+        error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
+        log.warning(error_msg)
+        return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+    # get upload metadata
+    metadata = body.get('metadata', None)
+    if metadata is not None:
+        metadata = json.dumps(json.loads(metadata), cls=DecimalEncoder)
+    
+    # TODO:
+    # if applicable: add metadata to database
+    #
+
+    key = f"{s3_directory}/{body['object_name']}"
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     url = json.dumps(s3.generate_presigned_post(
         Bucket = BUCKET_NAME,
@@ -78,7 +97,15 @@ def upload(event, context):
 def download(event, context): 
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
-    key = "data/" + body['object_name']
+
+    # retrieve and validate the s3_directory
+    s3_directory = body.get('s3_directory', 'data')
+    if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
+        error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
+        log.warning(error_msg)
+        return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+    key = f"{s3_directory}/{body['object_name']}"
     params = {
         "Bucket": BUCKET_NAME,
         "Key": key,

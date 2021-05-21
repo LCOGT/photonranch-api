@@ -15,6 +15,8 @@ plugins:
   - serverless-python-requirements
   - serverless-domain-manager
   - serverless-prune-plugin
+  - serverless-offline
+
 custom:
 
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
@@ -32,6 +34,8 @@ custom:
 
   # This is to reduce the size of the deployment
   pythonRequirements:
+    dockerizePip: non-linux
+    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
     slim: true
@@ -51,6 +55,7 @@ provider:
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
     REGION: ${self:provider.region}
+    INFO_IMAGES_TABLE: 'info-images'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
@@ -177,11 +182,20 @@ functions:
           cors: true
 
   # Image package for a single image
+  get_info_image:
+    handler: api/info_images.get_info_image_package
+    events:
+      - http:
+          path: /infoimage/{site}
+          method: get
+          cors: true
+
+  # Image package for a single image
   get_image_by_filename:
-    #handler: api/handler.get_image
     handler: api/db.get_image_by_filename_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
+      # note: layer sourced from https://github.com/keithrozario/Klayers
     events:
       - http:
           path: /image/{base_filename}
@@ -190,13 +204,11 @@ functions:
 
   # List of image packages for last k images at the given site 
   latestImages:
-    #handler: api/handler.latest_images
     handler: api/db.get_latest_site_images_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
     events:
       - http:
-          #path: /{site}/latest_images/{k}
           path: /{site}/latest_images/{number_of_images}
           method: get
           cors: true
@@ -204,7 +216,7 @@ functions:
   getFitsHeader:
     handler: api/db.get_fits_header_from_db_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
     events:
       - http:
           path: /fitsheader/{base_filename}
@@ -214,7 +226,7 @@ functions:
   filteredImageQuery:
     handler: api/db.filtered_images_query_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:8
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
     events:
       - http:
           path: /filtered_images

@@ -10,7 +10,7 @@ from botocore.client import Config
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 REGION = os.environ['REGION']
 S3_PUT_TTL = 300
-S3_GET_TTL = 3600
+S3_GET_TTL = 86400 * 5  # 5 days before s3 image links expire
 
 dynamodb_r = boto3.resource('dynamodb', REGION)
 ssm_c = boto3.client('ssm', region_name=REGION)

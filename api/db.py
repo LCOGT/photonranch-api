@@ -106,6 +106,8 @@ class Image(Base):
             "jpg_medium_exists": self.jpg_medium_exists,
             "jpg_small_exists": self.jpg_small_exists,
 
+            "s3_directory": "data",
+
             "username": self.username,
             "user_id": self.user_id,
         }
