@@ -18,6 +18,7 @@ from botocore.client import Config
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from api.helpers import dynamodb_r, ssm_c
 from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
+from api.helpers import get_base_filename_from_full_filename
 
 db_host = _get_secret('db-host')
 db_database = _get_secret('db-database')
@@ -28,6 +29,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
+s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
 
 def dummy_requires_auth(event, context):
     """ No purpose other than testing auth functionality """
@@ -48,7 +50,7 @@ def upload(event, context):
     json-string body of the request.
 
     Example request body:
-    '{"object_name":"a_file.txt"}'
+    '{"object_name":"a_file.txt", "s3_directory": "data"}'
 
     This request will save an image into the main s3 bucket as:
     MAIN_BUCKET_NAME/data/a_file.txt
@@ -63,16 +65,65 @@ def upload(event, context):
     # If successful, returns HTTP status code 204
     log.info(f'File upload HTTP status code: {http_response.status_code}')
 
+    * * *
+
+    If the upload url is to be used with an info image, then the request must include 
+    'info_channel' with a value of 1, 2, or 3.
+    This will prompt an update to the info-images table, where it will store the provided
+    base_filename in the row with pk=={site}#metadata, under the attribute channel{n}.
+
+    For example, the request body 
+    {
+        "object_name": "tst-inst-20211231-00000001-EX10.jpg",
+        "s3_directory": "info-images",
+        "info_channel": 2
+    }
+    will result in the info-images table being updated with
+    {
+        "pk": "tst#metadata",
+        "channel2": "tst-inst-20211231-00000001",
+        ...
+    }
+    The URL returned by this endpoint will allow a POST request to s3 with the actual file. 
+    The code that processes new s3 objects will see that it is an info image, then 
+    query the info-images table to find which channel to use, and finally update the info-images
+    table with an entry like
+    {
+        "pk": "tst#2",
+        "jpg_10_exists": true,
+        ...
+    }
+    This is the object that is queried to find the info image at site tst, channel 2. 
     """
+
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
     
     # retrieve and validate the s3_directory
     s3_directory = body.get('s3_directory', 'data')
+    filename = body.get('object_name')
     if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
         error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
         log.warning(error_msg)
         return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+    # if info image: get the channel number to use
+    if s3_directory == 'info-images':
+
+        site = filename.split('-')[0]
+        base_filename = get_base_filename_from_full_filename(filename)
+        channel = int(body.get('info_channel', 1))
+        if channel not in [1,2,3]:
+            error_msg = f"Value for info_channel must be either 1, 2, or 3. Recieved {channel} instead."
+            log.warning(error_msg)
+            return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+        # create an entry to track metadata for the next info image that will be uploaded
+        info_images_table.update_item(
+            Key={ 'pk': f'{site}#metadata' },
+            UpdateExpression=f"set channel{channel}=:basefilename",
+            ExpressionAttributeValues={':basefilename': base_filename}
+        )
 
     # get upload metadata
     metadata = body.get('metadata', None)
@@ -84,12 +135,11 @@ def upload(event, context):
     #
 
     key = f"{s3_directory}/{body['object_name']}"
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = json.dumps(s3.generate_presigned_post(
+    url = s3.generate_presigned_post(
         Bucket = BUCKET_NAME,
         Key = key,
         ExpiresIn = S3_PUT_TTL
-    ))
+    )
     log.info(f"Presigned upload url: {url}")
     return http_response(HTTPStatus.OK, url)
 
@@ -110,7 +160,6 @@ def download(event, context):
         "Bucket": BUCKET_NAME,
         "Key": key,
     }
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     url = s3.generate_presigned_url(
         ClientMethod='get_object',
         Params=params,
@@ -128,6 +177,7 @@ def get_config(event, context):
     return http_response(HTTPStatus.OK, config['Item'])
 
 
+# TODO: add validation
 def put_config(event, context):
     log.info(json.dumps(event, indent=2))
     site = event['pathParameters']['site']

@@ -78,6 +78,14 @@ def get_s3_image_path(base_filename, datatype, reduction_level, file_extension):
     path = f"data/{full_filename}"
     return path
 
+def get_base_filename_from_full_filename(full_filename):
+    ''' convert a string like
+    tst001-inst-20210525-00000123-EX01.fits.bz2
+    to
+    tst001-inst-20210525-00000123
+    '''
+    return full_filename.split('.')[0].rsplit('-', 1)[0]
+
 def get_s3_file_url(path, ttl=604800):
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
     url = s3.generate_presigned_url(

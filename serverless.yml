@@ -186,7 +186,7 @@ functions:
     handler: api/info_images.get_info_image_package
     events:
       - http:
-          path: /infoimage/{site}
+          path: /infoimage/{site}/{channel}
           method: get
           cors: true
 
