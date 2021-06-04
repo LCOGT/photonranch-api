@@ -88,6 +88,8 @@ def test_get_info_image_package_success(setup_teardown):
     assert(response_body['base_filename'] == base_filename)
     assert(response_body['fits_01_exists'] == True)
     assert(response_body['fits_10_exists'] == False)
+    assert(response_body['site'] == site)
+    assert(response_body['channel'] == channel)
 
 
 def test_get_info_image_package_no_image(setup_teardown):

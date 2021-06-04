@@ -20,7 +20,8 @@ def get_info_image_package(event, context):
 
         info_image_package = {
             **info_image, 
-            "site": info_image["pk"].split('#')[0],
+            "site": site,
+            "channel": channel,
             "base_filename": info_image["base_filename"],
             #TODO: check for file existence by checking if the file path exists. Then remove the explicit existance keys from info-images database.
             "jpg_medium_exists": info_image.get("jpg_medium_exists", False),
