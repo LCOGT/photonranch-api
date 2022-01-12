@@ -131,6 +131,23 @@ class Image(Base):
 
         return package
 
+    def get_small_fits_filename(self):
+        return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+
+    def get_large_fits_filename(self):
+        return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+
+    def get_best_fits_filename(self):
+        """ Return the full filename for the largest fits version stored in s3. 
+        If there is no fits file available, return an empty string. 
+        """
+        if self.fits_01_exists: 
+            return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+
+        elif self.fits_10_exists: 
+            return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+
+        else: return ''
 
 def get_latest_site_images(db_address, site, number_of_images, user_id=None):
     """ Get the n latest images from a site. 
@@ -255,6 +272,50 @@ def remove_image_by_filename(base_filename):
         session.commit()
 
 
+def get_files_within_date_range(site: str, start_timestamp_s: int, 
+        end_timestamp_s: int, fits_size: str):
+    """ Query for files at a given site within a date range.
+
+    Args:
+        site (str): site code, eg. "mrc"
+        start_timestamp_s (int): timestamp in seconds, early bound.
+        end_timestamp_s (int): timestamp in seconds, later bound.
+        fits_size (str): "small" | "large" | "best": choose whether to only 
+            select small fits files, only large fits files, or best available.
+
+    Returns:
+        list: list of filenames (str) that match the query  
+    """
+    fits_size = fits_size.lower()
+    if not fits_size in ['small', 'large', 'best']:
+        raise ValueError('fits_size must be either "small", "large", or "best".')
+
+    start_datetime = datetime.fromtimestamp(start_timestamp_s)
+    end_datetime = datetime.fromtimestamp(end_timestamp_s)
+    query_filters = [
+        Image.site == site,
+        Image.capture_date >= start_datetime,
+        Image.capture_date <= end_datetime,
+    ]
+    if fits_size == "small": 
+        query_filters.append(Image.fits_10_exists.is_(True))
+    elif fits_size == "large":
+        query_filters.append(Image.fits_01_exists.is_(True))
+
+    with get_session(db_address=DB_ADDRESS) as session:
+        images = session.query(Image)\
+            .filter(*query_filters)\
+            .all()
+        session.expunge_all()
+
+    if fits_size == "small": 
+        return [image.get_small_fits_filename() for image in images]
+
+    elif fits_size == "large": 
+        return [image.get_large_fits_filename() for image in images]
+
+    elif fits_size == "best": 
+        return [image.get_best_fits_filename() for image in images]
 
 
 #####################################################

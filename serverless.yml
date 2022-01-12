@@ -91,6 +91,12 @@ provider:
         - sqs:*
       Resource: arn:aws:sqs:*:*:*
 
+    - Effect: Allow
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: 
+        - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
+
 resources: # CloudFormation template syntax from here on.
   Resources:
 
@@ -178,6 +184,14 @@ functions:
     events:
       - http:
           path: /download
+          method: post
+          cors: true
+  downloadzip:
+    handler: api/handler.download_zip
+    timeout: 120 
+    events:
+      - http:
+          path: /downloadzip
           method: post
           cors: true
 

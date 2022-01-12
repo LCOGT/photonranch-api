@@ -2,6 +2,8 @@
 import json 
 import os 
 import boto3 
+import base64
+from pprint import pprint
 import decimal 
 import sys 
 import time 
@@ -20,6 +22,8 @@ from api.helpers import dynamodb_r, ssm_c
 from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
 from api.helpers import get_base_filename_from_full_filename
 
+from api.db import get_files_within_date_range
+
 db_host = _get_secret('db-host')
 db_database = _get_secret('db-database')
 db_user = _get_secret('db-user')
@@ -30,6 +34,7 @@ log.setLevel(logging.INFO)
 
 info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
 s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
+lambda_client = boto3.client('lambda', REGION)
 
 def dummy_requires_auth(event, context):
     """ No purpose other than testing auth functionality """
@@ -167,6 +172,43 @@ def download(event, context):
     )
     log.info(f"Presigned download url: {url}")
     return http_response(HTTPStatus.OK, str(url))
+
+def download_zip(event, context):
+
+    pprint(event)
+    body = _get_body(event)
+    pprint(body)
+
+    start_timestamp_s = int(body.get('start_timestamp_s'))
+    end_timestamp_s = int(body.get('end_timestamp_s'))
+    fits_size = body.get('fits_size')
+    site = body.get('site')
+
+    files = get_files_within_date_range(site, start_timestamp_s, end_timestamp_s, fits_size)
+    print('number of files: ', len(files))
+    print('first file: ', files[0])
+
+    payload = json.dumps({
+        'filenames': files
+        }).encode('utf-8')
+
+    response = lambda_client.invoke(
+        FunctionName='zip-downloads-dev-zip',
+        InvocationType='RequestResponse',
+        LogType='Tail',
+        Payload=payload
+    )
+    lambda_response = response['Payload'].read()
+
+    zip_url = json.loads(json.loads(lambda_response)['body'])
+    print(zip_url)
+
+    log_response = base64.b64decode(response['LogResult']).decode('utf-8')
+    pprint(log_response)
+
+    logs = log_response.splitlines()
+    pprint(logs)
+    return http_response(HTTPStatus.OK, zip_url)
 
 
 def get_config(event, context):
