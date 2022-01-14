@@ -4,12 +4,6 @@ import os
 import boto3 
 import base64
 from pprint import pprint
-import decimal 
-import sys 
-import time 
-import datetime 
-import re 
-import requests
 import psycopg2
 import logging
 from http import HTTPStatus
@@ -18,7 +12,7 @@ from botocore.exceptions import ClientError
 from botocore.client import Config
 
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
-from api.helpers import dynamodb_r, ssm_c
+from api.helpers import dynamodb_r
 from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
 from api.helpers import get_base_filename_from_full_filename
 
@@ -185,6 +179,11 @@ def download_zip(event, context):
     site = body.get('site')
 
     files = get_files_within_date_range(site, start_timestamp_s, end_timestamp_s, fits_size)
+
+    # Return 404 if no images fit the query.
+    if len(files) == 0:
+        return http_response(HTTPStatus.NOT_FOUND, 'No images exist for the given query.')
+
     print('number of files: ', len(files))
     print('first file: ', files[0])
 
@@ -209,81 +208,3 @@ def download_zip(event, context):
     logs = log_response.splitlines()
     pprint(logs)
     return http_response(HTTPStatus.OK, zip_url)
-
-
-def get_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table = dynamodb_r.Table('site_configurations')
-    config = table.get_item(Key = { "site": site })
-    return http_response(HTTPStatus.OK, config['Item'])
-
-
-# TODO: add validation
-def put_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    body = _get_body(event)
-    table = dynamodb_r.Table('site_configurations')
-    response = table.put_item(Item = {
-        "site": site,
-        "configuration": body
-    })
-    return http_response(HTTPStatus.OK, response)
-
-
-def delete_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table = dynamodb_r.Table('site_configurations')
-    response = table.delete_item(Key={"site": site})
-    return http_response(HTTPStatus.OK,response)
-
-
-def all_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    table = dynamodb_r.Table('site_configurations')
-    response = table.scan()
-    items = {}
-    for entry in response['Items']: 
-        items[entry['site']] = entry['configuration']
-    return http_response(HTTPStatus.OK,items)
-
-
-def get_status(event, context):
-    # TODO: change site code to use the new endpoint directly, not this one.
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table_name = str(site)
-    key = {"Type": "State"}
-    table = dynamodb_r.Table(table_name)
-    status =table.get_item(Key=key)
-    return http_response(HTTPStatus.OK, {
-        "site": site,
-        "content": status['Item']
-    })
-
-
-def put_status(event, context):
-    # TODO: change site code to use the new endpoint directly, not this one.
-    log.info(json.dumps(event, indent=2))
-
-    status_item = _get_body(event)
-    status_item["Type"] = "State"
-
-    site = event['pathParameters']['site']
-
-    # Send status to the newer dynamodb table
-    url = f"https://status.photonranch.org/status/{site}/status"
-    payload = {
-        "status": _get_body(event),
-        "statusType": "deviceStatus",
-    }
-    log.info(f"Payload: {payload}")
-    data = json.dumps(payload, cls=DecimalEncoder)
-    response = requests.post(url, data=data)
-    log.info(f"Status endpoint response: {response}")
-
-    return http_response(HTTPStatus.OK, {
-        "site": site,
-    })

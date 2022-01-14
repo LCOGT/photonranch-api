@@ -54,6 +54,7 @@ provider:
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
+    CONFIG_TABLE_NAME: 'site_configurations'
     REGION: ${self:provider.region}
     INFO_IMAGES_TABLE: 'info-images'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
@@ -145,7 +146,7 @@ resources: # CloudFormation template syntax from here on.
 functions:
   authorizerFunc: 
     handler: authorizer.auth
-    cors: true
+
   dummyRequiresAuth:
     handler: handler.dummy_requires_auth
     events:
@@ -186,8 +187,10 @@ functions:
           path: /download
           method: post
           cors: true
+
   downloadzip:
     handler: api/handler.download_zip
+    memorySize: 1024
     timeout: 120 
     events:
       - http:
@@ -208,7 +211,7 @@ functions:
   get_image_by_filename:
     handler: api/db.get_image_by_filename_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
       # note: layer sourced from https://github.com/keithrozario/Klayers
     events:
       - http:
@@ -220,17 +223,27 @@ functions:
   latestImages:
     handler: api/db.get_latest_site_images_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
       - http:
           path: /{site}/latest_images/{number_of_images}
           method: get
           cors: true
 
+  latestImageAllSites:
+    handler: api/db.get_latest_images_all_sites_handler
+    layers:
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+    events:
+      - http:
+          path: /latest_image_all_sites/
+          method: get
+          cors: true
+
   getFitsHeader:
     handler: api/db.get_fits_header_from_db_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
       - http:
           path: /fitsheader/{base_filename}
@@ -240,43 +253,44 @@ functions:
   filteredImageQuery:
     handler: api/db.filtered_images_query_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:18
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
       - http:
           path: /filtered_images
           method: get
           cors: true
 
+  ### Config Endpoints
   getConfig:
-    handler: api/handler.get_config
+    handler: api/site_configs.get_config
     events:
       - http:
           path: /{site}/config
           method: get
           cors: true
   putConfig:
-    handler: api/handler.put_config
+    handler: api/site_configs.put_config
     events:
       - http:
           path: /{site}/config
           method: put
           cors: true
   deleteConfig:
-    handler: api/handler.delete_config
+    handler: api/site_configs.delete_config
     events:
       - http:
           path: /{site}/config
           method: delete
           cors: true
   allConfig:
-    handler: api/handler.all_config
+    handler: api/site_configs.all_config
     events:
       - http:
           path: /all/config
           method: get
           cors: true
 
-  # Weather database stuff
+  ### Weather Database Endpoints
   exampleQuery: 
     handler: api/weather.exampleQuery
     events:
@@ -301,6 +315,7 @@ functions:
           method: post
           cors: true
 
+  ### Site Events Endpoints
   siteEvents:
     handler: api/events_handler.siteevents
     events:
@@ -315,20 +330,4 @@ functions:
       - http:
           path: /events/moon/rise-set-illum
           method: get
-          cors: true
-
-  getStatus:
-    handler: api/handler.get_status
-    events:
-      - http:
-          path: /{site}/status
-          method: get
-          cors: true
-
-  putStatus: 
-    handler: api/handler.put_status
-    events:
-      - http:
-          path: /{site}/status
-          method: put
           cors: true

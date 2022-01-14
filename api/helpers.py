@@ -8,6 +8,7 @@ import logging
 from botocore.client import Config
 
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+CONFIG_TABLE_NAME = os.environ['CONFIG_TABLE_NAME']
 REGION = os.environ['REGION']
 S3_PUT_TTL = 300
 S3_GET_TTL = 86400 * 5  # 5 days before s3 image links expire
