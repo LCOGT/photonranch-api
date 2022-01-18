@@ -61,43 +61,46 @@ provider:
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
-  iamRoleStatements:
-    - Effect: Allow 
-      Action: 
-        - s3:GetObject
-        - s3:PutObject
-        - s3:ListBucket
-        - s3:ListBucketVersions
-      Resource: 
-        - "arn:aws:s3:::photonranch-001/*"
-        - "arn:aws:s3:::photonranch-001"
+  iam:
+    role:
+      name: photonranch-api-default-role
+      statements: 
+        - Effect: Allow 
+          Action: 
+            - s3:GetObject
+            - s3:PutObject
+            - s3:ListBucket
+            - s3:ListBucketVersions
+          Resource: 
+            - "arn:aws:s3:::photonranch-001/*"
+            - "arn:aws:s3:::photonranch-001"
 
-    - Effect: Allow
-      Action:
-        - ssm:GetParameter
-      Resource: "arn:aws:ssm:${self:provider.region}:*:parameter/*"
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+          Resource: "arn:aws:ssm:${self:provider.region}:*:parameter/*"
 
-    - Effect: Allow 
-      Action: 
-        - "dynamodb:PutItem"
-        - "dynamodb:GetItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
-        - "dynamodb:Scan"
-        - "dynamodb:Query"
-      Resource:
-        - "arn:aws:dynamodb:${self:provider.region}:*:*"
+        - Effect: Allow 
+          Action: 
+            - "dynamodb:PutItem"
+            - "dynamodb:GetItem"
+            - "dynamodb:UpdateItem"
+            - "dynamodb:DeleteItem"
+            - "dynamodb:Scan"
+            - "dynamodb:Query"
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:*"
 
-    - Effect: Allow
-      Action:
-        - sqs:*
-      Resource: arn:aws:sqs:*:*:*
+        - Effect: Allow
+          Action:
+            - sqs:*
+          Resource: arn:aws:sqs:*:*:*
 
-    - Effect: Allow
-      Action:
-        - "lambda:InvokeFunction"
-      Resource: 
-        - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
+        - Effect: Allow
+          Action:
+            - "lambda:InvokeFunction"
+          Resource: 
+            - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
 
 resources: # CloudFormation template syntax from here on.
   Resources:
