@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from api.handler import info_images_table
 from api.handler import upload 
+from api.handler import get_recent_uploads
 
 from api.helpers import get_base_filename_from_full_filename
 
@@ -103,3 +104,25 @@ def test_upload_info_image_good():
     assert('Item' in ddb_entry.keys())
     assert(ddb_entry['Item'][f'channel{info_channel}'] == base_filename)
     assert(response['statusCode']==HTTPStatus.OK)
+
+
+def test_get_recent_uploads_specific_site():
+    ''' simple test looking for a correctly formatted response '''
+    event = {
+        "queryStringParameters": {
+            "site": "tst"
+        }
+    }
+    result = get_recent_uploads(event, {})
+    assert isinstance(json.loads(result['body']), list)
+
+
+def test_get_recent_uploads_all_sites():
+    ''' simple test looking for a correctly formatted response '''
+    event = {
+        "queryStringParameters": {
+            "site": "tst"
+        }
+    }
+    result = get_recent_uploads(event, {})
+    assert isinstance(json.loads(result['body']), list)
