@@ -27,6 +27,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
+recent_uploads_table = dynamodb_r.Table(os.getenv('UPLOADS_LOG_TABLE_NAME'))
 s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
 lambda_client = boto3.client('lambda', REGION)
 
@@ -208,3 +209,14 @@ def download_zip(event, context):
     logs = log_response.splitlines()
     pprint(logs)
     return http_response(HTTPStatus.OK, zip_url)
+
+def get_recent_uploads(event, context):
+    
+    print("Query string params: ", event['queryStringParameters'])
+    site = event['queryStringParameters']['site']
+    response = recent_uploads_table.query(
+        KeyConditionExpression=Key('site').eq(site)
+    )
+    results = response['Items']
+    return http_response(HTTPStatus.OK, results) 
+    

@@ -54,7 +54,8 @@ provider:
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
-    CONFIG_TABLE_NAME: 'site_configurations'
+    CONFIG_TABLE_NAME: site_configurations
+    UPLOADS_LOG_TABLE_NAME: recent-uploads-log
     REGION: ${self:provider.region}
     INFO_IMAGES_TABLE: 'info-images'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
@@ -196,6 +197,14 @@ functions:
       - http:
           path: /downloadzip
           method: post
+          cors: true
+
+  getRecentUploads: 
+    handler: api/handler.get_recent_uploads
+    events:
+      - http:
+          path: /recentuploads
+          method: get
           cors: true
 
   # Image package for a single image
