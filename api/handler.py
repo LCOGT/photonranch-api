@@ -213,10 +213,23 @@ def download_zip(event, context):
 def get_recent_uploads(event, context):
     
     print("Query string params: ", event['queryStringParameters'])
-    site = event['queryStringParameters']['site']
-    response = recent_uploads_table.query(
-        KeyConditionExpression=Key('site').eq(site)
-    )
-    results = response['Items']
+    try: 
+        site = event['queryStringParameters']['site']
+    except: 
+        msg = "Please be sure to include the sitecode query parameter."
+        return http_response(HTTPStatus.NOT_FOUND, msg)
+
+    # Results from across all sites
+    if site == 'all': 
+        response = recent_uploads_table.scan()
+        results = response['Items']
+    
+    # Results for specific site
+    else:
+        response = recent_uploads_table.query(
+            KeyConditionExpression=Key('site').eq(site)
+        )
+        results = response['Items']
+
     return http_response(HTTPStatus.OK, results) 
     
