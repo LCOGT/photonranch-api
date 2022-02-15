@@ -15,6 +15,8 @@ from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from api.helpers import dynamodb_r
 from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
 from api.helpers import get_base_filename_from_full_filename
+from api.helpers import get_s3_file_url
+from api.s3_helpers import save_tiff_to_s3
 
 from api.db import get_files_within_date_range
 
@@ -145,7 +147,21 @@ def upload(event, context):
 
 
 def download(event, context): 
-    log.info(json.dumps(event, indent=2))
+    """ This method is used to handle requests to download individual data files. 
+    
+    Request body args:
+        s3_directory (str): data | info-images | allsky | test, specifies the s3 object prefix (ie folder)
+                            where the data is stored. Default is 'data'.
+        object_name (str): the full filename of the requested file. Appending this to the end of s3_directory 
+                           should specify the full key for the object in s3. 
+        image_type (str): tif | fits, used if the requester wants a tif file created from the underlying fits
+                          image. If so, the tif file is create on the fly. Default is 'fits'.
+        stretch (str): linear | arcsinh, used to specify the stretch parameters if a tif file is requested. 
+                       Default is 'arcsinh'.
+
+    Return: (str) presigned s3 download url that the requester can use to access the file. 
+    """
+    log.info(event)
     body = _get_body(event)
 
     # retrieve and validate the s3_directory
@@ -155,28 +171,48 @@ def download(event, context):
         log.warning(error_msg)
         return http_response(HTTPStatus.FORBIDDEN, error_msg)
 
-    key = f"{s3_directory}/{body['object_name']}"
+    key = f"{s3_directory}/{body['object_name']}"  # full path to object in s3 bucket
     params = {
         "Bucket": BUCKET_NAME,
         "Key": key,
     }
-    url = s3.generate_presigned_url(
-        ClientMethod='get_object',
-        Params=params,
-        ExpiresIn=S3_GET_TTL
-    )
-    log.info(f"Presigned download url: {url}")
-    return http_response(HTTPStatus.OK, str(url))
+    
+    image_type = body.get('image_type', 'fits')  # assume 'tif' if not otherwise specified
+
+    # Routine if TIFF file is specified
+    if image_type in ['tif', 'tiff']:   
+        stretch = body.get('stretch', 'arcsinh')
+        #s3_destination_key = f"downloads/tif/{body['object_name']}"
+        s3_destination_key = save_tiff_to_s3(BUCKET_NAME, key, stretch)
+        url = get_s3_file_url(s3_destination_key)
+        log.info(f"Presigned download url: {url}")
+        return http_response(HTTPStatus.OK, str(url))
+
+    # if TIFF file not requested, just get the file as-is from s3
+    else: 
+        url = s3.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=params,
+            ExpiresIn=S3_GET_TTL
+        )
+        log.info(f"Presigned download url: {url}")
+        return http_response(HTTPStatus.OK, str(url))
+
 
 def download_zip(event, context):
+    """ This method returns a link to download a zip of multiple images in fits format. 
+    First, get a list of files to be zipped based on the query parameters specified. 
+    Next, call a lambda function (defined in the repository zip-downloads) that creates a zip
+    from the list of specified files and uploads that back to s3, returning a presigned download url. 
+    Finally, this function returns the url in the http response to the requester. 
+    """
 
-    pprint(event)
     body = _get_body(event)
     pprint(body)
 
     start_timestamp_s = int(body.get('start_timestamp_s'))
     end_timestamp_s = int(body.get('end_timestamp_s'))
-    fits_size = body.get('fits_size')
+    fits_size = body.get('fits_size')  # small | large | best
     site = body.get('site')
 
     files = get_files_within_date_range(site, start_timestamp_s, end_timestamp_s, fits_size)
@@ -210,8 +246,14 @@ def download_zip(event, context):
     pprint(logs)
     return http_response(HTTPStatus.OK, zip_url)
 
+
 def get_recent_uploads(event, context):
-    
+    """ Query for a list of files recently uploaded to s3. 
+    The logs routine is found in the ptrdata repository, in which a lambda funciton is triggered for new objects
+    in the s3 bucket with prefix 'data/' (where all the regular site data is sent). 
+
+    This is mainly used for easier debugging, and is displayed in the PTR web UI. 
+    """
     print("Query string params: ", event['queryStringParameters'])
     try: 
         site = event['queryStringParameters']['site']

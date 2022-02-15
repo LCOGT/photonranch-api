@@ -441,7 +441,7 @@ def filtered_images_query_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
     except Exception as e:
         logger.exception("Error in filter images query. ")
-        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, e)
 
     return http_response(HTTPStatus.OK, images)
 
@@ -455,6 +455,6 @@ def remove_image_by_filename_handler(event, context):
     except Exception as e:
         error_msg = f"Could not delete {base_filename}. Error: {e}"
         logger.exception(error_msg)
-        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, e)
 
-    return http_response(HTTPStatus.OK, image)
+    return http_response(HTTPStatus.OK, f'Successfully removed {base_filename}')

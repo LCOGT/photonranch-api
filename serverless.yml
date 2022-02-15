@@ -185,6 +185,8 @@ functions:
           method: post
   download:
     handler: api/handler.download
+    memorySize: 2024
+    timeout: 60 
     events:
       - http:
           path: /download
