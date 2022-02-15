@@ -49,5 +49,5 @@ toml==0.10.1
 tqdm==4.32.2
 typing-extensions==3.7.4.3
 tzwhere==3.0.3
-urllib3==1.25.3
+urllib3==1.26.5
 zipp==3.1.0
