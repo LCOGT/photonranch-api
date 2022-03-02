@@ -205,6 +205,8 @@ functions:
 
   getRecentUploads: 
     handler: api/handler.get_recent_uploads
+    memorySize: 2024
+    timeout: 60 
     events:
       - http:
           path: /recentuploads
@@ -235,6 +237,8 @@ functions:
   # List of image packages for last k images at the given site 
   latestImages:
     handler: api/db.get_latest_site_images_handler
+    memorySize: 2024
+    timeout: 60 
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
@@ -265,6 +269,8 @@ functions:
 
   filteredImageQuery:
     handler: api/db.filtered_images_query_handler
+    memorySize: 2024
+    timeout: 60 
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:

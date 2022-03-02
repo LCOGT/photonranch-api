@@ -258,7 +258,6 @@ def filtered_images_query(db_address: str, query_filters: list):
         images = session.query(Image)\
             .order_by(Image.sort_date.desc())\
             .filter(*query_filters)\
-            .limit(100)\
             .all()
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
@@ -418,6 +417,8 @@ def filtered_images_query_handler(event, context):
     query_filters = []
     if "username" in filter_params:
         query_filters.append(Image.username==filter_params["username"])
+    if "user_id" in filter_params: 
+        query_filters.append(Image.user_id==filter_params["user_id"])
     if "site" in filter_params:
         query_filters.append(Image.site==filter_params["site"])
     if "filter" in filter_params:
