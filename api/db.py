@@ -15,7 +15,7 @@ from sqlalchemy.engine.url import URL # don't need if we get the db-address from
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import ArgumentError
 
-from api.helpers import _get_secret, http_response
+from api.helpers import get_secret, http_response
 from api.helpers import get_s3_image_path, get_s3_file_url
 
 from api.site_configs import get_all_sites
@@ -28,7 +28,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 Base = declarative_base()
-DB_ADDRESS = _get_secret('db-url')
+DB_ADDRESS = get_secret('db-url')
 
 @contextmanager
 def get_session(db_address):

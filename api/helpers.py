@@ -39,8 +39,8 @@ def http_response(status_code, body):
             "Access-Control-Allow-Origin": "*",
             # Required for cookies, authorization headers with HTTPS
             "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Headers": "*",
-            "Content-Type": "application/json",
+            #"Access-Control-Allow-Headers": "*",
+            #"Content-Type": "application/json",
         },
         "body": body
     }
@@ -52,7 +52,7 @@ def _get_body(event):
         log.exception("event body could not be JSON decoded.")
         return {}
 
-def _get_secret(key):
+def get_secret(key):
     """
     Some parameters are stored in AWS Systems Manager Parameter Store.
     This replaces the .env variables we used to use with flask.
@@ -65,10 +65,10 @@ def _get_secret(key):
 
 def get_db_connection():
     connection_params = {
-        'host': _get_secret('db-host'),
-        'database': _get_secret('db-database'),
-        'user': _get_secret('db-user'),
-        'password': _get_secret('db-password')
+        'host': get_secret('db-host'),
+        'database': get_secret('db-database'),
+        'user': get_secret('db-user'),
+        'password': get_secret('db-password')
     }
     connection = psycopg2.connect(**connection_params)
     return connection

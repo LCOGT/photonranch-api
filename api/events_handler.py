@@ -16,7 +16,7 @@ from api.events import make_site_events
 from api.events import get_moon_riseset_illum
 from helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from helpers import dynamodb_r, ssm_c
-from helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
+from helpers import DecimalEncoder, http_response, _get_body, get_secret, get_db_connection
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)

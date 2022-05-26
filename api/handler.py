@@ -13,17 +13,17 @@ from botocore.client import Config
 
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
 from api.helpers import dynamodb_r
-from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
+from api.helpers import DecimalEncoder, http_response, _get_body, get_secret, get_db_connection
 from api.helpers import get_base_filename_from_full_filename
 from api.helpers import get_s3_file_url
 from api.s3_helpers import save_tiff_to_s3
 
 from api.db import get_files_within_date_range
 
-db_host = _get_secret('db-host')
-db_database = _get_secret('db-database')
-db_user = _get_secret('db-user')
-db_password = _get_secret('db-password')
+db_host = get_secret('db-host')
+db_database = get_secret('db-database')
+db_user = get_secret('db-user')
+db_password = get_secret('db-password')
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
@@ -36,8 +36,9 @@ lambda_client = boto3.client('lambda', REGION)
 def dummy_requires_auth(event, context):
     """ No purpose other than testing auth functionality """
     log.info(json.dumps(event, indent=2))
+    log.info("Testing individual method deployment")
 
-    return http_response(HTTPStatus.OK, "auth successful")
+    return http_response(HTTPStatus.OK, "successful authorization")
 
 
 def default(event, context):

@@ -11,7 +11,7 @@ os.environ['REGION'] = 'us-east-1'
 
 from api import db
 from api.db import Image
-from api.helpers import _get_secret
+from api.helpers import get_secret
 
 VALID_USER_ID = "google-oauth2|100354044221813550027"
 INVALID_USER_ID = "invalid-user-id"
@@ -35,7 +35,7 @@ INVALID_QUERY_FILTERS = [
 
 @pytest.fixture 
 def db_address():
-    return _get_secret('db-url')
+    return get_secret('db-url')
 
 
 def test_get_latest_site_images(db_address):

@@ -3,7 +3,7 @@ import boto3
 import os
 from http import HTTPStatus
 
-from api.helpers import _get_secret, http_response, get_s3_file_url
+from api.helpers import get_secret, http_response, get_s3_file_url
 
 
 ddb = boto3.resource('dynamodb', os.getenv('REGION'))

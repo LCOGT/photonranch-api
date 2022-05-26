@@ -2,15 +2,15 @@ import logging
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 import random, datetime, json, time, requests
-from helpers import _get_secret, http_response, _get_body, DecimalEncoder
+from helpers import get_secret, http_response, _get_body, DecimalEncoder
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-bucket = _get_secret('influxdb-testbucket')
-weather_bucket = _get_secret('influxdb-bucket-weather')
-org = _get_secret('influxdb-org') 
-token = _get_secret('influxdb-token-serverless_api_fullaccess_token')
+bucket = get_secret('influxdb-testbucket')
+weather_bucket = get_secret('influxdb-bucket-weather')
+org = get_secret('influxdb-org') 
+token = get_secret('influxdb-token-serverless_api_fullaccess_token')
 
 client = influxdb_client.InfluxDBClient(
     url="https://us-west-2-1.aws.cloud2.influxdata.com",
