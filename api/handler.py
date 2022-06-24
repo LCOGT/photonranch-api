@@ -2,12 +2,8 @@
 import json 
 import os 
 import boto3 
-import decimal 
-import sys 
-import time 
-import datetime 
-import re 
-import requests
+import base64
+from pprint import pprint
 import psycopg2
 import logging
 from http import HTTPStatus
@@ -16,8 +12,13 @@ from botocore.exceptions import ClientError
 from botocore.client import Config
 
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, S3_GET_TTL
-from api.helpers import dynamodb_r, ssm_c
+from api.helpers import dynamodb_r
 from api.helpers import DecimalEncoder, http_response, _get_body, _get_secret, get_db_connection
+from api.helpers import get_base_filename_from_full_filename
+from api.helpers import get_s3_file_url
+from api.s3_helpers import save_tiff_to_s3
+
+from api.db import get_files_within_date_range
 
 db_host = _get_secret('db-host')
 db_database = _get_secret('db-database')
@@ -28,6 +29,9 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
+recent_uploads_table = dynamodb_r.Table(os.getenv('UPLOADS_LOG_TABLE_NAME'))
+s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
+lambda_client = boto3.client('lambda', REGION)
 
 def dummy_requires_auth(event, context):
     """ No purpose other than testing auth functionality """
@@ -48,7 +52,7 @@ def upload(event, context):
     json-string body of the request.
 
     Example request body:
-    '{"object_name":"a_file.txt"}'
+    '{"object_name":"a_file.txt", "s3_directory": "data"}'
 
     This request will save an image into the main s3 bucket as:
     MAIN_BUCKET_NAME/data/a_file.txt
@@ -63,16 +67,65 @@ def upload(event, context):
     # If successful, returns HTTP status code 204
     log.info(f'File upload HTTP status code: {http_response.status_code}')
 
+    * * *
+
+    If the upload url is to be used with an info image, then the request must include 
+    'info_channel' with a value of 1, 2, or 3.
+    This will prompt an update to the info-images table, where it will store the provided
+    base_filename in the row with pk=={site}#metadata, under the attribute channel{n}.
+
+    For example, the request body 
+    {
+        "object_name": "tst-inst-20211231-00000001-EX10.jpg",
+        "s3_directory": "info-images",
+        "info_channel": 2
+    }
+    will result in the info-images table being updated with
+    {
+        "pk": "tst#metadata",
+        "channel2": "tst-inst-20211231-00000001",
+        ...
+    }
+    The URL returned by this endpoint will allow a POST request to s3 with the actual file. 
+    The code that processes new s3 objects will see that it is an info image, then 
+    query the info-images table to find which channel to use, and finally update the info-images
+    table with an entry like
+    {
+        "pk": "tst#2",
+        "jpg_10_exists": true,
+        ...
+    }
+    This is the object that is queried to find the info image at site tst, channel 2. 
     """
+
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
     
     # retrieve and validate the s3_directory
     s3_directory = body.get('s3_directory', 'data')
+    filename = body.get('object_name')
     if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
         error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
         log.warning(error_msg)
         return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+    # if info image: get the channel number to use
+    if s3_directory == 'info-images':
+
+        site = filename.split('-')[0]
+        base_filename = get_base_filename_from_full_filename(filename)
+        channel = int(body.get('info_channel', 1))
+        if channel not in [1,2,3]:
+            error_msg = f"Value for info_channel must be either 1, 2, or 3. Recieved {channel} instead."
+            log.warning(error_msg)
+            return http_response(HTTPStatus.FORBIDDEN, error_msg)
+
+        # create an entry to track metadata for the next info image that will be uploaded
+        info_images_table.update_item(
+            Key={ 'pk': f'{site}#metadata' },
+            UpdateExpression=f"set channel{channel}=:basefilename",
+            ExpressionAttributeValues={':basefilename': base_filename}
+        )
 
     # get upload metadata
     metadata = body.get('metadata', None)
@@ -84,18 +137,31 @@ def upload(event, context):
     #
 
     key = f"{s3_directory}/{body['object_name']}"
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = json.dumps(s3.generate_presigned_post(
+    url = s3.generate_presigned_post(
         Bucket = BUCKET_NAME,
         Key = key,
         ExpiresIn = S3_PUT_TTL
-    ))
+    )
     log.info(f"Presigned upload url: {url}")
     return http_response(HTTPStatus.OK, url)
 
 
 def download(event, context): 
-    log.info(json.dumps(event, indent=2))
+    """ This method is used to handle requests to download individual data files. 
+    
+    Request body args:
+        s3_directory (str): data | info-images | allsky | test, specifies the s3 object prefix (ie folder)
+                            where the data is stored. Default is 'data'.
+        object_name (str): the full filename of the requested file. Appending this to the end of s3_directory 
+                           should specify the full key for the object in s3. 
+        image_type (str): tif | fits, used if the requester wants a tif file created from the underlying fits
+                          image. If so, the tif file is create on the fly. Default is 'fits'.
+        stretch (str): linear | arcsinh, used to specify the stretch parameters if a tif file is requested. 
+                       Default is 'arcsinh'.
+
+    Return: (str) presigned s3 download url that the requester can use to access the file. 
+    """
+    log.info(event)
     body = _get_body(event)
 
     # retrieve and validate the s3_directory
@@ -105,93 +171,107 @@ def download(event, context):
         log.warning(error_msg)
         return http_response(HTTPStatus.FORBIDDEN, error_msg)
 
-    key = f"{s3_directory}/{body['object_name']}"
+    key = f"{s3_directory}/{body['object_name']}"  # full path to object in s3 bucket
     params = {
         "Bucket": BUCKET_NAME,
         "Key": key,
     }
-    s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = s3.generate_presigned_url(
-        ClientMethod='get_object',
-        Params=params,
-        ExpiresIn=S3_GET_TTL
-    )
-    log.info(f"Presigned download url: {url}")
-    return http_response(HTTPStatus.OK, str(url))
+    
+    image_type = body.get('image_type', 'fits')  # assume 'tif' if not otherwise specified
+
+    # Routine if TIFF file is specified
+    if image_type in ['tif', 'tiff']:   
+        stretch = body.get('stretch', 'arcsinh')
+        #s3_destination_key = f"downloads/tif/{body['object_name']}"
+        s3_destination_key = save_tiff_to_s3(BUCKET_NAME, key, stretch)
+        url = get_s3_file_url(s3_destination_key)
+        log.info(f"Presigned download url: {url}")
+        return http_response(HTTPStatus.OK, str(url))
+
+    # if TIFF file not requested, just get the file as-is from s3
+    else: 
+        url = s3.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=params,
+            ExpiresIn=S3_GET_TTL
+        )
+        log.info(f"Presigned download url: {url}")
+        return http_response(HTTPStatus.OK, str(url))
 
 
-def get_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table = dynamodb_r.Table('site_configurations')
-    config = table.get_item(Key = { "site": site })
-    return http_response(HTTPStatus.OK, config['Item'])
+def download_zip(event, context):
+    """ This method returns a link to download a zip of multiple images in fits format. 
+    First, get a list of files to be zipped based on the query parameters specified. 
+    Next, call a lambda function (defined in the repository zip-downloads) that creates a zip
+    from the list of specified files and uploads that back to s3, returning a presigned download url. 
+    Finally, this function returns the url in the http response to the requester. 
+    """
 
-
-def put_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
     body = _get_body(event)
-    table = dynamodb_r.Table('site_configurations')
-    response = table.put_item(Item = {
-        "site": site,
-        "configuration": body
-    })
-    return http_response(HTTPStatus.OK, response)
+    pprint(body)
+
+    start_timestamp_s = int(body.get('start_timestamp_s'))
+    end_timestamp_s = int(body.get('end_timestamp_s'))
+    fits_size = body.get('fits_size')  # small | large | best
+    site = body.get('site')
+
+    files = get_files_within_date_range(site, start_timestamp_s, end_timestamp_s, fits_size)
+
+    # Return 404 if no images fit the query.
+    if len(files) == 0:
+        return http_response(HTTPStatus.NOT_FOUND, 'No images exist for the given query.')
+
+    print('number of files: ', len(files))
+    print('first file: ', files[0])
+
+    payload = json.dumps({
+        'filenames': files
+        }).encode('utf-8')
+
+    response = lambda_client.invoke(
+        FunctionName='zip-downloads-dev-zip',
+        InvocationType='RequestResponse',
+        LogType='Tail',
+        Payload=payload
+    )
+    lambda_response = response['Payload'].read()
+
+    zip_url = json.loads(json.loads(lambda_response)['body'])
+    print(zip_url)
+
+    log_response = base64.b64decode(response['LogResult']).decode('utf-8')
+    pprint(log_response)
+
+    logs = log_response.splitlines()
+    pprint(logs)
+    return http_response(HTTPStatus.OK, zip_url)
 
 
-def delete_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table = dynamodb_r.Table('site_configurations')
-    response = table.delete_item(Key={"site": site})
-    return http_response(HTTPStatus.OK,response)
+def get_recent_uploads(event, context):
+    """ Query for a list of files recently uploaded to s3. 
+    The logs routine is found in the ptrdata repository, in which a lambda funciton is triggered for new objects
+    in the s3 bucket with prefix 'data/' (where all the regular site data is sent). 
 
+    This is mainly used for easier debugging, and is displayed in the PTR web UI. 
+    """
+    print("Query string params: ", event['queryStringParameters'])
+    try: 
+        site = event['queryStringParameters']['site']
+    except: 
+        msg = "Please be sure to include the sitecode query parameter."
+        return http_response(HTTPStatus.NOT_FOUND, msg)
 
-def all_config(event, context):
-    log.info(json.dumps(event, indent=2))
-    table = dynamodb_r.Table('site_configurations')
-    response = table.scan()
-    items = {}
-    for entry in response['Items']: 
-        items[entry['site']] = entry['configuration']
-    return http_response(HTTPStatus.OK,items)
+    # Results from across all sites
+    if site == 'all': 
+        response = recent_uploads_table.scan()
+        results = response['Items']
+    
+    # Results for specific site
+    else:
+        response = recent_uploads_table.query(
+            KeyConditionExpression=Key('site').eq(site)
+        )
+        results = response['Items']
 
-
-def get_status(event, context):
-    # TODO: change site code to use the new endpoint directly, not this one.
-    log.info(json.dumps(event, indent=2))
-    site = event['pathParameters']['site']
-    table_name = str(site)
-    key = {"Type": "State"}
-    table = dynamodb_r.Table(table_name)
-    status =table.get_item(Key=key)
-    return http_response(HTTPStatus.OK, {
-        "site": site,
-        "content": status['Item']
-    })
-
-
-def put_status(event, context):
-    # TODO: change site code to use the new endpoint directly, not this one.
-    log.info(json.dumps(event, indent=2))
-
-    status_item = _get_body(event)
-    status_item["Type"] = "State"
-
-    site = event['pathParameters']['site']
-
-    # Send status to the newer dynamodb table
-    url = f"https://status.photonranch.org/status/{site}/status"
-    payload = {
-        "status": _get_body(event),
-        "statusType": "deviceStatus",
-    }
-    log.info(f"Payload: {payload}")
-    data = json.dumps(payload, cls=DecimalEncoder)
-    response = requests.post(url, data=data)
-    log.info(f"Status endpoint response: {response}")
-
-    return http_response(HTTPStatus.OK, {
-        "site": site,
-    })
+    return http_response(HTTPStatus.OK, results) 
+    

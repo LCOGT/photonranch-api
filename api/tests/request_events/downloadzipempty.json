@@ -1,0 +1,8 @@
+
+{
+    "resource": "/",
+    "path": "/",
+    "httpMethod": "POST",
+    "key": "val",
+    "body": "{\"site\": \"nonsite\", \"start_timestamp_s\": 1641024000, \"end_timestamp_s\": 1642147200, \"fits_size\": \"small\"}"
+}

@@ -1,0 +1,7 @@
+{
+    "resource": "/",
+    "path": "/",
+    "httpMethod": "POST",
+    "key": "val",
+    "body": "{\"s3_directory\": \"data\", \"object_name\": \"sro-kb001ms-20220208-00000679-EX10.fits.bz2\", \"stretch\": \"arcsinh\", \"image_type\": \"tif\"}"
+}

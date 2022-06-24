@@ -2,6 +2,7 @@ import pytest
 import os
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import ArgumentError
+import datetime
 
 # These env vars are normally configured from serverless.yml.
 # Create them here manually for tests. Required in api/helpers.py.
@@ -87,3 +88,14 @@ def test_get_image_by_filename_valid_input(db_address):
 def test_get_image_by_filename_invalid_input(db_address):
     with pytest.raises(NoResultFound):
         image = db.get_image_by_filename(db_address, INVALID_BASE_FILENAME)
+
+@pytest.mark.parametrize( 'fits_size', [ 'small', 'large', 'best' ])
+def test_get_files_within_date_range(fits_size):
+    site = 'tst'
+    start_timestamp = datetime.datetime(2022, 1, 1).timestamp()
+    end_timestamp = datetime.datetime(2022,1,14).timestamp()
+    image_list = db.get_files_within_date_range(site, 
+            start_timestamp, end_timestamp, fits_size)
+
+    print(image_list)
+    assert (isinstance(image_list, list))

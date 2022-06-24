@@ -1,5 +1,6 @@
 import logging
 import json
+import time
 import boto3
 from datetime import datetime
 from http import HTTPStatus
@@ -16,6 +17,8 @@ from sqlalchemy.exc import ArgumentError
 
 from api.helpers import _get_secret, http_response
 from api.helpers import get_s3_image_path, get_s3_file_url
+
+from api.site_configs import get_all_sites
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -130,7 +133,30 @@ class Image(Base):
             package["jpg_thumbnail_url"] = url
 
         return package
+    
+    def get_jpg_url(self):
+        if self.jpg_medium_exists:
+            path = get_s3_image_path(self.base_filename, self.data_type, "10", "jpg")
+            return get_s3_file_url(path)
+        return ''
 
+    def get_small_fits_filename(self):
+        return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+
+    def get_large_fits_filename(self):
+        return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+
+    def get_best_fits_filename(self):
+        """ Return the full filename for the largest fits version stored in s3. 
+        If there is no fits file available, return an empty string. 
+        """
+        if self.fits_01_exists: 
+            return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+
+        elif self.fits_10_exists: 
+            return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+
+        else: return ''
 
 def get_latest_site_images(db_address, site, number_of_images, user_id=None):
     """ Get the n latest images from a site. 
@@ -165,6 +191,30 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
     return image_pkgs
+
+
+def get_latest_image_all_sites():
+    start = time.time()
+    sites = get_all_sites()
+    print(time.time() - start)
+    print(sites)
+    results = {} 
+
+    with get_session(db_address=DB_ADDRESS) as session:
+        for site in sites:
+            print(time.time() - start)
+            site_image = session.query(Image)\
+                .filter(Image.site == site)\
+                .filter(Image.jpg_medium_exists == True)\
+                .order_by(Image.sort_date.desc())\
+                .limit(1)\
+                .first()
+            if site_image:
+                results[site] = site_image.get_jpg_url()
+        print(results)
+        session.expunge_all()
+        print('final time: ', time.time() - start)
+    return results
 
 
 def get_fits_header_from_db(db_address, base_filename):
@@ -208,7 +258,6 @@ def filtered_images_query(db_address: str, query_filters: list):
         images = session.query(Image)\
             .order_by(Image.sort_date.desc())\
             .filter(*query_filters)\
-            .limit(100)\
             .all()
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
@@ -255,6 +304,50 @@ def remove_image_by_filename(base_filename):
         session.commit()
 
 
+def get_files_within_date_range(site: str, start_timestamp_s: int, 
+        end_timestamp_s: int, fits_size: str):
+    """ Query for files at a given site within a date range.
+
+    Args:
+        site (str): site code, eg. "mrc"
+        start_timestamp_s (int): timestamp in seconds, early bound.
+        end_timestamp_s (int): timestamp in seconds, later bound.
+        fits_size (str): "small" | "large" | "best": choose whether to only 
+            select small fits files, only large fits files, or best available.
+
+    Returns:
+        list: list of filenames (str) that match the query  
+    """
+    fits_size = fits_size.lower()
+    if not fits_size in ['small', 'large', 'best']:
+        raise ValueError('fits_size must be either "small", "large", or "best".')
+
+    start_datetime = datetime.fromtimestamp(start_timestamp_s)
+    end_datetime = datetime.fromtimestamp(end_timestamp_s)
+    query_filters = [
+        Image.site == site,
+        Image.capture_date >= start_datetime,
+        Image.capture_date <= end_datetime,
+    ]
+    if fits_size == "small": 
+        query_filters.append(Image.fits_10_exists.is_(True))
+    elif fits_size == "large":
+        query_filters.append(Image.fits_01_exists.is_(True))
+
+    with get_session(db_address=DB_ADDRESS) as session:
+        images = session.query(Image)\
+            .filter(*query_filters)\
+            .all()
+        session.expunge_all()
+
+    if fits_size == "small": 
+        return [image.get_small_fits_filename() for image in images]
+
+    elif fits_size == "large": 
+        return [image.get_large_fits_filename() for image in images]
+
+    elif fits_size == "best": 
+        return [image.get_best_fits_filename() for image in images]
 
 
 #####################################################
@@ -280,6 +373,11 @@ def get_latest_site_images_handler(event, context):
         query_args["user_id"] = query_params["userid"]
 
     images = get_latest_site_images(**query_args)
+    return http_response(HTTPStatus.OK, images)
+
+def get_latest_images_all_sites_handler(event, context):
+    images = get_latest_image_all_sites() 
+    #images = get_latest_site_images(DB_ADDRESS, 'tst', '2')
     return http_response(HTTPStatus.OK, images)
 
 
@@ -319,6 +417,8 @@ def filtered_images_query_handler(event, context):
     query_filters = []
     if "username" in filter_params:
         query_filters.append(Image.username==filter_params["username"])
+    if "user_id" in filter_params: 
+        query_filters.append(Image.user_id==filter_params["user_id"])
     if "site" in filter_params:
         query_filters.append(Image.site==filter_params["site"])
     if "filter" in filter_params:
@@ -342,7 +442,7 @@ def filtered_images_query_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
     except Exception as e:
         logger.exception("Error in filter images query. ")
-        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, e)
 
     return http_response(HTTPStatus.OK, images)
 
@@ -356,6 +456,6 @@ def remove_image_by_filename_handler(event, context):
     except Exception as e:
         error_msg = f"Could not delete {base_filename}. Error: {e}"
         logger.exception(error_msg)
-        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        return http_response(HTTPStatus.NOT_FOUND, e)
 
-    return http_response(HTTPStatus.OK, image)
+    return http_response(HTTPStatus.OK, f'Successfully removed {base_filename}')
