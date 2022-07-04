@@ -33,7 +33,6 @@ custom:
     stage: ${self:provider.stage}
     createRoute53Record: true
 
-  # This is to reduce the size of the deployment
   pythonRequirements:
     dockerizePip: non-linux
     useDownloadCache: false
