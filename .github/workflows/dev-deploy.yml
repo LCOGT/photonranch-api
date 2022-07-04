@@ -1,8 +1,8 @@
-name: Deploy Test Stage
+name: Deploy to Dev
 on:
   push:
     branches:
-      - test
+      - dev
 jobs:
   unit-test:
     runs-on: ubuntu-latest
@@ -23,11 +23,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run unit tests
+    - name: Run unit tests 
       run: |
         python -m pytest
 
-  deploy-test:
+ deploy-dev:
     needs: unit-test
     runs-on: ubuntu-latest
     steps:
@@ -72,7 +72,7 @@ jobs:
     - name: Install Plugins
       run: npx serverless plugin install --name serverless-python-requirements && npx serverless plugin install --name serverless-domain-manager && npx serverless plugin install --name serverless-plugin-existing-s3 && npx serverless plugin install --name serverless-prune-plugin && npx serverless plugin install --name serverless-offline  && npx serverless plugin install --name serverless-dotenv-plugin
     - name: Serverless Deploy
-      run: npx serverless deploy --stage test
+      run: npx serverless deploy --stage dev
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}

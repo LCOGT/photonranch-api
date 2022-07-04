@@ -5,11 +5,11 @@ app: photonranch
 service: photonranch-api
 
 package:
-  exclude:
-    - venv/**
-    - node_modules/**
-    - .pytest_cache/**
-    - .vscode/**
+  patterns:
+    - '!venv/**'
+    - '!node_modules/**'
+    - '!.pytest_cache/**'
+    - '!.vscode/**'
 
 plugins:
   - serverless-python-requirements
@@ -22,6 +22,7 @@ custom:
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
   # Run as `sls deploy --stage <stage_name>`
   stage:
+    prod: prod
     dev: api
     test: test
 
@@ -35,10 +36,8 @@ custom:
   # This is to reduce the size of the deployment
   pythonRequirements:
     dockerizePip: non-linux
-    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
-    slim: true
 
   # serverless prune plugin
   # automatically prunes function versions older than the last 3
@@ -49,8 +48,8 @@ custom:
 
 provider:
   name: aws
-  stage: ${opt:stage, "dev"}
-  runtime: python3.7
+  stage: ${opt:stage, "test"}
+  runtime: python3.9
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
