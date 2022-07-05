@@ -12,6 +12,7 @@ from cryptography.x509 import load_pem_x509_certificate
 AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
 AUTH0_CLIENT_PUBLIC_KEY = os.getenv('AUTH0_CLIENT_PUBLIC_KEY')
 
+
 def auth(event, context):
     print(f"auth event: ")
     print(json.dumps(event))
@@ -40,6 +41,7 @@ def auth(event, context):
     except Exception as e:
         print(f'Exception encountered: {e}')
         raise Exception('Unauthorized')
+
 
 def getUserRoles(auth_token):
     # Call the auth0 user management api to get user info
@@ -81,11 +83,13 @@ def generate_policy(principal_id, effect, resource, userRoles):
         }
     }
 
+
 def convert_certificate_to_pem(public_key):
     cert_str = public_key.encode()
     cert_obj = load_pem_x509_certificate(cert_str, default_backend())
     pub_key = cert_obj.public_key()
     return pub_key
+
 
 def format_public_key(public_key):
     public_key = public_key.replace('\n', ' ').replace('\r', '')
