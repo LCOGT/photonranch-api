@@ -17,7 +17,6 @@ from sqlalchemy.exc import ArgumentError
 
 from api.helpers import get_secret, http_response
 from api.helpers import get_s3_image_path, get_s3_file_url
-
 from api.site_configs import get_all_sites
 
 logger = logging.getLogger(__name__)
@@ -30,12 +29,13 @@ logger.setLevel(logging.DEBUG)
 Base = declarative_base()
 DB_ADDRESS = get_secret('db-url')
 
+
 @contextmanager
 def get_session(db_address):
-    """ Get a connection to the database.
+    """Gets a connection to the database.
 
     Returns:
-        session: SQLAlchemy Database Session
+        session: SQLAlchemy Database Session.
     """
     engine = create_engine(db_address)
     db_session = sessionmaker(bind=engine)
@@ -76,18 +76,19 @@ class Image(Base):
     user_id           = Column(String)
     header            = Column(String)
 
+
     def __init__(self, base_filename):
         self.base_filename = base_filename
 
-    def get_image_pkg(self):
-        """ A dictionary representation of common image metadata.
 
-        This is the format that is used and expected by the frontend when it 
+    def get_image_pkg(self):
+        """A dictionary representation of common image metadata.
+
+        This is the format that is used and expected by the frontend when it
         queries this api for images. 
 
         Notably missing from this is the entire fits header, for smaller 
-        payload sizes. 
-        
+        payload sizes.
         """
 
         package = {
@@ -134,22 +135,29 @@ class Image(Base):
 
         return package
     
+
     def get_jpg_url(self):
+        """Returns the s3 URL to the medium jpg at AWS."""
         if self.jpg_medium_exists:
             path = get_s3_image_path(self.base_filename, self.data_type, "10", "jpg")
             return get_s3_file_url(path)
         return ''
 
+
     def get_small_fits_filename(self):
         return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+
 
     def get_large_fits_filename(self):
         return f"{self.base_filename}-{self.data_type}01.fits.bz2"
 
+
     def get_best_fits_filename(self):
-        """ Return the full filename for the largest fits version stored in s3. 
-        If there is no fits file available, return an empty string. 
+        """Returns the full filename for the largest fits version stored in s3.
+
+        If there is no fits file available, return an empty string.
         """
+
         if self.fits_01_exists: 
             return f"{self.base_filename}-{self.data_type}01.fits.bz2"
 
@@ -158,26 +166,28 @@ class Image(Base):
 
         else: return ''
 
-def get_latest_site_images(db_address, site, number_of_images, user_id=None):
-    """ Get the n latest images from a site. 
 
-    Note: only returns sucessfully if the jpg preview exists. 
+def get_latest_site_images(db_address, site, number_of_images, user_id=None):
+    """Gets the n latest images from a site.
+
+    Note: Only returns sucessfully if the jpg preview exists. 
 
     Args: 
-        db_address (str): address for the database to query
-        site (str): 3-letter site code
-        number_of_images(int): number of images to return
-        user_id (str): optional, filters out any images not taken by the user. 
-                Still returns `number_of_images` images.
+        db_address (str): Address for the database to query.
+        site (str): 3-letter site code.
+        number_of_images (int): Number of images to return.
+        user_id (str):
+            Optional, filters out any images not taken by the user.
+            Still returns `number_of_images` images.
 
     Returns:
-        list[dict]: list of dicts, each representing one image with metadata.
-
+        list[dict]: List of dicts, each representing one image with metadata.
     """
+
     # Filter by site, and by user_id if provided.
     query_filters = [
         Image.site==site,
-        Image.jpg_medium_exists.is_(True) # the jpg preview must exist
+        Image.jpg_medium_exists.is_(True)  # The jpg preview must exist
     ]
     if user_id:
         query_filters.append(Image.user_id==user_id)
@@ -194,6 +204,8 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
 
 
 def get_latest_image_all_sites():
+    """Gets the latest images at all sites."""
+    
     start = time.time()
     sites = get_all_sites()
     print(time.time() - start)
@@ -218,17 +230,18 @@ def get_latest_image_all_sites():
 
 
 def get_fits_header_from_db(db_address, base_filename):
-    """ Return the fits header as a dictionary for the given fits file.
+    """Returns the fits header as a dictionary for the given fits file.
 
     Args: 
-        db_address (str): address for the database to query
-        base_filename (str): the filename (without the ex-version or .extension)
-                for identifying the header we want. 
+        db_address (str): Address for the database to query.
+        base_filename (str):
+            The filename (without the ex-version or .extension)
+            for identifying the header we want.
 
     Returns:
-        dict: the fits header as a dictionary.
-
+        dict: The fits header as a dictionary.
     """
+
     with get_session(db_address=db_address) as session:
         header = session.query(Image.header)\
             .filter(Image.base_filename==base_filename)\
@@ -238,20 +251,21 @@ def get_fits_header_from_db(db_address, base_filename):
 
 
 def filtered_images_query(db_address: str, query_filters: list): 
-    """ Get images that satisfy the specified filters. 
+    """Gets images that satisfy the specified filters. 
 
     Common query filters include exposure duration, site, capture date, 
-            image filter, etc...
+    image filter, etc...
 
     Args: 
-        db_address (str): address for the database to query
-        query_filters (list): all the filter expressions. These will be 
-                sent in the sqlalchemy filter method as .filter(*query_filters)
+        db_address (str): Address for the database to query.
+        query_filters (list):
+            All the filter expressions. These will be sent in the
+            sqlalchemy filter method as .filter(*query_filters).
 
     Returns:
-        list[dict]: list of dicts, each representing an image with metadata.
-
+        list[dict]: List of dicts, each representing an image with metadata.
     """
+
     # Add the condition that the jpg must exist
     query_filters.append(Image.jpg_medium_exists.is_(True))
     with get_session(db_address=db_address) as session:
@@ -265,22 +279,23 @@ def filtered_images_query(db_address: str, query_filters: list):
 
 
 def get_image_by_filename(db_address, base_filename):
-    """ Get the image package for the image specified by the filename. 
+    """Gets the image package for the image specified by the filename.
 
-    Note: only returns sucessfully if the jpg preview exists. 
+    Note: Only returns sucessfully if the jpg preview exists.
 
     Args: 
-        db_address (str): address for the database to query
-        base_filename (str): the filename (without the ex-version or .extension)
-                for identifying the header we want. 
+        db_address (str): Address for the database to query.
+        base_filename (str):
+            The filename (without the ex-version or .extension)
+            for identifying the header we want. 
 
     Returns:
-        dict: the image package representing the image with common metadata.
-
+        dict: The image package representing the image with common metadata.
     """
+
     query_filters = [
-        Image.base_filename == base_filename, # match filenames
-        Image.jpg_medium_exists.is_(True)       # the jpg must exist
+        Image.base_filename == base_filename,  # Match filenames
+        Image.jpg_medium_exists.is_(True)      # The jpg must exist
     ]
     with get_session(db_address=db_address) as session:
         image = session.query(Image)\
@@ -290,11 +305,11 @@ def get_image_by_filename(db_address, base_filename):
 
 
 def remove_image_by_filename(base_filename):
-    """ Remove an entire row represented by the data's base filename.
+    """Removes an entire row represented by the data's base filename.
 
     Args:
-        base_filename (str): identifies what to delete. 
-            Example: wmd-ea03-20190621-00000007
+        base_filename (str):
+            Identifies what to delete. Example: saf-ea03-20190621-00000007.
     """
 
     with get_session(db_address=DB_ADDRESS) as session:
@@ -306,18 +321,20 @@ def remove_image_by_filename(base_filename):
 
 def get_files_within_date_range(site: str, start_timestamp_s: int, 
         end_timestamp_s: int, fits_size: str):
-    """ Query for files at a given site within a date range.
+    """Queries for files at a given site within a date range.
 
     Args:
-        site (str): site code, eg. "mrc"
-        start_timestamp_s (int): timestamp in seconds, early bound.
-        end_timestamp_s (int): timestamp in seconds, later bound.
-        fits_size (str): "small" | "large" | "best": choose whether to only 
-            select small fits files, only large fits files, or best available.
+        site (str): Sitecode (eg. "mrc").
+        start_timestamp_s (int): Timestamp in seconds, early bound.
+        end_timestamp_s (int): Timestamp in seconds, later bound.
+        fits_size (str):
+            "small" | "large" | "best": choose whether to only select
+            small fits files, only large fits files, or best available.
 
     Returns:
-        list: list of filenames (str) that match the query  
+        list: List of filenames (str) that match the query.
     """
+
     fits_size = fits_size.lower()
     if not fits_size in ['small', 'large', 'best']:
         raise ValueError('fits_size must be either "small", "large", or "best".')
@@ -355,6 +372,15 @@ def get_files_within_date_range(site: str, start_timestamp_s: int,
 #####################################################
 
 def get_latest_site_images_handler(event, context):
+    """Handler for getting the latest images at a site.
+
+    Args:
+        event.body.site: Sitecode (eg. "saf").
+        event.body.number_of_images: Number of images to return.
+
+    Returns:
+        200 status code with latest site image data.
+    """
 
     # Parse the arguments passed in the http request.
     site = event['pathParameters']['site']
@@ -375,13 +401,25 @@ def get_latest_site_images_handler(event, context):
     images = get_latest_site_images(**query_args)
     return http_response(HTTPStatus.OK, images)
 
+
 def get_latest_images_all_sites_handler(event, context):
     images = get_latest_image_all_sites() 
-    #images = get_latest_site_images(DB_ADDRESS, 'tst', '2')
     return http_response(HTTPStatus.OK, images)
 
 
 def get_fits_header_from_db_handler(event, context):
+    """Handler for retrieving the header from a specified fits file.
+
+    Args:
+        event.body.base_filename: 
+            The filename (without the ex-version or .extension)
+            for identifying the header we want.
+
+    Returns:
+        200 status code with header info if successful.
+        404 status code if no header found with given base_filename.
+    """
+
     base_filename = event['pathParameters']['base_filename']
 
     try:
@@ -394,14 +432,28 @@ def get_fits_header_from_db_handler(event, context):
 
 
 def get_image_by_filename_handler(event, context):
+    """Handler for retrieving an image given the base filename.
+
+    Args:
+        event.body.base_filename: Filename (without the 'EX' or .extension).
+
+    Returns:
+        200 status code with requested image if successful.
+        404 status code if:
+            - No files found with given base filename.
+            - Multiple files found with given base filename.
+    """
+
     base_filename = event['pathParameters']['base_filename']
 
     try: 
         image = get_image_by_filename(DB_ADDRESS, base_filename)
+
     except NoResultFound:
         error_msg = f"No results found for {base_filename}"
         logger.exception(error_msg)
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        
     except MultipleResultsFound:
         error_msg = f"Multiple images found for {base_filename}"
         logger.exception(error_msg)
@@ -411,6 +463,18 @@ def get_image_by_filename_handler(event, context):
 
 
 def filtered_images_query_handler(event, context):
+    """Handler for querying images based on specified filters.
+    
+    Requests may query based on username, user_id, site, filter
+    (as in imaging), min and max exposure times, start and end
+    dates, or filename.
+
+    Returns:
+        200 status code with matching images if successful.
+        400 status code if ArgumentError results in a bad request.
+        404 status code if other exception occurs during query.
+    """
+
     filter_params = event['queryStringParameters']
 
     # Get filter parameters:
@@ -439,7 +503,7 @@ def filtered_images_query_handler(event, context):
     except ArgumentError:
         error_msg = "Invalid query filter. "
         logger.exception(error_msg)
-        return http_response(HTTPStatus.NOT_FOUND, error_msg)
+        return http_response(HTTPStatus.BAD_REQUEST, error_msg)
     except Exception as e:
         logger.exception("Error in filter images query. ")
         return http_response(HTTPStatus.NOT_FOUND, e)
@@ -447,8 +511,17 @@ def filtered_images_query_handler(event, context):
     return http_response(HTTPStatus.OK, images)
 
 
-
 def remove_image_by_filename_handler(event, context):
+    """Handler for removing an image given the base filename.
+
+    Args:
+        event.body.base_filename: Filename (without the 'EX' or .extension).
+    
+    Returns:
+        200 status code with successful removal of image.
+        404 status code if exception occurs during attempted removal.
+    """
+
     base_filename = event['pathParameters']['base_filename']
 
     try: 
@@ -459,3 +532,4 @@ def remove_image_by_filename_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, e)
 
     return http_response(HTTPStatus.OK, f'Successfully removed {base_filename}')
+
