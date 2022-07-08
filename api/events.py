@@ -139,11 +139,6 @@ def daylength(ephemeris, topos, degrees):
     :class:`~skyfield.timelib.Time` and will return ``True`` if the sun is up
     or twilight has started, else ``False``.
 
-    Args:
-        ephemeris (dict): Ephemeris file ("de421.bsp").
-        topos (): .
-        degrees (float): .
-
     Returns:
         Function that returns True if sun is up at a given time,
         False otherwise.

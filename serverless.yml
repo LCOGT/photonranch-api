@@ -23,7 +23,7 @@ custom:
   # Run as `sls deploy --stage <stage_name>`
   stage:
     prod: prod
-    dev: api
+    dev: api  # dev
     test: test
 
   # Make sure to first run 'serverless create_domain'
@@ -38,9 +38,8 @@ custom:
     useDownloadCache: false
     useStaticCache: false
 
-  # serverless prune plugin
-  # automatically prunes function versions older than the last 3
-  # this prevents the lambda function from exceeding storage limits. 
+  # Serverless prune plugin automatically prunes function versions older than 
+  # the last 3. This prevents the lambda function from exceeding storage limits. 
   prune:
     automatic: true
     number: 3
@@ -101,7 +100,7 @@ provider:
           Resource: 
             - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
 
-resources: # CloudFormation template syntax from here on.
+resources:  # CloudFormation template syntax from here on.
   Resources:
 
     # Configure API gateway "Gateway Responses" to work with CORS restrictions
@@ -160,7 +159,7 @@ functions:
           authorizer:
             name: authorizerFunc
             type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
   home:
     handler: api/handler.default
@@ -312,7 +311,7 @@ functions:
           authorizer:
             name: authorizerFunc
             type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
 
   getControlRoom:
@@ -343,32 +342,7 @@ functions:
     handler: api/control_rooms.restart_all_rooms_handler
     events:
       - schedule: 
-          rate: cron(0 * * * ? *) # run once every hour
-
-  ### Weather Database Endpoints
-  exampleQuery: 
-    handler: api/weather.exampleQuery
-    events:
-      - http:
-          path: /example-query
-          method: post
-          cors: true
-
-  weatherGraphQuery: 
-    handler: api/weather.weatherGraphQuery
-    events:
-      - http:
-          path: /weather/graph-data
-          method: post
-          cors: true
-
-  addWeatherStatus:
-    handler: api/weather.writeWeather
-    events:
-      - http:
-          path: /weather/write
-          method: post
-          cors: true
+          rate: cron(0 * * * ? *)  # Run once every hour
 
   ### Night Log Endpoints
   getNightLogNote:
