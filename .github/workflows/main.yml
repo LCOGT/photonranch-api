@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev, test]
+
+jobs:
+
+  # Set the name of the environment based on the branch.
+  # This is used to set the deployment stage at AWS.
+  determine-stage:
+    outputs:
+      deployment-stage: ${{ steps.deployment-stage.outputs.env }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up deployment stage
+        id: deployment-stage
+        run: |
+          echo "::set-output name=env::${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}"
+  
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # Set up Python 3.9 environment 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9 
+
+    # Install Python dependencies    
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    # Run tests
+    - name: Run tests 
+      run: |
+        python -m pytest
+
+
+  deploy:
+    needs: 
+      - determine-stage
+      - run-tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE
+    - uses: actions/checkout@v2
+
+    # Configure Auth0 secrets
+    - name: Create public_key file
+      run: |
+        cat > /home/runner/work/photonranch-api/photonranch-api/public_key << EOF
+        -----BEGIN CERTIFICATE-----
+        ${{ secrets.AUTH0_PUBLIC_KEY }}
+        -----END CERTIFICATE-----
+        EOF
+        
+    - name: Create Auth0 secrets file
+      run: |
+        cat > /home/runner/work/photonranch-api/photonranch-api/secrets.json << EOF
+        {
+          "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}"
+        }
+        EOF
+
+    # Configure AWS credentials
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # Set up Node
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    # Set up Python 3.9 environment
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9 
+
+    # Install Node dependencies
+    - name: Set up Environment
+      run: npm ci
+
+    # Install Serverless plugins
+    - name: Install Plugins
+      run: |
+        npx serverless plugin install --name serverless-python-requirements && 
+        npx serverless plugin install --name serverless-domain-manager && 
+        npx serverless plugin install --name serverless-plugin-existing-s3 && 
+        npx serverless plugin install --name serverless-prune-plugin && 
+        npx serverless plugin install --name serverless-offline && 
+        npx serverless plugin install --name serverless-dotenv-plugin 
+      
+    # Deploy to stage 
+    - name: Serverless Deploy
+      run: npx serverless deploy --stage {{ needs.determine-stage.outputs.deployment-stage}}
+      env:
+        SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}

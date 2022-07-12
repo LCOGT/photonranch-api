@@ -5,11 +5,11 @@ app: photonranch
 service: photonranch-api
 
 package:
-  exclude:
-    - venv/**
-    - node_modules/**
-    - .pytest_cache/**
-    - .vscode/**
+  patterns:
+    - '!venv/**'
+    - '!node_modules/**'
+    - '!.pytest_cache/**'
+    - '!.vscode/**'
 
 plugins:
   - serverless-python-requirements
@@ -22,7 +22,8 @@ custom:
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
   # Run as `sls deploy --stage <stage_name>`
   stage:
-    dev: api
+    prod: prod
+    dev: api  # dev
     test: test
 
   # Make sure to first run 'serverless create_domain'
@@ -32,25 +33,21 @@ custom:
     stage: ${self:provider.stage}
     createRoute53Record: true
 
-  # This is to reduce the size of the deployment
   pythonRequirements:
     dockerizePip: non-linux
-    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
-    slim: true
 
-  # serverless prune plugin
-  # automatically prunes function versions older than the last 3
-  # this prevents the lambda function from exceeding storage limits. 
+  # Serverless prune plugin automatically prunes function versions older than 
+  # the last 3. This prevents the lambda function from exceeding storage limits. 
   prune:
     automatic: true
     number: 3
 
 provider:
   name: aws
-  stage: ${opt:stage, "dev"}
-  runtime: python3.7
+  stage: ${opt:stage, "test"}
+  runtime: python3.9
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
@@ -58,6 +55,8 @@ provider:
     UPLOADS_LOG_TABLE_NAME: recent-uploads-log
     REGION: ${self:provider.region}
     INFO_IMAGES_TABLE: 'info-images'
+    REMOTEHQ_ROOMS_TABLE: 'remotehq-control-rooms'
+    NIGHT_LOG_TABLE: 'night-log'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
@@ -101,7 +100,7 @@ provider:
           Resource: 
             - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
 
-resources: # CloudFormation template syntax from here on.
+resources:  # CloudFormation template syntax from here on.
   Resources:
 
     # Configure API gateway "Gateway Responses" to work with CORS restrictions
@@ -110,7 +109,7 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Access-Control-Allow-Origin'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
         ResponseType: DEFAULT_4XX
         RestApiId:
@@ -120,8 +119,8 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Access-Control-Allow-Origin'"
         ResponseType: DEFAULT_5XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
@@ -144,72 +143,64 @@ resources: # CloudFormation template syntax from here on.
         ResponseType: UNAUTHORIZED
         RestApiId:
           Ref: 'ApiGatewayRestApi'
-        StatusCode: '401'
-
+        StatusCode: '401'    
+        
 functions:
   authorizerFunc: 
-    handler: authorizer.auth
+    handler: api/authorizer.auth
 
   dummyRequiresAuth:
-    handler: handler.dummy_requires_auth
+    handler: api/handler.dummy_requires_auth
     events:
       - http:
-          path: /dummy-requires-auth
+          path: dummy-requires-auth
           method: post
           authorizer:
             name: authorizerFunc
             type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - Access-Control-Allow-Origin
-              - Access-Control-Allow-Credentials
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+          cors: true
   home:
     handler: api/handler.default
     events:
       - http:
           path: /
           method: get
+          cors: true
   upload:
     handler: api/handler.upload
     events:
       - http:
-          path: /upload
+          path: upload
           method: post
+          cors: true
   download:
     handler: api/handler.download
     memorySize: 2024
-    timeout: 60 
+    timeout: 30 
     events:
       - http:
-          path: /download
+          path: download
           method: post
           cors: true
 
   downloadzip:
     handler: api/handler.download_zip
     memorySize: 1024
-    timeout: 120 
+    timeout: 30 
     events:
       - http:
-          path: /downloadzip
+          path: downloadzip
           method: post
           cors: true
 
   getRecentUploads: 
     handler: api/handler.get_recent_uploads
     memorySize: 2024
-    timeout: 60 
+    timeout: 30 
     events:
       - http:
-          path: /recentuploads
+          path: recentuploads
           method: get
           cors: true
 
@@ -218,7 +209,7 @@ functions:
     handler: api/info_images.get_info_image_package
     events:
       - http:
-          path: /infoimage/{site}/{channel}
+          path: infoimage/{site}/{channel}
           method: get
           cors: true
 
@@ -230,7 +221,7 @@ functions:
       # note: layer sourced from https://github.com/keithrozario/Klayers
     events:
       - http:
-          path: /image/{base_filename}
+          path: image/{base_filename}
           method: get
           cors: true
 
@@ -238,7 +229,7 @@ functions:
   latestImages:
     handler: api/db.get_latest_site_images_handler
     memorySize: 2024
-    timeout: 60 
+    timeout: 30 
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
@@ -270,7 +261,7 @@ functions:
   filteredImageQuery:
     handler: api/db.filtered_images_query_handler
     memorySize: 2024
-    timeout: 60 
+    timeout: 30 
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
     events:
@@ -309,28 +300,63 @@ functions:
           method: get
           cors: true
 
-  ### Weather Database Endpoints
-  exampleQuery: 
-    handler: api/weather.exampleQuery
-    events:
+  ### RemoteHQ api proxy
+  newRemoteHQBrowser:
+    handler: api/remotehq_helpers.handle_new_remotehq_browser
+    events: 
       - http:
-          path: /example-query
+          path: /new_remotehq_browser
           method: post
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
 
-  weatherGraphQuery: 
-    handler: api/weather.weatherGraphQuery
-    events:
+  getControlRoom:
+    handler: api/control_rooms.get_control_room
+    events: 
       - http:
-          path: /weather/graph-data
-          method: post
+          path: /control_room/{site}
+          method: get
           cors: true
 
-  addWeatherStatus:
-    handler: api/weather.writeWeather
-    events:
+  deleteControlRoom:
+    handler: api/control_rooms.delete_control_room
+    events: 
       - http:
-          path: /weather/write
+          path: /control_room/{site}
+          method: delete
+          cors: true
+
+  restartControlRoom:
+    handler: api/control_rooms.restart_control_room_handler
+    events: 
+      - http:
+          path: /control_room/{site}/restart
+          method: get
+          cors: true
+
+  restartAllRooms:
+    handler: api/control_rooms.restart_all_rooms_handler
+    events:
+      - schedule: 
+          rate: cron(0 * * * ? *)  # Run once every hour
+
+  ### Night Log Endpoints
+  getNightLogNote:
+    handler: api/night_log.get_note_handler
+    events: 
+      - http:
+          path: /nightlog/{site}
+          method: get
+          cors: true
+
+  createNightLogNote:
+    handler: api/night_log.create_note_handler
+    events: 
+      - http:
+          path: /nightlog/{site}
           method: post
           cors: true
 

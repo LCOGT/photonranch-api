@@ -1,17 +1,17 @@
 {
   "name": "photonranch-api",
   "description": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
-    "serverless": "^2.46.0",
-    "serverless-domain-manager": "^3.3.1",
+    "serverless": "^3.19.0",
+    "serverless-domain-manager": "^6.0.3",
     "serverless-plugin-existing-s3": "^2.4.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.768.0",
-    "serverless-dotenv-plugin": "^2.1.1",
-    "serverless-offline": "^7.0.0",
-    "serverless-prune-plugin": "^1.4.3",
-    "serverless-python-requirements": "^5.0.0"
+    "aws-sdk": "^2.1167.0",
+    "serverless-dotenv-plugin": "^4.0.1",
+    "serverless-offline": "^8.8.0",
+    "serverless-prune-plugin": "^2.0.1",
+    "serverless-python-requirements": "^5.4.0"
   }
 }

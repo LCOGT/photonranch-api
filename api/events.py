@@ -10,9 +10,9 @@ from skyfield.api import utc
 
 TIMESCALE = api.load.timescale(builtin=True)
 
-def _get_calibration_frame_durations():
 
-    # Get these from config eventually
+def _get_calibration_frame_durations():
+    # TODO: Get these from config eventually.
     return {
         "screen_flat_duration": 1.5/24,
         "bias_dark_duration": 8/24,
@@ -23,30 +23,34 @@ def _get_calibration_frame_durations():
 
 
 def _add_time(timeObject, days: float):
-    """Return the skyfield Time object plus some number of days."""
+    """Returns the skyfield Time object plus some number of days."""
+
     timescale = api.load.timescale(builtin=True)
     return timescale.tai_jd(timeObject.tai + days)
 
+
 def skyfieldtime_from_utciso(iso_str):
-    """ Convert a utc iso string to a skyfield time object. """
+    """Converts a UTC ISO string to a skyfield time object."""
+
     dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%SZ")
     dt = dt.replace(tzinfo=utc)
     return TIMESCALE.from_datetime(dt)
 
-def _sort_dict_of_time_objects(unsorted):
-    """Return dict with items sorted by the order of their time values.
 
-    Though python dicts do not explicitly support order, they are typically
-    printed with the same order that keys were added. This method simply makes
+def _sort_dict_of_time_objects(unsorted):
+    """Returns dict with items sorted by the order of their time values.
+
+    Though Python dicts do not explicitly support order, they are typically
+    printed with the same order that keys were added. This simply makes
     the dict print nicely on most systems.
 
     Args:
-        unsorted(dict): dict where all values are skyfield time objects.
+        unsorted (dict): Dict where all values are skyfield time objects.
 
     Returns:
-        dict: same keys and values as input, but ordered by increasing
-            time value.
+        dict: Same keys and values as input, ordered by increasing time value.
     """
+
     unsortedList = [(x, unsorted[x]) for x in unsorted]
     sortedList = sorted(unsortedList, key=lambda x: x[1].tai)
     sortedDict = {}
@@ -54,20 +58,21 @@ def _sort_dict_of_time_objects(unsorted):
         sortedDict[item[0]] = item[1]
     return sortedDict
 
+
 def _build_site_context(lat: float, lng: float, time: float, timezone: str):
-    """Return the geo information specific to the observatory.
+    """Returns the geo information specific to the observatory.
 
     This information is used in many of the site-events-related functions.
 
     Args:
-        lat (float): latitude in deg N
-        lng (float): longitude in deg E
-        time (float): unix time in s
-        timezone (str): tz database timezone name (ie. 'America/Los_Angeles')
+        lat (float): Latitude in deg N.
+        lng (float): Longitude in deg E.
+        time (float): Unix time in s.
+        timezone (str): Tz database timezone name (ie. 'America/Los_Angeles').
 
     Returns:
-        dict: skyfield objects for the start/end of day times, observatory, and
-                ephemeris file.
+        dict: Skyfield objects for the start/end of day times, observatory, and
+        ephemeris file.
     """
 
     timescale = api.load.timescale(builtin=True)
@@ -88,16 +93,17 @@ def _build_site_context(lat: float, lng: float, time: float, timezone: str):
 
 
 def _get_tz_offset(timezone: str, timestamp: float) -> float:
-    """Gets the current UTC offset (hours) for the given timezone.
+    """Gets the current UTC offset in hours for the given timezone.
 
     Args:
-        timezone (str): timezone name, ie. 'America/Los_Angeles'
-        timestamp (float): unix time (s) defining when the offset is applied.
-            Note: this determines whether to include daylight savings time.
+        timezone (str): Timezone name (ie. 'America/Los_Angeles').
+        timestamp (float): Unix time (s) defining when the offset is applied.
+            Note: This determines whether to include daylight savings time.
 
     Returns:
-        float: hours (+ or -) from UTC time
+        float: Hours (+ or -) from UTC time.
     """
+
     tz = pytz.timezone(timezone)
     utc_offset = datetime.fromtimestamp(timestamp, tz=tz).utcoffset()
     offset = ((utc_offset.days * 86400) + (utc_offset.seconds)) / 3600
@@ -105,17 +111,19 @@ def _get_tz_offset(timezone: str, timestamp: float) -> float:
 
 
 def _get_local_noon(timezone: str, time: float) -> float:
-    """Gets the local noon preceeding the given time, in julian days
+    """Gets the local noon preceeding the given time in Julian days.
 
     May show unexpected behavior around DST transitions.
 
     Args:
-        timezone (str): timezone name, ie. 'America/Los_Angeles'
-        time (float): unix time in seconds
+        timezone (str): Timezone name (ie. 'America/Los_Angeles').
+        time (float): Unix time in seconds.
 
     Returns:
-        float: TAI in julian days denoting local noon.
+        float: TAI (International Atomic Time) in Julian days,
+        denoting local noon.
     """
+
     ts = api.load.timescale(builtin=True)
     utc_timezone = pytz.timezone('utc')
     time_obj = ts.from_datetime(datetime.fromtimestamp(time, tz=utc_timezone))
@@ -125,12 +133,17 @@ def _get_local_noon(timezone: str, time: float) -> float:
 
 
 def daylength(ephemeris, topos, degrees):
-    """Build a function of time that returns the daylength.
+    """Builds a function of time that returns the daylength.
 
     The function that this returns will expect a single argument that is a
     :class:`~skyfield.timelib.Time` and will return ``True`` if the sun is up
     or twilight has started, else ``False``.
+
+    Returns:
+        Function that returns True if sun is up at a given time,
+        False otherwise.
     """
+
     sun = ephemeris['sun']
     topos_at = (ephemeris['earth'] + topos).at
 
@@ -139,12 +152,26 @@ def daylength(ephemeris, topos, degrees):
         t._nutation_angles = iau2000b(t.tt)
         return topos_at(t).observe(sun).apparent().altaz()[0].degrees > -degrees
 
-    is_sun_up_at.rough_period = 0.5  # twice a day
+    is_sun_up_at.rough_period = 0.5  # Twice a day
     return is_sun_up_at
 
 
 def get_rise_set_times(site_context, horizonAngle=0):
+    """Gets the sun rising and setting times at a given site.
 
+    Args:
+        site_context.day_start (float): Starting time in Julian days.
+        site_context.day_end (float): Ending time in Julian days.
+        site_context.observatory (list):
+            List of the latitude and longitude (float values) for a site.
+        horizonAngle (float):
+            Specify the horizon angle to use in degrees. Default is 0 degrees.
+
+    Returns:
+        List of sunrise and sunset times in Julian days,
+        ordered so that rising time comes before setting time.
+    """
+    
     rise_set, is_rise = almanac.find_discrete(
         site_context['day_start'],
         site_context['day_end'],
@@ -153,7 +180,7 @@ def get_rise_set_times(site_context, horizonAngle=0):
     )
     rise_set_list = list(rise_set)
 
-    # order list so rise comes before set.
+    # Order list so rise comes before set.
     if is_rise[1]:
         rise_set_list.reverse()
 
@@ -161,18 +188,19 @@ def get_rise_set_times(site_context, horizonAngle=0):
 
 
 def calc_flat_vals(site_context, t0, t1):
-    """Get the flattest spots in the sky.
+    """Gets the flattest spots in the sky.
 
     Args:
-        site_context: dict with site information. See _build_site_context().
-        t0 (skyfield time obj): time for calculating the starting flat spot.
-        t1 (skyfield time obj): time for calculatign the end flat spot.
+        site_context (dict): Site information. See _build_site_context().
+        t0 (skyfield time obj): Time for calculating the starting flat spot.
+        t1 (skyfield time obj): Time for calculating the ending flat spot.
 
     Returns:
-        dict: flat start/end ra/dec values, with ra in hours an dec in deg.
+        Dict: Flat starting and ending RA and dec values,
+        with RA in hours and dec in deg.
     """
 
-    # NOTE: astropy might be a better package here.
+    # NOTE: Astropy might be a better package here.
 
     eph = api.load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
@@ -217,7 +245,19 @@ def calc_flat_vals(site_context, t0, t1):
 
 
 def get_moon_events(site_context):
+    """Gets moon events during a specified time frame at a given observatory.
+    
+    Args:
+        site_context.day_start (float): Starting time in Julian days.
+        site_context.day_end (float): Ending time in Julian days.  
+        site_context.eph (dict): Ephemeris file ("de421.bsp").
+        site_context.observatory (list):
+            List of the latitude and longitude (float values) for a site.
 
+    Returns:
+        Dictionary of moon events.
+    """
+    
     t0 = site_context['day_start']
     t1 = site_context['day_end']
     eph = site_context['eph']
@@ -237,20 +277,21 @@ def get_moon_events(site_context):
 
 
 def get_next_moon_transit(lat, lng, time): 
-    """ Get the next moon transit of the meridian for the location and time.
+    """Gets the next moon transit of the meridian for the location and time.
 
     This method uses ephem instead of skyfield, because skyfield does not have
-    a simple way to calculate transits. 
+    a simple way to calculate transits.
 
     Args:
-        lat (float): latitude N, in degrees. Note: str is also fine.
-        lng (float): longitude E, in degrees. Note: str is also fine.
-        time (datetime): python datetime; transit will be the next one after
-            this time. 
+        lat (float): Latitude N, in degrees. Note: str is also fine.
+        lng (float): Longitude E, in degrees. Note: str is also fine.
+        time (datetime):
+            Python datetime; transit will be the next one after this time.
 
     Returns: 
-        datetime: python datetime object with utc timezone.
+        Datetime: Python datetime object with UTC timezone of next transit.
     """
+
     obs = ephem.Observer() 
     obs.lat, obs.lon = str(lat), str(lng)
     obs.date = time
@@ -260,18 +301,18 @@ def get_next_moon_transit(lat, lng, time):
 
 
 def get_moon_riseset_illum(lat, lng, start, end):
-    """ Calculate moon rise/set times and illumination.
+    """Calculates the moon rise and set times and illumination.
 
     Args:
-        lat (float): latitude of the observing location, degrees N.
-        lng (float): longitude of hte observing location, degrees E.
-        start (str): utc iso time string (like 2020-12-31T01:00:00Z)
-        start (str): utc iso time string 
+        lat (float): Latitude of the observing location in degrees N.
+        lng (float): Longitude of the observing location in degrees E.
+        start (str): UTC ISO starting time string (eg. "2022-12-31T01:00:00Z").
+        end (str): UTC ISO ending time string.
 
     Returns:
-        list of dict: each dict contains 
-            "rise": utc iso time string, 
-            "set": utc iso time string,
+        List of dict. Each dict contains:
+            "rise": UTC ISO time string, 
+            "set": UTC ISO time string,
             "illumination": [0,1] value for illum. percent at transit time.
     """
 
@@ -322,17 +363,18 @@ def get_moon_riseset_illum(lat, lng, start, end):
 
 
 def make_site_events(lat: float, lng: float, time: float, timezone: str):
-    """ Compile all the events in to a single dictionary.
+    """Compiles all the events into a single dictionary.
 
     Args:
-        lat (float): site latitude in deg N
-        lng (float): site longitude in deg E
-        time (float): unix timestamp within the 24hr block (local noon-noon) 
+        lat (float): Site latitude in deg N.
+        lng (float): Site longitude in deg E.
+        time (float):
+            Unix timestamp within the 24 hr block (local noon-noon)
             when we want to get events.
-        timezone (str): tz database timezone name (ie. 'America/Los_Angeles')
+        timezone (str): tz database timezone name (ie. 'America/Los_Angeles').
 
     Returns:
-        dict: event name as key, tai julian days (float) as value. 
+        dict: Event name as key, TAI Julian days (float) as value. 
     """
 
     site_context = _build_site_context(lat, lng, time, timezone)
@@ -344,16 +386,16 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
     longest_screen = cal_frame_durations['longest_screen']
     longest_dark = cal_frame_durations['longest_dark']
 
-    # final arg in these functions is degrees below the horizon.
+    # Final arg in these functions is degrees below the horizon.
     sunrise, sunset = get_rise_set_times(site_context, 0.25)
     civil_dawn, civil_dusk = get_rise_set_times(site_context, 6)
     nautical_dawn, nautical_dusk = get_rise_set_times(site_context, 12)
     astro_dawn, astro_dusk = get_rise_set_times(site_context, 18)
 
-    ops_win_begin = _add_time(sunset, -1/24)  # one hour before sunset
+    ops_win_begin = _add_time(sunset, -1/24)  # One hour before sunset
 
     morn_sky_flat_end, _ = get_rise_set_times(site_context, 1.5)  
-    eve_sky_flat_begin = _add_time(sunset, -0.5/24)  # half hr before sunset
+    eve_sky_flat_begin = _add_time(sunset, -0.5/24)  # Half hr before sunset
     morn_sky_flat_begin, eve_sky_flat_end = get_rise_set_times(site_context, 11.75)
 
     morn_flat_vals = calc_flat_vals(site_context, ops_win_begin, eve_sky_flat_end)
@@ -395,7 +437,7 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
         "Civil Dusk": civil_dusk,
         "End Eve Sky Flats": eve_sky_flat_end,
         
-        # one minute after eve skyflat time ends
+        # One minute after eve skyflat time ends
         "Clock & Auto Focus": _add_time(eve_sky_flat_end, 1/1440),
 
         "Naut Dusk": nautical_dusk,
@@ -403,7 +445,7 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
         "Middle of Night": midnight,
         "End Astro Dark": astro_dawn,
 
-        # four minutes before nautical dawn
+        # Four minutes before nautical dawn
         "Final Clock & Auto Focus": _add_time(nautical_dawn, -4/1440),
 
         "Naut Dawn": nautical_dawn,
@@ -412,7 +454,7 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
         "End Morn Sky Flats": morn_sky_flat_end,
 
         # 0.5 minutes after morning skyflats end
-        "Ops Window Closes": _add_time(morn_sky_flat_end, 0.5/1440), # margin time to close
+        "Ops Window Closes": _add_time(morn_sky_flat_end, 0.5/1440),  # Margin time to close
         "Sunrise": sunrise,
     }
 
@@ -429,3 +471,4 @@ def make_site_events(lat: float, lng: float, time: float, timezone: str):
     site_events = {k:t.tai for k, t in site_events.items()}
 
     return site_events
+
