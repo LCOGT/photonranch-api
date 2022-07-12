@@ -225,7 +225,7 @@ def download_zip(event, context):
 
     First, get a list of files to be zipped based on
     the query parameters specified. Next, call a Lambda function
-    (defined in the repository zip-downloads) that creates a zip
+    (defined in the repository photonranch-downloads) that creates a zip
     from the list of specified files and uploads that back to s3,
     returning a presigned download URL. Finally, return the URL
     in the HTTP response to the requester.

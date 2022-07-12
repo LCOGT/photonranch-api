@@ -148,7 +148,6 @@ resources:  # CloudFormation template syntax from here on.
 functions:
   authorizerFunc: 
     handler: api/authorizer.auth
-    cors: true
 
   dummyRequiresAuth:
     handler: api/handler.dummy_requires_auth
