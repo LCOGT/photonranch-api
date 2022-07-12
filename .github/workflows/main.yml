@@ -112,8 +112,8 @@ jobs:
         npx serverless plugin install --name serverless-dotenv-plugin 
       
     # Deploy to stage 
-    - name: Serverless Deploy {{ needs.determine-stage.outputs.deployment-stage }}
-      run: npx serverless deploy --stage {{ needs.determine-stage.outputs.deployment-stage }}
+    - name: Serverless Deploy ${{ needs.determine-stage.outputs.deployment-stage }}
+      run: npx serverless deploy --stage ${{ needs.determine-stage.outputs.deployment-stage }}
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
