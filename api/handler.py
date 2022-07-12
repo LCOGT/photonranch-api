@@ -198,7 +198,7 @@ def download(event, context):
         "Key": key,
     }
     
-    image_type = body.get('image_type', 'fits')  # Assume 'tif' if not otherwise specified
+    image_type = body.get('image_type', 'fits')  # Assume FITS if not otherwise specified
 
     # Routine if TIFF file is specified
     if image_type in ['tif', 'tiff']:   
@@ -231,10 +231,13 @@ def download_zip(event, context):
     in the HTTP response to the requester.
 
     Args:
-        event.body.start_timestamp_s: UTC datestring of starting time to query.
-        event.body.end_timestamp_s: UTC datestring of ending time to query.
-        event.body.fits_size: Size of the FITS file (eg. 'small', 'large').
-        event.body.site: Sitecode to zip files from.
+        event.body.start_timestamp_s (str):
+            UTC datestring of starting time to query.
+        event.body.end_timestamp_s (str): 
+            UTC datestring of ending time to query.
+        event.body.fits_size (str):
+            Size of the FITS file (eg. 'small', 'large').
+        event.body.site (str): Sitecode to zip files from.
 
     Returns:
         200 status code with requested presigned URL at AWS.
@@ -282,13 +285,13 @@ def download_zip(event, context):
 
 
 def get_recent_uploads(event, context):
-    """Queries for a list of files recently uploaded to s3.
+    """Queries for a list of files recently uploaded to S3.
 
     The logs routine is found in the ptrdata repository,
-    in which a lambda funciton is triggered for new objects in the
+    in which a Lambda funciton is triggered for new objects in the
     s3 bucket with prefix 'data/' (where all the regular site data is sent).
 
-    This is mainly used for easier debugging, and is displayed in the PTR web UI. 
+    Mainly used for easier debugging and is displayed in the PTR web UI.
 
     Args:
         event.body.site: Sitecode to query recent files from.
