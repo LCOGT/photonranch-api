@@ -121,7 +121,7 @@ Requests for all services in this repository are handled at the base URL `https:
     - 404: Multiple files found.
 - GET `/{site}/latest_images/{number_of_images}`
   - Description: Gets the latest images at a site.
-  - Authorization required:
+  - Authorization required: No.
   - Query parameters:
     - site (string): Sitecode.
     - number_of_images (int): Number of latest images to return.
