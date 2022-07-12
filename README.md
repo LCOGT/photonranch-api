@@ -18,6 +18,7 @@ This repository is home to the backend services for several APIs as opposed to a
 - **night_log**: Creates and retrieves night log notes at a given site.
 - **events**: Retrieves events such as moonrise, moonset, sunrise, observing windows, and other information about nightly events at a given site.
 
+For more on the multifile zipping and downloading process, see the [photonranch-downloads](https://github.com/LCOGT/photonranch-downloads) repository.
 ## Dependencies
 
 This application currently runs under Python 3.9. Dependencies for the Python Lambda functions are zipped with the `serverless-python-requirements` plugin. Special note for psycopg2 (Python postgres library): make sure `requirements.txt` lists 'psycopg2-binary', and not 'psycopg2'. This is required for the dependency to run in the Lambda environment.

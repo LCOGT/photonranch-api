@@ -8,15 +8,15 @@ jobs:
 
   # Set the name of the environment based on the branch.
   # This is used to set the deployment stage at AWS.
-  staging:
+  determine-stage:
     outputs:
-      deploy-stage: ${{ steps.deploy-stage.outputs.stage }}
+      deployment-stage: ${{ steps.deployment-stage.outputs.env }}
     runs-on: ubuntu-latest
     steps:
       - name: Set up deployment stage
-        id: deploy-stage
+        id: deployment-stage
         run: |
-          echo "::set-output name=stage::${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}"
+          echo "::set-output name=env::${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}"
   
   run-tests:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
 
   deploy:
     needs: 
-      - staging
+      - determine-stage
       - run-tests
     runs-on: ubuntu-latest
     
@@ -113,7 +113,7 @@ jobs:
       
     # Deploy to stage 
     - name: Serverless Deploy
-      run: npx serverless deploy --stage {{ needs.staging.outputs.deploy-stage}}
+      run: npx serverless deploy --stage {{ needs.determine-stage.outputs.deployment-stage}}
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
