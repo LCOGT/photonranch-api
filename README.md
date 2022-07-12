@@ -30,7 +30,7 @@ Clone the repository to your local machine:
 
 ```
 git clone https://github.com/LCOGT/photonranch-api.git
-cd photonranch-calendar
+cd photonranch-api
 ```
 
 ### Requirements
