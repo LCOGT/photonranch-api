@@ -18,7 +18,10 @@ from api.remotehq_helpers import Room
 ### Endpoints
 
 def get_control_room(event, context):
-    """Retrieves RemoteHQ rooom details for a given site."
+    """Retrieves RemoteHQ rooom details for a given site.
+
+    If the requested room does not yet exist, creates the
+    room for the specified site.
     
     Args:
         event.body.site (str): Sitecode to get room at (eg. "saf").

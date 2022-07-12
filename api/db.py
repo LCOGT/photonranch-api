@@ -435,7 +435,8 @@ def get_image_by_filename_handler(event, context):
     """Handler for retrieving an image given the base filename.
 
     Args:
-        event.body.base_filename: Filename (without the 'EX' or .extension).
+        event.body.base_filename (str):
+            Filename (without the 'EX' or .extension).
 
     Returns:
         200 status code with requested image if successful.
