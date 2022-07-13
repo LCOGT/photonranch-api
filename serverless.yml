@@ -35,8 +35,10 @@ custom:
 
   pythonRequirements:
     dockerizePip: non-linux
+    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
+    slim: true
 
   # Serverless prune plugin automatically prunes function versions older than 
   # the last 3. This prevents the lambda function from exceeding storage limits. 
