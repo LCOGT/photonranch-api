@@ -17,6 +17,7 @@ from api.helpers import DecimalEncoder, http_response, _get_body, get_secret, ge
 from api.helpers import get_base_filename_from_full_filename
 from api.helpers import get_s3_file_url
 from api.s3_helpers import save_tiff_to_s3
+from api.s3_helpers import save_fz_to_fits
 
 from api.db import get_files_within_date_range
 
@@ -187,7 +188,14 @@ def download(event, context):
         s3_destination_key = save_tiff_to_s3(BUCKET_NAME, key, stretch)
         url = get_s3_file_url(s3_destination_key)
         log.info(f"Presigned download url: {url}")
-        return http_response(HTTPStatus.OK, str(url))
+        return http_response(HTTPStatus.OK, str(url)) 
+
+    # Routine to de-fz a file for downloading as a plain fits
+    elif image_type in ['fits', 'fits.fz', 'fz']:
+        s3_destination_key = save_fz_to_fits(BUCKET_NAME, key)
+        url = get_s3_file_url(s3_destination_key)
+        log.info(f"Presigned download url: {url}")
+        return http_response(HTTPStatus.OK, str(url))        
 
     # if TIFF file not requested, just get the file as-is from s3
     else: 
