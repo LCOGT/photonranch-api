@@ -44,7 +44,7 @@ def save_fz_to_fits(bucket, s3_source_key, stretch):
     fits_filename = f"{source_filename.split('.')[0]}.fits"    
     s3_destination_key = f"downloads/fits/{fits_filename}"
 
-    s3_client.upload_file(local_fits_file_path_fz, bucket, s3_destination_key)
+    s3_client.upload_file(local_fits_file_path, bucket, s3_destination_key)
     return s3_destination_key
 
 def create_tiff(local_source_file_path, local_tiff_file_path, stretch):
