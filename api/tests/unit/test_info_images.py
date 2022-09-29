@@ -16,10 +16,10 @@ def create_info_image_entry(site, channel, base_filename, data_type, header=None
     optional_attributes = {}
     if include_fits_01: 
         optional_attributes['fits_01_exists'] = True
-        optional_attributes['fits_01_file_path'] = f"info-images/{base_filename}-{data_type}00.fits.bz2"
+        optional_attributes['fits_01_file_path'] = f"info-images/{base_filename}-{data_type}00.fits.fz"
     if include_fits_10: 
         optional_attributes['fits_10_exists'] = True
-        optional_attributes['fits_10_file_path'] = f"info-images/{base_filename}-{data_type}10.fits.bz2"
+        optional_attributes['fits_10_file_path'] = f"info-images/{base_filename}-{data_type}10.fits.fz"
     if include_jpg_10: 
         optional_attributes['jpg_10_exists'] = True
         optional_attributes['jpg_10_path'] = f"info-images/{base_filename}-{data_type}10.jpg"

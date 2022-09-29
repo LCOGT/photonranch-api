@@ -145,11 +145,11 @@ class Image(Base):
 
 
     def get_small_fits_filename(self):
-        return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+        return f"{self.base_filename}-{self.data_type}10.fits.fz"
 
 
     def get_large_fits_filename(self):
-        return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+        return f"{self.base_filename}-{self.data_type}01.fits.fz"
 
 
     def get_best_fits_filename(self):
@@ -159,10 +159,10 @@ class Image(Base):
         """
 
         if self.fits_01_exists: 
-            return f"{self.base_filename}-{self.data_type}01.fits.bz2"
+            return f"{self.base_filename}-{self.data_type}01.fits.fz"
 
         elif self.fits_10_exists: 
-            return f"{self.base_filename}-{self.data_type}10.fits.bz2"
+            return f"{self.base_filename}-{self.data_type}10.fits.fz"
 
         else: return ''
 
