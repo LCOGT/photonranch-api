@@ -49,16 +49,19 @@ def save_tiff_to_s3(bucket, s3_source_key, stretch):
 def save_fz_to_fits(bucket, s3_source_key):
     tmpkey = s3_source_key.replace('/', '')
     local_source_file_path = f"/tmp/{uuid.uuid4()}{tmpkey}"
-    local_fits_file_path = f"/tmp/fits-{tmpkey}"
+    local_fits_file_path = f"/tmp/fits-{tmpkey}".replace('.fits.fz','.fits')
     #local_fits_file_path_fz = f"/tmp/fits-{tmpkey}.fits.fz"
 
+    print (local_fits_file_path)
     s3_client.download_file(bucket, s3_source_key, local_source_file_path)
-    #image_metadata = create_fitsfromfz(local_source_file_path, local_tiff_file_path)
+    create_fitsfromfz(local_source_file_path, local_fits_file_path)
 
     # generate the name for the item in s3, also the name of the downloaded file
-    source_filename = s3_source_key.split('/')[-1]
-    fits_filename = f"{source_filename.replace('.fits.fz','.fits')}"    
+    source_filename = s3_source_key.split('/')[-1].replace('.fits.fz','.fits')
+    print (source_filename)
+    fits_filename = f"{source_filename}"    
     s3_destination_key = f"downloads/fits/{fits_filename}"
+    print (s3_destination_key)
 
     s3_client.upload_file(local_fits_file_path, bucket, s3_destination_key)
     return s3_destination_key
