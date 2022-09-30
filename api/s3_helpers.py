@@ -33,8 +33,6 @@ def save_tiff_to_s3(bucket, s3_source_key, stretch):
     local_source_file_path = f"/tmp/{uuid.uuid4()}{tmpkey}"
     local_tiff_file_path = f"/tmp/tiff-{tmpkey}.tif"
     local_tiff_file_path_bz2 = f"/tmp/tiff-{tmpkey}.tif.bz2"
-    
-    print (s3_source_key)
 
     s3_client.download_file(bucket, s3_source_key.replace('.bz2','.fz'), local_source_file_path)
     image_metadata = create_tiff(local_source_file_path, local_tiff_file_path, stretch)
@@ -53,6 +51,8 @@ def save_fz_to_fits(bucket, s3_source_key):
     local_source_file_path = f"/tmp/{uuid.uuid4()}{tmpkey}"
     local_fits_file_path = f"/tmp/fits-{tmpkey}".replace('.fits.fz','.fits')
     #local_fits_file_path_fz = f"/tmp/fits-{tmpkey}.fits.fz"
+    
+    print (s3_source_key)
 
     s3_client.download_file(bucket, s3_source_key, local_source_file_path)
     create_fitsfromfz(local_source_file_path, local_fits_file_path)
