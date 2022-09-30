@@ -49,7 +49,7 @@ def save_tiff_to_s3(bucket, s3_source_key, stretch):
 def save_fz_to_fits(bucket, s3_source_key):
     tmpkey = s3_source_key.replace('/', '')
     local_source_file_path = f"/tmp/{uuid.uuid4()}{tmpkey}"
-    local_fits_file_path = f"/tmp/fits-{tmpkey}".replace('.fits.fz','.fits')
+    local_fits_file_path = f"/tmp/fits-{tmpkey}"
     #local_fits_file_path_fz = f"/tmp/fits-{tmpkey}.fits.fz"
 
     s3_client.download_file(bucket, s3_source_key, local_source_file_path)
