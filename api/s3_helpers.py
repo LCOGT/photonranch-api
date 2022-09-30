@@ -36,7 +36,7 @@ def save_tiff_to_s3(bucket, s3_source_key, stretch):
     
     print (s3_source_key)
 
-    s3_client.download_file(bucket, s3_source_key.replace('.bz2' + '.fz'), local_source_file_path)
+    s3_client.download_file(bucket, s3_source_key.replace('.bz2','.fz'), local_source_file_path)
     image_metadata = create_tiff(local_source_file_path, local_tiff_file_path, stretch)
 
     # Generate the name for the item in s3; also the name of the downloaded file
