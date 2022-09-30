@@ -47,12 +47,22 @@ def save_tiff_to_s3(bucket, s3_source_key, stretch):
     return s3_destination_key
 
 def save_fz_to_fits(bucket, s3_source_key):
+    """Saves a FITS file from a FITS.FZ file to an s3 bucket.
+
+    Creates a FITS file from a given FITS.FZ file using create_fitsfromfz.
+
+    Args:
+        bucket (str): Name of the s3 bucket to save TIFF file to.
+        s3_source_key (str): Filepath to the FITS image to convert.
+    
+    Returns:
+        s3 destination key string, the filepath to the saved FITS file
+        in s3.
+    """
     tmpkey = s3_source_key.replace('/', '')
     local_source_file_path = f"/tmp/{uuid.uuid4()}{tmpkey}"
     local_fits_file_path = f"/tmp/fits-{tmpkey}".replace('.fits.fz','.fits')
-    #local_fits_file_path_fz = f"/tmp/fits-{tmpkey}.fits.fz"
-    
-    print (s3_source_key)
+
 
     s3_client.download_file(bucket, s3_source_key, local_source_file_path)
     create_fitsfromfz(local_source_file_path, local_fits_file_path)
@@ -66,6 +76,15 @@ def save_fz_to_fits(bucket, s3_source_key):
     return s3_destination_key
 
 def create_fitsfromfz(local_source_file_path, local_fits_file_path):
+    """Creates a FITS file from a given FITS.FZ filepath.
+
+    Args:
+        local_source_file_path (str): Local filepath to FITS.FZ file.
+        local_tiff_file_path (str): Local filepath to save FITS to.
+
+    Returns:
+        True
+    """
     with fits.open(local_source_file_path) as hdulist:
         hdulist.verify('fix')
         # Pull out the original non-compressed fits and header
