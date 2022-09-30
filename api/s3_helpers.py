@@ -52,16 +52,13 @@ def save_fz_to_fits(bucket, s3_source_key):
     local_fits_file_path = f"/tmp/fits-{tmpkey}".replace('.fits.fz','.fits')
     #local_fits_file_path_fz = f"/tmp/fits-{tmpkey}.fits.fz"
 
-    print (local_fits_file_path)
     s3_client.download_file(bucket, s3_source_key, local_source_file_path)
     create_fitsfromfz(local_source_file_path, local_fits_file_path)
 
     # generate the name for the item in s3, also the name of the downloaded file
     source_filename = s3_source_key.split('/')[-1].replace('.fits.fz','.fits')
-    print (source_filename)
     fits_filename = f"{source_filename}"    
     s3_destination_key = f"downloads/fits/{fits_filename}"
-    print (s3_destination_key)
 
     s3_client.upload_file(local_fits_file_path, bucket, s3_destination_key)
     return s3_destination_key
@@ -91,7 +88,7 @@ def create_tiff(local_source_file_path, local_tiff_file_path, stretch):
     """
 
     with fits.open(local_source_file_path) as hdulist:
-        prihdr = hdulist[0].header
+        prihdr = hdulist[1].header
 
         metadata = {
             'PTRName': 'thename',
@@ -99,7 +96,7 @@ def create_tiff(local_source_file_path, local_tiff_file_path, stretch):
         }
 
         # Linear 16bit tif
-        ts = numpy.asarray(hdulist[0].data)
+        ts = numpy.asarray(hdulist[1].data)
 
         # Arcsinh 16bit tif (Artificial stretch, so there is some massaging to get it into a 16 bit tif)
         if stretch == "arcsinh":
