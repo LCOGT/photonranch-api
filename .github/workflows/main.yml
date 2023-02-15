@@ -6,19 +6,6 @@ on:
 
 jobs:
 
-  # Set the name of the environment based on the branch.
-  # This is used to set the deployment stage at AWS.
-  determine-stage:
-    runs-on: ubuntu-latest
-    outputs:
-      deployment-stage: ${{ steps.deployment-stage.outputs.STAGE }}
-    steps:
-      - name: Set up deployment stage name
-        id: deployment-stage
-        run: echo "STAGE=${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}" >> $GITHUB_ENV
-      - name: Sanity Check
-        run: echo $STAGE
-
   run-tests:
     runs-on: ubuntu-latest
     steps:
@@ -53,12 +40,20 @@ jobs:
 
   deploy:
     needs: 
-      - determine-stage
       - run-tests
     runs-on: ubuntu-latest
-    
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE
+
+    # Configure the deployment stage name from the active branch
+    - name: Set up deployment stage name
+      id: deployment-stage
+      run: |
+        echo "DEPLOY_STAGE=${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}" >> $GITHUB_ENV
+
+    - name: Verify Stage
+      run: echo $DEPLOY_STAGE
+
+    # Checks-out the repository under $GITHUB_WORKSPACE
     - uses: actions/checkout@v2
 
     # Configure Auth0 secrets
@@ -111,17 +106,11 @@ jobs:
         npx serverless plugin install --name serverless-prune-plugin && 
         npx serverless plugin install --name serverless-offline && 
         npx serverless plugin install --name serverless-dotenv-plugin 
-
-    - name: Verify Stage
-      run: echo $DEPLOY_STAGE
-      env:
-        DEPLOY_STAGE: ${{ needs.determine-stage.outputs.deployment-stage }}
       
     # Deploy to stage 
-    - name: Serverless Deploy 
-      run: npx serverless deploy --stage ${{ env.DEPLOY_STAGE }}
+    - name: Serverless Deploy $DEPLOY_STAGE
+      run: npx serverless deploy --stage $DEPLOY_STAGE
       env:
-        DEPLOY_STAGE: ${{ needs.determine-stage.outputs.deployment-stage }}
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
