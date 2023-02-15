@@ -18,7 +18,6 @@ plugins:
   - serverless-offline
 
 custom:
-
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
   # Run as `sls deploy --stage <stage_name>`
   stage:
