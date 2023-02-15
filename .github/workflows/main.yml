@@ -9,14 +9,13 @@ jobs:
   # Set the name of the environment based on the branch.
   # This is used to set the deployment stage at AWS.
   determine-stage:
-    outputs:
-      deployment-stage: ${{ steps.deployment-stage.outputs.env }}
     runs-on: ubuntu-latest
+    outputs:
+      deployment-stage: ${{ steps.deployment-stage.outputs.stage }}
     steps:
       - name: Set up deployment stage name
         id: deployment-stage
-        run: |
-          echo "::set-output name=env::${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}"
+        run: echo "stage=${{ fromJSON('{"main":"prod","dev":"dev","test":"test"}')[github.ref_name] }}" >> $GITHUB_ENV
   
   run-tests:
     runs-on: ubuntu-latest
