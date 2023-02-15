@@ -124,9 +124,11 @@ class Image(Base):
         package["jpg_url"] = ""
         if self.jpg_medium_exists:
             path = get_s3_image_path(self.base_filename, self.data_type, "20", "jpg")
-            if not path:
+            try:
+                url = get_s3_file_url(path)
+            except:
                 path = get_s3_image_path(self.base_filename, self.data_type, "10", "jpg")
-            url = get_s3_file_url(path)
+                url = get_s3_file_url(path)
             package["jpg_url"] = url
 
         package["jpg_thumbnail_url"] = ""
