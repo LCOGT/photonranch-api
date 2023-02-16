@@ -34,7 +34,6 @@ custom:
 
   pythonRequirements:
     dockerizePip: non-linux
-    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
     slim: true
