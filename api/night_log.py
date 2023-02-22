@@ -78,7 +78,10 @@ def get_note_handler(event, context):
     """
 
     site = event['pathParameters']['site']
-    note = get_note(site)
+    try:
+        note = get_note(site)
+    except KeyError:
+        return http_response(HTTPStatus.NOT_FOUND)
     return http_response(HTTPStatus.OK, note)
     
 
@@ -99,3 +102,17 @@ def create_note_handler(event, context):
     create_note(site, note_data)
     return http_response(HTTPStatus.OK, 'Note created successfully')
 
+
+def delete_note_handler(event, context):
+    """Handler method for retrieving a note from a specified site.
+    
+    Args:
+        event.body.site (str): Sitecode (eg. "saf").
+
+    Returns:
+        200 status code
+    """
+
+    site = event['pathParameters']['site']
+    note = remove_note(site)
+    return http_response(HTTPStatus.OK, note)

@@ -21,8 +21,8 @@ custom:
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
   # Run as `sls deploy --stage <stage_name>`
   stage:
-    prod: prod
-    dev: api  # dev
+    prod: api
+    dev: dev
     test: test
 
   # Make sure to first run 'serverless create_domain'
@@ -358,6 +358,18 @@ functions:
       - http:
           path: /nightlog/{site}
           method: post
+          cors: true
+
+  deleteNightLogNote:
+    handler: api/night_log.delete_note_handler
+    events: 
+      - http:
+          path: /nightlog/{site}
+          method: delete
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
 
   ### Site Events Endpoints
