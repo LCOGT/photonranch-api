@@ -8,7 +8,7 @@ from api.helpers import _get_body
 from api.helpers import http_response
 
 NIGHT_LOG_TABLE = dynamodb_r.Table(os.getenv('NIGHT_LOG_TABLE'))
-SECONDS_PER_DAY = 60 * 60 * 24
+SECONDS_PER_HOUR = 60 * 60
 
 
 ############################
@@ -50,7 +50,8 @@ def create_note(site, note_data):
 
     # Time to live timestamp two days from now
     now = int(time.time())
-    ttl = now + (2 * SECONDS_PER_DAY)
+    ttl_hours = note_data['ttl_hours']
+    ttl = now + (ttl_hours * SECONDS_PER_HOUR)
 
     response = NIGHT_LOG_TABLE.put_item(
         Item={ 
