@@ -5,11 +5,11 @@ app: photonranch
 service: photonranch-api
 
 package:
-  exclude:
-    - venv/**
-    - node_modules/**
-    - .pytest_cache/**
-    - .vscode/**
+  patterns:
+    - '!venv/**'
+    - '!node_modules/**'
+    - '!.pytest_cache/**'
+    - '!.vscode/**'
 
 plugins:
   - serverless-python-requirements
@@ -18,11 +18,11 @@ plugins:
   - serverless-offline
 
 custom:
-
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
   # Run as `sls deploy --stage <stage_name>`
   stage:
-    dev: api
+    prod: api
+    dev: dev
     test: test
 
   # Make sure to first run 'serverless create_domain'
@@ -32,25 +32,22 @@ custom:
     stage: ${self:provider.stage}
     createRoute53Record: true
 
-  # This is to reduce the size of the deployment
   pythonRequirements:
     dockerizePip: non-linux
-    dockerFile: serverless-deploy-helpers/Dockerfile
     useDownloadCache: false
     useStaticCache: false
     slim: true
 
-  # serverless prune plugin
-  # automatically prunes function versions older than the last 3
-  # this prevents the lambda function from exceeding storage limits. 
+  # Serverless prune plugin automatically prunes function versions older than 
+  # the last 3. This prevents the lambda function from exceeding storage limits. 
   prune:
     automatic: true
     number: 3
 
 provider:
   name: aws
-  stage: ${opt:stage, "dev"}
-  runtime: python3.7
+  stage: ${opt:stage, "test"}
+  runtime: python3.9
   region: us-east-1
   environment: 
     S3_BUCKET_NAME: 'photonranch-001'
@@ -103,7 +100,7 @@ provider:
           Resource: 
             - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
 
-resources: # CloudFormation template syntax from here on.
+resources:  # CloudFormation template syntax from here on.
   Resources:
 
     # Configure API gateway "Gateway Responses" to work with CORS restrictions
@@ -151,7 +148,6 @@ resources: # CloudFormation template syntax from here on.
 functions:
   authorizerFunc: 
     handler: api/authorizer.auth
-    cors: true
 
   dummyRequiresAuth:
     handler: api/handler.dummy_requires_auth
@@ -162,7 +158,7 @@ functions:
           authorizer:
             name: authorizerFunc
             type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
   home:
     handler: api/handler.default
@@ -208,7 +204,7 @@ functions:
           method: get
           cors: true
 
-  # Image package for a single image
+  # Image package for a single info image
   get_info_image:
     handler: api/info_images.get_info_image_package
     events:
@@ -221,7 +217,7 @@ functions:
   get_image_by_filename:
     handler: api/db.get_image_by_filename_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
       # note: layer sourced from https://github.com/keithrozario/Klayers
     events:
       - http:
@@ -235,7 +231,7 @@ functions:
     memorySize: 2024
     timeout: 30 
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
       - http:
           path: /{site}/latest_images/{number_of_images}
@@ -245,7 +241,7 @@ functions:
   latestImageAllSites:
     handler: api/db.get_latest_images_all_sites_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
       - http:
           path: /latest_image_all_sites/
@@ -255,7 +251,7 @@ functions:
   getFitsHeader:
     handler: api/db.get_fits_header_from_db_handler
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
       - http:
           path: /fitsheader/{base_filename}
@@ -267,7 +263,7 @@ functions:
     memorySize: 2024
     timeout: 30 
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-python38-SQLAlchemy:34
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
       - http:
           path: /filtered_images
@@ -314,7 +310,7 @@ functions:
           authorizer:
             name: authorizerFunc
             type: request
-            resultTtlInSeconds: 0 # Don't cache the policy or other tasks will fail!
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
 
   getControlRoom:
@@ -345,32 +341,7 @@ functions:
     handler: api/control_rooms.restart_all_rooms_handler
     events:
       - schedule: 
-          rate: cron(0 * * * ? *) # run once every hour
-
-  ### Weather Database Endpoints
-  exampleQuery: 
-    handler: api/weather.exampleQuery
-    events:
-      - http:
-          path: /example-query
-          method: post
-          cors: true
-
-  weatherGraphQuery: 
-    handler: api/weather.weatherGraphQuery
-    events:
-      - http:
-          path: /weather/graph-data
-          method: post
-          cors: true
-
-  addWeatherStatus:
-    handler: api/weather.writeWeather
-    events:
-      - http:
-          path: /weather/write
-          method: post
-          cors: true
+          rate: cron(0 * * * ? *)  # Run once every hour
 
   ### Night Log Endpoints
   getNightLogNote:
@@ -387,6 +358,22 @@ functions:
       - http:
           path: /nightlog/{site}
           method: post
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+          cors: true
+
+  deleteNightLogNote:
+    handler: api/night_log.delete_note_handler
+    events: 
+      - http:
+          path: /nightlog/{site}
+          method: delete
+          authorizer:
+            name: authorizerFunc
+            type: request
+            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
           cors: true
 
   ### Site Events Endpoints
