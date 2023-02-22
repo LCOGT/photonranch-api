@@ -204,7 +204,7 @@ functions:
           method: get
           cors: true
 
-  # Image package for a single image
+  # Image package for a single info image
   get_info_image:
     handler: api/info_images.get_info_image_package
     events:

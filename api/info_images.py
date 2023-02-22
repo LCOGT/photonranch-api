@@ -66,5 +66,5 @@ def get_info_image_package(event, context):
         return http_response(HTTPStatus.OK, info_image_package)
 
     except KeyError:
-        return http_response(HTTPStatus.NOT_FOUND, f'No info image for site {site}.')
+        return http_response(HTTPStatus.NO_CONTENT, f'No info image for site {site}.')
 
