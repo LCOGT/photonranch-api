@@ -6,6 +6,7 @@ import decimal
 import logging
 
 from botocore.client import Config
+from botocore.exceptions import ClientError
 
 BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 CONFIG_TABLE_NAME = os.environ['CONFIG_TABLE_NAME']
@@ -111,10 +112,15 @@ def get_s3_file_url(path, ttl=604800):
     """Generates a presigned URL for a file at AWS."""
 
     s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
-    url = s3.generate_presigned_url(
-        ClientMethod="get_object",
-        Params={"Bucket": BUCKET_NAME, "Key": path},
-        ExpiresIn=ttl
-    )
+    try:
+        url = s3.generate_presigned_url(
+            ClientMethod="get_object",
+            Params={"Bucket": BUCKET_NAME, "Key": path},
+            ExpiresIn=ttl
+        )
+    except ClientError as e:
+        logging.error(e)
+        return None
+        
     return url
 
