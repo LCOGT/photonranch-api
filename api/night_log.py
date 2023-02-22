@@ -82,7 +82,7 @@ def get_note_handler(event, context):
     try:
         note = get_note(site)
     except KeyError:
-        return http_response(HTTPStatus.NOT_FOUND, f"No note exists for site {site}")
+        return http_response(HTTPStatus.NO_CONTENT, f"No note exists for site {site}")
     return http_response(HTTPStatus.OK, note)
     
 
@@ -116,4 +116,4 @@ def delete_note_handler(event, context):
 
     site = event['pathParameters']['site']
     note = remove_note(site)
-    return http_response(HTTPStatus.OK, note)
+    return http_response(HTTPStatus.NO_CONTENT, f"note for {site} has been deleted")
