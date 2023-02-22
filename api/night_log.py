@@ -50,7 +50,7 @@ def create_note(site, note_data):
 
     # Time to live timestamp two days from now
     now = int(time.time())
-    ttl_hours = note_data['ttl_hours']
+    ttl_hours = int(note_data['ttl_hours'])
     ttl = now + (ttl_hours * SECONDS_PER_HOUR)
 
     response = NIGHT_LOG_TABLE.put_item(
