@@ -104,7 +104,7 @@ def test_get_info_image_package_no_image(setup_teardown):
     # run the method we want to test
     response = get_info_image_package(event, {})
 
-    assert(response['statusCode'] == HTTPStatus.NOT_FOUND)
+    assert(response['statusCode'] == HTTPStatus.NO_CONTENT)
 
 
 def test_get_info_image_package_check_file_urls(setup_teardown):
