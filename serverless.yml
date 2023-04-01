@@ -16,6 +16,7 @@ plugins:
   - serverless-domain-manager
   - serverless-prune-plugin
   - serverless-offline
+  - serverless-dynamodb-local
 
 custom:
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
@@ -24,6 +25,18 @@ custom:
     prod: api
     dev: dev
     test: test
+
+  dynamodb:
+    stages: 
+      - dev
+      - test
+      - prod
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+  serverless-offline:
+    httpPort: 3000
 
   # Make sure to first run 'serverless create_domain'
   customDomain:
@@ -145,250 +158,252 @@ resources:  # CloudFormation template syntax from here on.
           Ref: 'ApiGatewayRestApi'
         StatusCode: '401'    
         
-functions:
-  authorizerFunc: 
-    handler: api/authorizer.auth
+functions: 
+  - ${file(./api/config_handlers.yml)}
 
-  dummyRequiresAuth:
-    handler: api/handler.dummy_requires_auth
-    events:
-      - http:
-          path: dummy-requires-auth
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
-  home:
-    handler: api/handler.default
-    events:
-      - http:
-          path: /
-          method: get
-          cors: true
-  upload:
-    handler: api/handler.upload
-    events:
-      - http:
-          path: upload
-          method: post
-          cors: true
-  download:
-    handler: api/handler.download
-    memorySize: 2024
-    timeout: 30 
-    events:
-      - http:
-          path: download
-          method: post
-          cors: true
+  - authorizerFunc: 
+      handler: api/authorizer.auth
 
-  downloadzip:
-    handler: api/handler.download_zip
-    memorySize: 1024
-    timeout: 30 
-    events:
-      - http:
-          path: downloadzip
-          method: post
-          cors: true
+  - dummyRequiresAuth:
+      handler: api/handler.dummy_requires_auth
+      events:
+        - http:
+            path: dummy-requires-auth
+            method: post
+            authorizer:
+              name: authorizerFunc
+              type: request
+              resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+            cors: true
+  - home:
+      handler: api/handler.default
+      events:
+        - http:
+            path: /
+            method: get
+            cors: true
+  - upload:
+      handler: api/handler.upload
+      events:
+        - http:
+            path: upload
+            method: post
+            cors: true
+  - download:
+      handler: api/handler.download
+      memorySize: 2024
+      timeout: 30 
+      events:
+        - http:
+            path: download
+            method: post
+            cors: true
 
-  getRecentUploads: 
-    handler: api/handler.get_recent_uploads
-    memorySize: 2024
-    timeout: 30 
-    events:
-      - http:
-          path: recentuploads
-          method: get
-          cors: true
+  - downloadzip:
+      handler: api/handler.download_zip
+      memorySize: 1024
+      timeout: 30 
+      events:
+        - http:
+            path: downloadzip
+            method: post
+            cors: true
+
+  - getRecentUploads: 
+      handler: api/handler.get_recent_uploads
+      memorySize: 2024
+      timeout: 30 
+      events:
+        - http:
+            path: recentuploads
+            method: get
+            cors: true
 
   # Image package for a single info image
-  get_info_image:
-    handler: api/info_images.get_info_image_package
-    events:
-      - http:
-          path: infoimage/{site}/{channel}
-          method: get
-          cors: true
+  - get_info_image:
+      handler: api/info_images.get_info_image_package
+      events:
+        - http:
+            path: infoimage/{site}/{channel}
+            method: get
+            cors: true
 
   # Image package for a single image
-  get_image_by_filename:
-    handler: api/db.get_image_by_filename_handler
-    layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
-      # note: layer sourced from https://github.com/keithrozario/Klayers
-    events:
-      - http:
-          path: image/{base_filename}
-          method: get
-          cors: true
+  - get_image_by_filename:
+      handler: api/db.get_image_by_filename_handler
+      layers:
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
+        # note: layer sourced from https://github.com/keithrozario/Klayers
+      events:
+        - http:
+            path: image/{base_filename}
+            method: get
+            cors: true
 
   # List of image packages for last k images at the given site 
-  latestImages:
-    handler: api/db.get_latest_site_images_handler
-    memorySize: 2024
-    timeout: 30 
-    layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
-    events:
-      - http:
-          path: /{site}/latest_images/{number_of_images}
-          method: get
-          cors: true
+  - latestImages:
+      handler: api/db.get_latest_site_images_handler
+      memorySize: 2024
+      timeout: 30 
+      layers:
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
+      events:
+        - http:
+            path: /{site}/latest_images/{number_of_images}
+            method: get
+            cors: true
 
-  latestImageAllSites:
-    handler: api/db.get_latest_images_all_sites_handler
-    layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
-    events:
-      - http:
-          path: /latest_image_all_sites/
-          method: get
-          cors: true
+  - latestImageAllSites:
+      handler: api/db.get_latest_images_all_sites_handler
+      layers:
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
+      events:
+        - http:
+            path: /latest_image_all_sites/
+            method: get
+            cors: true
 
-  getFitsHeader:
-    handler: api/db.get_fits_header_from_db_handler
-    layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
-    events:
-      - http:
-          path: /fitsheader/{base_filename}
-          method: get
-          cors: true
+  - getFitsHeader:
+      handler: api/db.get_fits_header_from_db_handler
+      layers:
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
+      events:
+        - http:
+            path: /fitsheader/{base_filename}
+            method: get
+            cors: true
 
-  filteredImageQuery:
-    handler: api/db.filtered_images_query_handler
-    memorySize: 2024
-    timeout: 30 
-    layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
-    events:
-      - http:
-          path: /filtered_images
-          method: get
-          cors: true
+  - filteredImageQuery:
+      handler: api/db.filtered_images_query_handler
+      memorySize: 2024
+      timeout: 30 
+      layers:
+        - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
+      events:
+        - http:
+            path: /filtered_images
+            method: get
+            cors: true
 
   ### Config Endpoints
-  getConfig:
-    handler: api/site_configs.get_config
-    events:
-      - http:
-          path: /{site}/config
-          method: get
-          cors: true
-  putConfig:
-    handler: api/site_configs.put_config
-    events:
-      - http:
-          path: /{site}/config
-          method: put
-          cors: true
-  deleteConfig:
-    handler: api/site_configs.delete_config
-    events:
-      - http:
-          path: /{site}/config
-          method: delete
-          cors: true
-  allConfig:
-    handler: api/site_configs.all_config
-    events:
-      - http:
-          path: /all/config
-          method: get
-          cors: true
+  - getConfig:
+      handler: api/site_configs.get_config
+      events:
+        - http:
+            path: /{site}/config
+            method: get
+            cors: true
+  - putConfig:
+      handler: api/site_configs.put_config
+      events:
+        - http:
+            path: /{site}/config
+            method: put
+            cors: true
+  - deleteConfig:
+      handler: api/site_configs.delete_config
+      events:
+        - http:
+            path: /{site}/config
+            method: delete
+            cors: true
+  - allConfig:
+      handler: api/site_configs.all_config
+      events:
+        - http:
+            path: /all/config
+            method: get
+            cors: true
 
   ### RemoteHQ api proxy
-  newRemoteHQBrowser:
-    handler: api/remotehq_helpers.handle_new_remotehq_browser
-    events: 
-      - http:
-          path: /new_remotehq_browser
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
+  - newRemoteHQBrowser:
+      handler: api/remotehq_helpers.handle_new_remotehq_browser
+      events: 
+        - http:
+            path: /new_remotehq_browser
+            method: post
+            authorizer:
+              name: authorizerFunc
+              type: request
+              resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+            cors: true
 
-  getControlRoom:
-    handler: api/control_rooms.get_control_room
-    events: 
-      - http:
-          path: /control_room/{site}
-          method: get
-          cors: true
+  - getControlRoom:
+      handler: api/control_rooms.get_control_room
+      events: 
+        - http:
+            path: /control_room/{site}
+            method: get
+            cors: true
 
-  deleteControlRoom:
-    handler: api/control_rooms.delete_control_room
-    events: 
-      - http:
-          path: /control_room/{site}
-          method: delete
-          cors: true
+  - deleteControlRoom:
+      handler: api/control_rooms.delete_control_room
+      events: 
+        - http:
+            path: /control_room/{site}
+            method: delete
+            cors: true
 
-  restartControlRoom:
-    handler: api/control_rooms.restart_control_room_handler
-    events: 
-      - http:
-          path: /control_room/{site}/restart
-          method: get
-          cors: true
+  - restartControlRoom:
+      handler: api/control_rooms.restart_control_room_handler
+      events: 
+        - http:
+            path: /control_room/{site}/restart
+            method: get
+            cors: true
 
-  restartAllRooms:
-    handler: api/control_rooms.restart_all_rooms_handler
-    events:
-      - schedule: 
-          rate: cron(0 * * * ? *)  # Run once every hour
+  - restartAllRooms:
+      handler: api/control_rooms.restart_all_rooms_handler
+      events:
+        - schedule: 
+            rate: cron(0 * * * ? *)  # Run once every hour
 
   ### Night Log Endpoints
-  getNightLogNote:
-    handler: api/night_log.get_note_handler
-    events: 
-      - http:
-          path: /nightlog/{site}
-          method: get
-          cors: true
+  - getNightLogNote:
+      handler: api/night_log.get_note_handler
+      events: 
+        - http:
+            path: /nightlog/{site}
+            method: get
+            cors: true
 
-  createNightLogNote:
-    handler: api/night_log.create_note_handler
-    events: 
-      - http:
-          path: /nightlog/{site}
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
+  - createNightLogNote:
+      handler: api/night_log.create_note_handler
+      events: 
+        - http:
+            path: /nightlog/{site}
+            method: post
+            authorizer:
+              name: authorizerFunc
+              type: request
+              resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+            cors: true
 
-  deleteNightLogNote:
-    handler: api/night_log.delete_note_handler
-    events: 
-      - http:
-          path: /nightlog/{site}
-          method: delete
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
+  - deleteNightLogNote:
+      handler: api/night_log.delete_note_handler
+      events: 
+        - http:
+            path: /nightlog/{site}
+            method: delete
+            authorizer:
+              name: authorizerFunc
+              type: request
+              resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+            cors: true
 
   ### Site Events Endpoints
-  siteEvents:
-    handler: api/events_handler.siteevents
-    events:
-      - http:
-          path: /events
-          method: get
-          cors: true
+  - siteEvents:
+      handler: api/events_handler.siteevents
+      events:
+        - http:
+            path: /events
+            method: get
+            cors: true
 
-  moonRiseSetIllum:
-    handler: api/events_handler.get_moon_riseset_illum_handler
-    events:
-      - http:
-          path: /events/moon/rise-set-illum
-          method: get
-          cors: true
+  - moonRiseSetIllum:
+      handler: api/events_handler.get_moon_riseset_illum_handler
+      events:
+        - http:
+            path: /events/moon/rise-set-illum
+            method: get
+            cors: true
