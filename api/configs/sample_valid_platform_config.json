@@ -1,0 +1,201 @@
+{
+    "site": "mrc1",
+    "site_id": "mrc1",
+    "obs_id": "mrc1",
+    "name": "Mountain Ranch Camp Observatory 0m35f7.2",
+    "TZ_database_name": "America/Los_Angeles",
+    "telescope_description": "0m35 f7.2 Planewave CDK",
+    "defaults": {
+        "camera": "camera_1_1",
+        "filter_wheel": "filter_wheel1",
+        "focuser": "focuser1",
+        "mount": "mount1",
+        "rotator": "rotator1",
+        "screen": "screen1",
+        "selector": "selector1",
+        "sequencer": "sequencer1",
+        "telescope": "telescope1"
+    },
+    "device_types": [
+        "mount",
+        "telescope",
+        "rotator",
+        "focuser",
+        "selector",
+        "filter_wheel",
+        "camera",
+        "sequencer"
+    ],
+    "camera": {
+        "camera_1_1": {
+            "desc": "QHY 600C Pro",
+            "name": "sq001cs",
+            "parent": "telescope1",
+            "settings": {
+                "areas_implemented": [
+                    "Big sq.",
+                    "Full",
+                    "Small sq.",
+                    "50%",
+                    "35%",
+                    "25%",
+                    "18%"
+                ],
+                "area_sq_deg": 0.4318,
+                "bin-desc": [
+                    "1x1",
+                    "2x2",
+                    "3x3",
+                    "4x4"
+                ],
+                "bin_enable": [
+                    "1 1"
+                ],
+                "bin_modes": [
+                    [
+                        "Optimal",
+                        0.91
+                    ],
+                    [
+                        "Fine",
+                        0.61
+                    ],
+                    [
+                        "Coarse",
+                        1.2
+                    ]
+                ],
+                "CameraXSize": 9600,
+                "CameraYSize": 6422,
+                "can_set_gain": true,
+                "can_subframe": true,
+                "chan_color": [
+                    "col",
+                    "gry",
+                    "gry",
+                    "gry"
+                ],
+                "coarse_bin": [
+                    2,
+                    2
+                ],
+                "default_area": "Full",
+                "fullwell_capacity": 80000,
+                "has_chiller": true,
+                "has_darkslide": true,
+                "has_screen": true,
+                "is_cmos": true,
+                "is_color": true,
+                "is_osc": true,
+                "max_daytime_exposure": 0.0001,
+                "max_exposure": 180,
+                "max_flat_exposure": 20,
+                "max_linearity": 60000,
+                "min_exposure": 0.0001,
+                "min_flat_exposure": 3,
+                "min_subframe": [
+                    128,
+                    128
+                ],
+                "optimal_bin": [
+                    1,
+                    1
+                ],
+                "pix_scale": 0.302597,
+                "saturate": 65535
+            }
+        }
+    },
+    "filter_wheel": {
+        "filter_wheel1": {
+            "name": "Dual filter wheel",
+            "desc": "FLI Centerline Custom Dual 50mm sq.",
+            "settings": {
+                "default_filter": "w",
+                "filter_data": [
+                    [
+                        "air",
+                        [
+                            0,
+                            0
+                        ],
+                        -1000,
+                        20,
+                        [
+                            2,
+                            17
+                        ],
+                        "ai"
+                    ]
+                ]
+            }
+        }
+    },
+    "focuser": {
+        "focuser1": {
+            "name": "focuser",
+            "maximum": 12700,
+            "minimum": 0,
+            "step_size": 1,
+            "unit": "micron"
+        }
+    },
+    "mount": {
+        "mount1": {
+            "name": "eastpier",
+            "alignment": "Alt-Az",
+            "pointing_tel": "tel1"
+        }
+    },
+    "rotator": {
+        "rotator1": {
+            "name": "rotator",
+            "maximum": 360,
+            "minimum": -180,
+            "step_size": 0.0001,
+            "unit": "degree"
+        }
+    },
+    "screen": {
+        "screen1": {
+            "name": "screen",
+            "minimum": 5,
+            "saturate": 170
+        }
+    },
+    "selector": {
+        "selector1": {
+            "name": "None",
+            "cameras": [
+                "camera_1_1"
+            ],
+            "guiders": [
+                null
+            ],
+            "instruments": [
+                "Main_camera"
+            ]
+        }
+    },
+    "sequencer": {
+        "sequencer1": {
+            "name": "Sequencer"
+        }
+    },
+    "telescope": {
+        "telescope1": {
+            "name": "Main OTA",
+            "camera_name": "camera_1_1",
+            "filter_wheel_name": "filterwheel1",
+            "focuser_name": "focuser1",
+            "rotator_name": "rotator1",
+            "screen_name": "screen1",
+            "aperture": 356,
+            "f-ratio": 7.2,
+            "focal_length": 2563,
+            "has_cover": false,
+            "has_fans": true,
+            "has_instrument_selector": false
+        }
+    }
+}

@@ -1,15 +1,10 @@
-import logging
 import json
+import jsonschema
 from http import HTTPStatus
 import boto3
 
-#from api.helpers import CONFIG_TABLE_NAME
-from api.helpers import dynamodb_r
-from api.helpers import http_response
-from api.helpers import _get_body
-
-log = logging.getLogger()
-log.setLevel(logging.INFO)
+from api.configs.validation_schemas import wema_config_schema
+from api.configs.validation_schemas import platform_config_schema
 
 resource = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
 table = resource.Table("WemaPlatformConfigs")
@@ -59,6 +54,18 @@ Insert a new item with the partition key (ConfigID = [platform_id]), sort key (C
 the platform JSON as the Config attribute, and the associated wema_id.
 """
 
+
+def filter_json(data, schema):
+    if 'properties' in schema:
+        filtered_data = {}
+        for key, subschema in schema['properties'].items():
+            if key in data:
+                filtered_data[key] = filter_json(data[key], subschema)
+        return filtered_data
+    elif 'type' in schema and schema['type'] == 'array' and 'items' in schema:
+        return [filter_json(item, schema['items']) for item in data]
+    else:
+        return data
 
 #####################################
 #####  Query and Write Methods  #####
@@ -140,12 +147,12 @@ def get_wema_handler(event, context):
 
     if wema:
         return {
-            'statusCode': 200,
+            'statusCode': HTTPStatus.OK,
             'body': json.dumps(wema)
         }
     else:
         return {
-            'statusCode': 404,
+            'statusCode': HTTPStatus.NOT_FOUND,  # 404
             'body': 'WEMA not found'
         }
 
@@ -155,7 +162,7 @@ def get_wema_and_all_platforms_handler(event, context):
 
     if wema:
         return {
-            'statusCode': 200,
+            'statusCode': HTTPStatus.OK,  # 200
             'body': json.dumps({
                 'wema': wema,
                 'platforms': platforms
@@ -163,7 +170,7 @@ def get_wema_and_all_platforms_handler(event, context):
         }
     else:
         return {
-            'statusCode': 404,
+            'statusCode': HTTPStatus.NOT_FOUND,  # 404
             'body': 'WEMA not found'
         }
 
@@ -173,7 +180,7 @@ def get_platform_and_associated_wema_handler(event, context):
 
     if platform:
         return {
-            'statusCode': 200,
+            'statusCode': HTTPStatus.OK,  # 200
             'body': json.dumps({
                 'platform': platform,
                 'wema': wema
@@ -181,7 +188,7 @@ def get_platform_and_associated_wema_handler(event, context):
         }
     else:
         return {
-            'statusCode': 404,
+            'statusCode': HTTPStatus.NOT_FOUND,  # 404
             'body': 'Platform not found'
         }
 
@@ -190,10 +197,20 @@ def write_wema_handler(event, context):
     wema_config = request_body['config']
     wema_id = request_body['wema_id']
 
+    # Validate the config against the JSON schema
+    try:
+        jsonschema.validate(wema_config, wema_config_schema)
+    except jsonschema.ValidationError as e:
+        return {
+            'statusCode': HTTPStatus.BAD_REQUEST,  # 400
+            'body': str(e)
+        }
+
+    simple_wema_config = filter_json(wema_config, wema_config_schema)
     write_wema(wema_id, wema_config)
 
     return {
-        'statusCode': 201,
+        'statusCode': HTTPStatus.CREATED,  # 201
         'body': 'WEMA created'
     }
 
@@ -203,10 +220,19 @@ def write_platform_handler(event, context):
     wema_id = request_body['wema_id']
     platform_config = request_body['config']
 
+    # Validate the config against the JSON schema
+    try:
+        jsonschema.validate(platform_config, platform_config_schema)
+    except jsonschema.ValidationError as e:
+        return {
+            'statusCode': HTTPStatus.BAD_REQUEST,  # 400
+            'body': str(e)
+        }
+
     write_platform(platform_id, wema_id, platform_config)
 
     return {
-        'statusCode': 201,
+        'statusCode': HTTPStatus.CREATED,  # 201
         'body': 'Platform created'
     }
     
@@ -214,6 +240,6 @@ def get_all_wemas_handler(event, context):
     wemas = get_all_wemas()
 
     return {
-        'statusCode': 200,
+        'statusCode': HTTPStatus.OK,  # 200
         'body': json.dumps(wemas)
     }

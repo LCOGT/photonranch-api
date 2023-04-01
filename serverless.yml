@@ -159,7 +159,7 @@ resources:  # CloudFormation template syntax from here on.
         StatusCode: '401'    
         
 functions: 
-  - ${file(./api/config_handlers.yml)}
+  - ${file(./api/configs/config_handlers.yml)}
 
   - authorizerFunc: 
       handler: api/authorizer.auth

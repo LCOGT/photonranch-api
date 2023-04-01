@@ -1,41 +1,41 @@
 
 getWEMA:
-  handler: api/site_configs_2.get_wema_handler
+  handler: api/configs/site_configs_2.get_wema_handler
   events:
     - http:
         path: /wemas/{wema_id}
         method: get
 
 getWEMAAndAllPlatforms:
-  handler: api/site_configs_2.get_wema_and_all_platforms_handler
+  handler: api/configs/site_configs_2.get_wema_and_all_platforms_handler
   events:
     - http:
         path: /wemas/{wema_id}/platforms
         method: get
 
 getPlatformAndAssociatedWEMA:
-  handler: api/site_configs_2.get_platform_and_associated_wema_handler
+  handler: api/configs/site_configs_2.get_platform_and_associated_wema_handler
   events:
     - http:
         path: /platforms/{platform_id}
         method: get
 
 writeWEMA:
-  handler: api/site_configs_2.write_wema_handler
+  handler: api/configs/site_configs_2.write_wema_handler
   events:
     - http:
         path: /wemas
         method: post
 
 writePlatform:
-  handler: api/site_configs_2.write_platform_handler
+  handler: api/configs/site_configs_2.write_platform_handler
   events:
     - http:
         path: /platforms
         method: post
 
 getAllWemas:
-    handler: api/site_configs_2.get_all_wemas_handler
+    handler: api/configs/site_configs_2.get_all_wemas_handler
     events:
       - http:
           path: /wemas
