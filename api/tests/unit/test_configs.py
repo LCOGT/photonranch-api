@@ -15,6 +15,7 @@ from api.configs.configs import write_wema_handler
 from api.configs.configs import write_platform_handler
 from api.configs.configs import get_all_wemas_handler
 
+from api.helpers import json_dumps_ddb
 
 # Sample data for testing
 wema_id = "WEMA123"
@@ -160,7 +161,8 @@ def test_write_wema_handler_good_config(mocker):
     response = write_wema_handler(event, context)
     assert response == {"statusCode": HTTPStatus.CREATED, "body": "WEMA created"}
 
-    mocked_write_wema.assert_called_once_with(wema_id, wema_config_good)
+    serialized_config = json_dumps_ddb(wema_config_good)
+    mocked_write_wema.assert_called_once_with(wema_id, serialized_config)
 
 def test_write_wema_handler_mrc(mocker):
     mocked_write_wema = mocker.patch("api.configs.configs.write_wema")
@@ -178,7 +180,8 @@ def test_write_wema_handler_mrc(mocker):
 
     response = write_wema_handler(event, context)
     assert response == {"statusCode": HTTPStatus.CREATED, "body": "WEMA created"}
-    mocked_write_wema.assert_called_once_with(wema_id, config)
+    serialized_config = json_dumps_ddb(config)
+    mocked_write_wema.assert_called_once_with(wema_id, serialized_config)
 
 def test_write_wema_handler_bad_config(mocker):
     mocked_write_wema = mocker.patch("api.configs.configs.write_wema")
@@ -199,7 +202,8 @@ def test_write_platform_handler_good_config(mocker):
     response = write_platform_handler(event, context)
     assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
 
-    mocked_write_platform.assert_called_once_with(platform_id, wema_id, platform_config_good)
+    serialized_config = json_dumps_ddb(platform_config_good)
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, serialized_config)
 
 def test_write_platform_handler_mrc1(mocker):
     mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
@@ -219,7 +223,8 @@ def test_write_platform_handler_mrc1(mocker):
 
     response = write_platform_handler(event, context)
     assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
-    mocked_write_platform.assert_called_once_with(platform_id, wema_id, config)
+    serialized_config = json_dumps_ddb(config)
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, serialized_config)
 
 def test_write_platform_handler_eco1(mocker):
     mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
@@ -239,7 +244,8 @@ def test_write_platform_handler_eco1(mocker):
 
     response = write_platform_handler(event, context)
     assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
-    mocked_write_platform.assert_called_once_with(platform_id, wema_id, config)
+    serialized_config = json_dumps_ddb(config)
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, serialized_config)
 
 def test_write_platform_handler_bad_config(mocker):
     mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
