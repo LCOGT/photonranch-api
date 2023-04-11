@@ -311,7 +311,6 @@ platform_config_schema = {
                     }
                 },
                 "required": [
-                    "name",
                     "settings"
                 ]
             }
