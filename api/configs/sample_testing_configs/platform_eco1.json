@@ -1,0 +1,745 @@
+{
+  "site": "eco1",
+  "admin_aliases": [
+    "ANS",
+    "WER",
+    "KVH",
+    "TELOPS",
+    "TB",
+    "DH",
+    "KC"
+  ],
+  "admin_owner_commands_only": false,
+  "airport_code": "MEL: Melbourne Airport",
+  "alt_path": "C:/ptr/",
+  "archive_age": 2,
+  "archive_path": "C:/ptr/",
+  "automatic_detail_default": "Enclosure is initially set to Automatic mode.",
+  "auto_eve_bias_dark": false,
+  "auto_eve_sky_flat": true,
+  "auto_midnight_moonless_bias_dark": true,
+  "auto_morn_bias_dark": false,
+  "auto_morn_sky_flat": true,
+  "aux_archive_path": null,
+  "camera": {
+    "camera_1_1": {
+      "desc": "SBIG16803",
+      "detector": "KAF16803",
+      "driver": "CCDSoft2XAdaptor.ccdsoft5Camera",
+      "file_mode_path": "G:/000ptr_saf/archive/sq01/autosaves/",
+      "manufacturer": "On-Semi",
+      "name": "ec002c",
+      "parent": "telescope1",
+      "service_date": "20211111",
+      "settings": {
+        "areas_implemented": [
+          "Full",
+          "4x4d",
+          "600%",
+          "500%",
+          "450%",
+          "300%",
+          "220%",
+          "150%",
+          "133%",
+          "Full",
+          "Sqr",
+          "71%",
+          "50%",
+          "35%",
+          "25%",
+          "12%"
+        ],
+        "bayer_pattern": null,
+        "bin_for_focus": false,
+        "bin_for_platesolve": true,
+        "bin_for_sep": true,
+        "bin_modes": [],
+        "CameraXSize": 4096,
+        "CameraYSize": 4096,
+        "cam_needs_NumXY_init": false,
+        "can_set_gain": true,
+        "can_subframe": true,
+        "cooler_on": true,
+        "corner_everlap": true,
+        "crop_preview": false,
+        "crop_preview_xleft": 1,
+        "crop_preview_xright": 1,
+        "crop_preview_ybottom": 1,
+        "crop_preview_ytop": 1,
+        "cycle_time": 12.5,
+        "darkslide_com": null,
+        "dark_exposure": 75,
+        "day_warm": true,
+        "day_warm_degrees": 8,
+        "default_area": "Full",
+        "default_rotation": 0,
+        "do_cosmics": false,
+        "drizzle_value_for_later_stacking": 0.5,
+        "east_offset": 0,
+        "flipx_fits": false,
+        "flipx_jpeg": false,
+        "flipy_fits": false,
+        "flipy_jpeg": false,
+        "focus_image_crop_height": 0,
+        "focus_image_crop_width": 0,
+        "fullwell_capacity": 65000,
+        "has_darkslide": false,
+        "has_screen": true,
+        "hold_flats_in_memory": true,
+        "interpolate_for_focus": false,
+        "interpolate_for_sep": false,
+        "is_cmos": false,
+        "is_color": false,
+        "is_osc": false,
+        "max_daytime_exposure": 0.0001,
+        "max_exposure": 3600,
+        "max_flat_exposure": 45,
+        "max_linearity": 65000,
+        "min_exposure": 0.2,
+        "min_flat_exposure": 3,
+        "min_subframe": [
+          128,
+          128
+        ],
+        "north_offset": 0,
+        "number_of_bias_to_collect": 10,
+        "number_of_bias_to_store": 128,
+        "number_of_dark_to_collect": 10,
+        "number_of_dark_to_store": 128,
+        "number_of_flat_to_collect": 10,
+        "number_of_flat_to_store": 63,
+        "osc_bayer": "RGGB",
+        "overscan_x": 24,
+        "overscan_y": 3,
+        "pix_scale": 0.637,
+        "platesolve_image_crop": 0,
+        "post_bias_available": true,
+        "pre_bias_available": false,
+        "rbi_delay": 0,
+        "readout_mode": "Normal",
+        "readout_seconds": 12.5,
+        "readout_speed": 0.08,
+        "read_mode": "Normal",
+        "reference_dark": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "reference_gain": 1.27,
+        "reference_noise": 10,
+        "rotate180_fits": false,
+        "rotate180_jpeg": false,
+        "rotate270_fits": false,
+        "rotate270_jpeg": false,
+        "rotate90_fits": false,
+        "rotate90_jpeg": true,
+        "rotation": 0,
+        "saturate": 65000,
+        "screen_settings": {
+          "screen_saturation": 157,
+          "screen_x0": 8.683,
+          "screen_x1": 0.1258,
+          "screen_x2": -0.00009,
+          "screen_x3": 0.00000003,
+          "screen_x4": -0.000000000004
+        },
+        "sep_image_crop_height": 0,
+        "sep_image_crop_width": 0,
+        "shutter_type": "Electronic",
+        "smart_stack_exposure_time": 75,
+        "squash_on_x_axis": true,
+        "StartX": 1,
+        "StartY": 1,
+        "temp_setpoint": -20,
+        "transpose_fits": false,
+        "transpose_jpeg": false,
+        "x_active": 4096,
+        "x_bias_end": 4096,
+        "x_bias_line": true,
+        "x_bias_start": 4096,
+        "x_chip": 4096,
+        "x_field_deg": 1.3333,
+        "x_pixel": 9,
+        "x_start": 0,
+        "x_trim_offset": 0,
+        "x_width": 4096,
+        "y_active": 4096,
+        "y_bias_line": true,
+        "y_bias_send": 4096,
+        "y_bias_start": 4096,
+        "y_chip": 4096,
+        "y_field_deg": 1.0665,
+        "y_pixel": 9,
+        "y_start": 0,
+        "y_trim_offset": 0,
+        "y_width": 4096
+      },
+      "use_file_mode": false
+    }
+  },
+  "check_time": 300,
+  "client_hostname": "ECO-0m40",
+  "client_path": "C:/ptr/",
+  "client_read_share_path": null,
+  "closest_distance_to_the_moon": 10,
+  "closest_distance_to_the_sun": 45,
+  "debug_duration_sec": 7200,
+  "debug_mode": true,
+  "debug_site_mode": false,
+  "defaults": {
+    "camera": "camera_1_1",
+    "enclosure": "enclosure1",
+    "filter_wheel": "filter_wheel1",
+    "focuser": "focuser1",
+    "mount": "mount1",
+    "observing_conditions": "observing_conditions1",
+    "rotator": "rotator1",
+    "screen": "screen1",
+    "selector":"selector1",
+    "sequencer": "sequencer1",
+    "telescope": "telescope1"
+  },
+  "description": "Eltham College is an independent, non-denominational, co-educational day school situated in Research, an outer suburb north east of Melbourne.\n                    ",
+  "device_types": [
+    "observing_conditions",
+    "enclosure",
+    "mount",
+    "telescope",
+    "focuser",
+    "selector",
+    "filter_wheel",
+    "camera",
+    "sequencer"
+  ],
+  "dome_on_wema": false,
+  "elevation": 150,
+  "enclosure": {
+    "enclosure1": {
+      "controlled_by": "mount1",
+      "directly_connected": true,
+      "driver": "Dragonfly.Dome",
+      "enc_is_specific": false,
+      "has_lights": false,
+      "hostIP": null,
+      "is_dome": false,
+      "mode": "Automatic",
+      "name": "Dragonfly Roof",
+      "parent": "site",
+      "settings": {
+        "lights": [
+          "Auto",
+          "White",
+          "Red",
+          "IR",
+          "Off"
+        ],
+        "roof_shutter": [
+          "Auto",
+          "Open",
+          "Close",
+          "Lock Closed",
+          "Unlock"
+        ]
+      }
+    }
+  },
+  "enclosure_check_period": 2,
+  "enc_types": [
+    "enclosure"
+  ],
+  "events": {
+    "Astro Dark": 45022.89586711402,
+    "Civil Dawn": 45023.341259196866,
+    "Civil Dusk": 45022.85413346291,
+    "Clock & Auto Focus": 45022.87977839045,
+    "Close and Park": 45023.38029866722,
+    "Cool Down, Open": 45022.78177995324,
+    "day_directory": "20230408",
+    "End Astro Dark": 45023.299458634916,
+    "End Eve Bias Dark": 45022.819627175464,
+    "End Eve Sky Flats": 45022.867856333556,
+    "End Morn Bias Dark": 45023.45529866722,
+    "End Morn Sky Flats": 45023.37890977834,
+    "End Nightly Reset": 45023.49696533389,
+    "Eve Bias Dark": 45022.73629384213,
+    "Eve Sky Flats": 45022.82309939768,
+    "Middle of Night": 45023.09799652504,
+    "Moon Rise": 45023.899420661524,
+    "Moon Set": 45023.48571770579,
+    "Moon Transit": 45023.17714298711,
+    "Morn Bias Dark": 45023.38168755611,
+    "Morn Sky Flats": 45023.34139601401,
+    "Naut Dawn": 45023.320562680674,
+    "Naut Dusk": 45022.874800778,
+    "Nightly Reset": 45023.483076445,
+    "Observing Begins": 45022.88533394601,
+    "Observing Ends": 45023.31001065779,
+    "Ops Window Closes": 45023.37960422278,
+    "Ops Window Start": 45022.82309939768,
+    "Prior Moon Rise": 45022.876414921804,
+    "Prior Moon Set": 45022.43818144213,
+    "Prior Moon Transit": 45022.143659847694,
+    "Sun Rise": 45023.358076445,
+    "Sun Set": 45022.8373355088,
+    "use_by": 45023.524743111666
+  },
+  "eve_cool_down_open": -80,
+  "eve_sky_flat_sunset_offset": -20.5,
+  "filter_wheel": {
+    "filter_wheel1": {
+      "driver": "CCDSoft2XAdaptor.ccdsoft5Camera",
+      "dual_wheel": false,
+      "ip_string": null,
+      "name": "SBIG 8-position wheel",
+      "parent": "telescope1",
+      "service_date": "20180101",
+      "settings": {
+        "auto_color_options": [
+          "manual",
+          "RGB",
+          "NB",
+          "RGBHA",
+          "RGBNB"
+        ],
+        "default_filter": "lum",
+        "filter_data": [
+          [
+            "lum",
+            [
+              0,
+              0
+            ],
+            0,
+            179,
+            [
+              1,
+              72
+            ],
+            "PhLum"
+          ],
+          [
+            "ip",
+            [
+              1,
+              1
+            ],
+            0,
+            50,
+            [
+              1,
+              119
+            ],
+            "PhRed"
+          ],
+          [
+            "v",
+            [
+              2,
+              2
+            ],
+            0,
+            16,
+            [
+              1,
+              113
+            ],
+            "PhGreen"
+          ],
+          [
+            "pb",
+            [
+              3,
+              3
+            ],
+            0,
+            25,
+            [
+              0.8,
+              97
+            ],
+            "PhBlue"
+          ],
+          [
+            "ha",
+            [
+              4,
+              4
+            ],
+            0,
+            2.634,
+            [
+              0.8,
+              97
+            ],
+            "PhBlue"
+          ],
+          [
+            "s2",
+            [
+              5,
+              5
+            ],
+            0,
+            4.728,
+            [
+              5,
+              200
+            ],
+            "Halpha"
+          ],
+          [
+            "o3",
+            [
+              6,
+              6
+            ],
+            0,
+            3.52,
+            [
+              4,
+              200
+            ],
+            "OIII"
+          ]
+        ],
+        "filter_screen_sort": [
+          "s2",
+          "o3",
+          "ha",
+          "pb",
+          "pg",
+          "pr",
+          "lum"
+        ],
+        "filter_sky_sort": [
+          "v",
+          "ip",
+          "lum",
+          "pb"
+        ],
+        "mono_Narrowband_colour_filters": [
+          "ha",
+          "o3",
+          "s2"
+        ],
+        "mono_Narrowband_relative_weights": [
+          1,
+          2,
+          2.5
+        ],
+        "mono_RGB_colour_filters": [
+          "pb",
+          "v",
+          "ip"
+        ],
+        "mono_RGB_relative_weights": [
+          1.2,
+          1,
+          0.8
+        ]
+      }
+    }
+  },
+  "focuser": {
+    "focuser1": {
+      "backlash": 0,
+      "coef_0": 13500,
+      "coef_c": 0,
+      "coef_date": "20220914",
+      "com_port": "COM9",
+      "desc": "Planewave Focuser",
+      "driver": "ASCOM.PWI3.Focuser",
+      "has_dial_indicator": false,
+      "maximum": 18000,
+      "minimum": 0,
+      "name": "focuser",
+      "parent": "telescope1",
+      "reference": 13500,
+      "ref_temp": 6265,
+      "start_at_config_reference": true,
+      "step_size": 1,
+      "throw": 750,
+      "unit": "micron",
+      "unit_conversion": 1,
+      "use_focuser_temperature": true
+    }
+  },
+  "focus_exposure_time": 10,
+  "focus_trigger": 5,
+  "host_wema_site_name": "ECO",
+  "keep_focus_images_on_disk": false,
+  "keep_reduced_on_disk": false,
+  "lamp_box": {
+    "lamp_box1": {
+      "desc": "None",
+      "driver": "None",
+      "name": "None",
+      "parent": "camera_1",
+      "spectrograph": "None",
+      "switches": "None"
+    }
+  },
+  "latitude": -37.70097222,
+  "location": "Eltham, Victoria, Australia",
+  "location _pole_monitor": null,
+  "location_day_allsky": null,
+  "location_night_allsky": null,
+  "location_seeing_report": null,
+  "longitude": 145.1918056,
+  "lowest_requestable_altitude": -5,
+  "maximum_roof_opens_per_evening": 4,
+  "minimum_realistic_seeing": 1,
+  "mount": {
+    "mount1": {
+      "alignment": "Equatorial",
+      "default_zenith_avoid": 0,
+      "desc": "Paramount ME II",
+      "driver": "ASCOM.SoftwareBisque.Telescope",
+      "east_flip_dec_correction": 0,
+      "east_flip_ra_correction": 0,
+      "has_ascom_altaz": false,
+      "has_paddle": false,
+      "home_after_unpark": true,
+      "home_before_park": true,
+      "hostIP": "10.0.0.140",
+      "hostname": "ecocdkpier",
+      "lowest_acceptable_altitude": -5,
+      "name": "ecocdkpier",
+      "parent": "enclosure1",
+      "permissive_mount_reset": "yes",
+      "pointing_tel": "tel1",
+      "settings": {
+        "elevation_offset": 0,
+        "home_altitude": 70,
+        "home_azimuth": 160,
+        "home_park_altitude": 0,
+        "home_park_azimuth": 270,
+        "horizon": 15,
+        "horizon_detail": {
+          "180": 10,
+          "270": 10,
+          "360": 10,
+          " 90": 10,
+          "0.1": 10
+        },
+        "latitude_offset": 0,
+        "longitude_offset": 0,
+        "model": {
+          "CH": 0,
+          "DCEC": 0,
+          "DCES": 0,
+          "HCEC": 0,
+          "HCES": 0,
+          "ID": 0,
+          "IH": 0,
+          "MA": 0,
+          "ME": 0,
+          "NP": 0,
+          "TF": 0,
+          "TX": 0,
+          "WID": 0,
+          "WIH": 0
+        },
+        "model_on": true,
+        "rates_on": true,
+        "refraction_on": true
+      },
+      "tel_id": "0m40",
+      "time_inactive_until_park": 3600,
+      "west_clutch_dec_correction": 0,
+      "west_clutch_ra_correction": 0
+    }
+  },
+  "mpc_code": "ZZ23",
+  "name": "Eltham College Observatory, 0m4f6.8",
+  "observatory_location": "eco",
+  "observatory_logo": null,
+  "observatory_url": "https://elthamcollege.vic.edu.au/",
+  "observing_check_period": 2,
+  "observing_conditions": {
+    "observing_conditions1": {
+      "driver": null,
+      "driver_2": null,
+      "driver_3": null,
+      "have_local_unihedron": false,
+      "name": "SRO File",
+      "ocn_has_unihedron": false,
+      "ocn_is_specific": false,
+      "parent": "site",
+      "share_path_name": "F:/ptr/",
+      "unihedron_port": 10,
+      "uni_driver": "ASCOM.SQM.serial.ObservingConditions"
+    }
+  },
+  "obsid_allowed_to_open_roof": true,
+  "obsid_in_automatic_default": "Automatic",
+  "obsid_is_generic": true,
+  "obsid_is_specific": false,
+  "obsid_roof_control": true,
+  "obs_id": "eco1",
+  "only_scope_that_controls_the_roof": false,
+  "owner": [
+    "google-oauth2|112401903840371673242"
+  ],
+  "owner_alias": [
+    "WER",
+    "TELOPS"
+  ],
+  "periodic_focus_time": 0.5,
+  "period_of_time_to_wait_for_roof_to_open": 100,
+  "pointing_calibration_on_startup": false,
+  "pointing_exposure_time": 20,
+  "re-calibrate_on_solve": true,
+  "redis_ip": null,
+  "reference_ambient": 10,
+  "reference_pressure": 867.254,
+  "roof_open_safety_base_time": 15,
+  "rotator": {
+    "rotator1": {
+      "backlash": 0,
+      "com_port": false,
+      "desc": false,
+      "driver": null,
+      "maximum": 360,
+      "minimum": -180,
+      "name": "rotator",
+      "parent": "telescope1",
+      "step_size": 0.0001,
+      "unit": "degree"
+    }
+  },
+  "save_raw_to_disk": false,
+  "save_to_alt_path": "no",
+  "screen": {
+    "screen1": {
+      "com_port": "COM10",
+      "desc": "No Screen",
+      "driver": null,
+      "minimum": 5,
+      "name": "screen",
+      "parent": "telescope1",
+      "saturate": 255
+    }
+  },
+  "selector": {
+    "selector1": {
+      "cameras": [
+        "camera_1_1"
+      ],
+      "com_port": null,
+      "default": 0,
+      "desc": "Null Changer",
+      "driver": null,
+      "guiders": [
+        null
+      ],
+      "instruments": [
+        "Main_camera"
+      ],
+      "name": "None",
+      "parent": "telescope1",
+      "ports": 1,
+      "recover_script": null,
+      "shutdown_script": null,
+      "startup_script": null
+    }
+  },
+  "send_files_at_end_of_night": "no",
+  "sequencer": {
+    "sequencer1": {
+      "desc": "Automation Control",
+      "driver": null,
+      "name": "Sequencer",
+      "parent": "site"
+    }
+  },
+  "server": {
+    "server1": {
+      "name": null,
+      "redis": "(host=none, port=6379, db=0, decode_responses=True)",
+      "win_url": null
+    }
+  },
+  "short_status_devices": [
+    "observing_conditions",
+    "enclosure",
+    "mount",
+    "telescope",
+    "screen",
+    "rotator",
+    "focuser",
+    "selector",
+    "filter_wheel",
+    "camera",
+    "sequencer"
+  ],
+  "site_id": "eco1",
+  "site_IPC_mechanism": null,
+  "solve_nth_image": 1,
+  "solve_timer": 5,
+  "stdev_fwhm": 0.5,
+  "telescope": {
+    "telescope1": {
+      "aperture": 432,
+      "camera_name": "camera1",
+      "collecting_area": 100000,
+      "configuration": {
+        "position1": [
+          "darkslide1",
+          "filter_wheel1",
+          "camera1"
+        ]
+      },
+      "desc": "CDK17",
+      "driver": null,
+      "filter_wheel_name": "filter_wheel1",
+      "focal_length": 2939,
+      "focuser_name": "focuser1",
+      "has_cover": false,
+      "has_dew_heater": true,
+      "has_fans": true,
+      "has_instrument_selector": false,
+      "instrument aliases": [
+        "SBIG16803"
+      ],
+      "instrument names": [
+        "camera1"
+      ],
+      "name": "Main OTA",
+      "obscuration": 23.7,
+      "parent": "mount1",
+      "ptrtel": "CDK17",
+      "rotator_name": "rotator1",
+      "screen_name": "screen1",
+      "selector_positions": 1,
+      "settings": {
+        "fans": [
+          "Auto",
+          "High",
+          "Low",
+          "Off"
+        ],
+        "offset_collimation": 0,
+        "offset_declination": 0,
+        "offset_flexure": 0,
+        "west_flip_ca_offset": 0,
+        "west_flip_dec_offset": 0,
+        "west_flip_ha_offset": 0
+      },
+      "telescop": "eco1"
+    }
+  },
+  "telescope_description": "n.a.",
+  "threshold_mount_update": 30,
+  "timezone": "AEST",
+  "TZ_database_name": "Australia/Melbourne",
+  "wema_hostname": [],
+  "wema_is_active": false,
+  "wema_types": [
+    "observing_conditions1",
+    "enclosure1"
+  ],
+  "wema_write_share_path": null
+}

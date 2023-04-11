@@ -2,29 +2,29 @@ import json
 import pytest
 from pytest_mock import MockerFixture
 from http import HTTPStatus
-from api.configs.site_configs_2 import get_wema
-from api.configs.site_configs_2 import get_wema_and_all_platforms
-from api.configs.site_configs_2 import get_platform_and_associated_wema
-from api.configs.site_configs_2 import write_wema
-from api.configs.site_configs_2 import write_platform
-from api.configs.site_configs_2 import get_all_wemas
-from api.configs.site_configs_2 import get_wema_handler
-from api.configs.site_configs_2 import get_wema_and_all_platforms_handler
-from api.configs.site_configs_2 import get_platform_and_associated_wema_handler
-from api.configs.site_configs_2 import write_wema_handler
-from api.configs.site_configs_2 import write_platform_handler
-from api.configs.site_configs_2 import get_all_wemas_handler
+from api.configs.configs import get_wema
+from api.configs.configs import get_wema_and_all_platforms
+from api.configs.configs import get_platform_and_associated_wema
+from api.configs.configs import write_wema
+from api.configs.configs import write_platform
+from api.configs.configs import get_all_wemas
+from api.configs.configs import get_wema_handler
+from api.configs.configs import get_wema_and_all_platforms_handler
+from api.configs.configs import get_platform_and_associated_wema_handler
+from api.configs.configs import write_wema_handler
+from api.configs.configs import write_platform_handler
+from api.configs.configs import get_all_wemas_handler
 
 
 # Sample data for testing
 wema_id = "WEMA123"
 platform_id = "PLATFORM123"
 
-good_wema_config_path = "api/configs/sample_valid_wema_config.json"
+good_wema_config_path = "api/configs/sample_testing_configs/wema_simplevalid.json"
 with open(good_wema_config_path, "r") as file:
     wema_config_good = json.load(file)
 
-good_platform_config_path = "api/configs/sample_valid_platform_config.json"
+good_platform_config_path = "api/configs/sample_testing_configs/platform_simplevalid.json"
 with open(good_platform_config_path, "r") as file:
     platform_config_good = json.load(file)
 
@@ -56,7 +56,7 @@ platform_dynamodb_json = {"ConfigID": platform_id, "WemaID": wema_id, "ConfigTyp
 
 @pytest.fixture
 def mock_table(mocker: MockerFixture):
-    return mocker.patch("api.configs.site_configs_2.table")
+    return mocker.patch("api.configs.configs.table")
 
 def test_get_wema(mock_table):
     mock_table.get_item.return_value = {"Item": wema_dynamodb_json}
@@ -123,7 +123,7 @@ def test_get_all_wemas(mock_table):
 ### Test Handler Methods ###
 
 def test_get_wema_handler(mocker):
-    mocked_get_wema = mocker.patch("api.configs.site_configs_2.get_wema", return_value=wema_dynamodb_json)
+    mocked_get_wema = mocker.patch("api.configs.configs.get_wema", return_value=wema_dynamodb_json)
     event = {"pathParameters": {"wema_id": wema_id}}
     context = {}
 
@@ -133,7 +133,7 @@ def test_get_wema_handler(mocker):
     mocked_get_wema.assert_called_once_with(wema_id)
 
 def test_get_wema_and_all_platforms_handler(mocker):
-    mocked_get_wema_and_all_platforms = mocker.patch("api.configs.site_configs_2.get_wema_and_all_platforms", return_value=(wema_dynamodb_json, [platform_dynamodb_json]))
+    mocked_get_wema_and_all_platforms = mocker.patch("api.configs.configs.get_wema_and_all_platforms", return_value=(wema_dynamodb_json, [platform_dynamodb_json]))
     event = {"pathParameters": {"wema_id": wema_id}}
     context = {}
 
@@ -143,7 +143,7 @@ def test_get_wema_and_all_platforms_handler(mocker):
     mocked_get_wema_and_all_platforms.assert_called_once_with(wema_id)
 
 def test_get_platform_and_associated_wema_handler(mocker):
-    mocked_get_platform_and_associated_wema = mocker.patch("api.configs.site_configs_2.get_platform_and_associated_wema", return_value=(platform_dynamodb_json, wema_dynamodb_json))
+    mocked_get_platform_and_associated_wema = mocker.patch("api.configs.configs.get_platform_and_associated_wema", return_value=(platform_dynamodb_json, wema_dynamodb_json))
     event = {"pathParameters": {"platform_id": platform_id}}
     context = {}
 
@@ -153,7 +153,7 @@ def test_get_platform_and_associated_wema_handler(mocker):
     mocked_get_platform_and_associated_wema.assert_called_once_with(platform_id)
 
 def test_write_wema_handler_good_config(mocker):
-    mocked_write_wema = mocker.patch("api.configs.site_configs_2.write_wema")
+    mocked_write_wema = mocker.patch("api.configs.configs.write_wema")
     event = {"body": json.dumps(wema_post_request_body_good_config)}
     context = {}
 
@@ -162,8 +162,26 @@ def test_write_wema_handler_good_config(mocker):
 
     mocked_write_wema.assert_called_once_with(wema_id, wema_config_good)
 
+def test_write_wema_handler_mrc(mocker):
+    mocked_write_wema = mocker.patch("api.configs.configs.write_wema")
+
+    # get the mrc config to test
+    config_path = "api/configs/sample_testing_configs/wema_mrc.json"
+    with open(config_path, "r") as file:
+        config = json.load(file)
+    wema_id = "mrc"
+    event = {"body": json.dumps({
+        "wema_id": wema_id,
+        "config": config
+    })}
+    context = {}
+
+    response = write_wema_handler(event, context)
+    assert response == {"statusCode": HTTPStatus.CREATED, "body": "WEMA created"}
+    mocked_write_wema.assert_called_once_with(wema_id, config)
+
 def test_write_wema_handler_bad_config(mocker):
-    mocked_write_wema = mocker.patch("api.configs.site_configs_2.write_wema")
+    mocked_write_wema = mocker.patch("api.configs.configs.write_wema")
     event = {"body": json.dumps(wema_post_request_body_bad_config)}
     context = {}
 
@@ -174,7 +192,7 @@ def test_write_wema_handler_bad_config(mocker):
     mocked_write_wema.assert_not_called()
 
 def test_write_platform_handler_good_config(mocker):
-    mocked_write_platform = mocker.patch("api.configs.site_configs_2.write_platform")
+    mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
     event = {"body": json.dumps(platform_post_request_body_good)}
     context = {}
 
@@ -183,8 +201,48 @@ def test_write_platform_handler_good_config(mocker):
 
     mocked_write_platform.assert_called_once_with(platform_id, wema_id, platform_config_good)
 
+def test_write_platform_handler_mrc1(mocker):
+    mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
+
+    # get the mrc1 config to test
+    config_path = "api/configs/sample_testing_configs/platform_mrc1.json"
+    with open(config_path, "r") as file:
+        config = json.load(file)
+    wema_id = "mrc"
+    platform_id = "mrc1"
+    event = {"body": json.dumps({
+        "wema_id": wema_id,
+        "platform_id": platform_id,
+        "config": config
+    })}
+    context = {}
+
+    response = write_platform_handler(event, context)
+    assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, config)
+
+def test_write_platform_handler_eco1(mocker):
+    mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
+
+    # get the eco1 config to test
+    config_path = "api/configs/sample_testing_configs/platform_eco1.json"
+    with open(config_path, "r") as file:
+        config = json.load(file)
+    wema_id = "eco"
+    platform_id = "eco1"
+    event = {"body": json.dumps({
+        "wema_id": wema_id,
+        "platform_id": platform_id,
+        "config": config
+    })}
+    context = {}
+
+    response = write_platform_handler(event, context)
+    assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, config)
+
 def test_write_platform_handler_bad_config(mocker):
-    mocked_write_platform = mocker.patch("api.configs.site_configs_2.write_platform")
+    mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
     event = {"body": json.dumps(platform_post_request_body_bad)}
     context = {}
 
@@ -195,7 +253,7 @@ def test_write_platform_handler_bad_config(mocker):
     mocked_write_platform.assert_not_called()
     
 def test_get_all_wemas_handler(mocker):
-    mocked_get_all_wemas = mocker.patch("api.configs.site_configs_2.get_all_wemas", return_value={wema_id: wema_dynamodb_json["Config"]})
+    mocked_get_all_wemas = mocker.patch("api.configs.configs.get_all_wemas", return_value={wema_id: wema_dynamodb_json["Config"]})
     event = {}
     context = {}
 

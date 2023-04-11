@@ -2,14 +2,12 @@ wema_config_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "observatory_id": {"type": "string"},
-        "name": {"type": "string"},
-        "observatory_name": {"type": "string"},
-        "observatory_location": {"type": "string"},
-        "observatory_latitude": {"type": "number"},
-        "observatory_longitude": {"type": "number"},
-        "observatory_elevation": {"type": "number"},
-        "observatory_state": {"type": "string"},
+        "site_id": {"type": "string"},
+        "site_description": {"type": "string"},
+        "site_location": {"type": "string"},
+        "site_latitude": {"type": "number"},
+        "site_longitude": {"type": "number"},
+        "site_elevation": {"type": "number"},
         "TZ_database_name": {"type": "string"},
         "defaults": {
             "type": "object",
@@ -70,7 +68,41 @@ wema_config_schema = {
         },
         "events": {
             "type": "object",
-            "additionalProperties": {"type": "number"},
+            "properties": {
+                "Astro Dark": {"type": "number"},
+                "Civil Dawn": {"type": "number"},
+                "Civil Dusk": {"type": "number"},
+                "Clock & Auto Focus": {"type": "number"},
+                "Close and Park": {"type": "number"},
+                "Cool Down, Open": {"type": "number"},
+                "End Astro Dark": {"type": "number"},
+                "End Eve Bias Dark": {"type": "number"},
+                "End Eve Sky Flats": {"type": "number"},
+                "End Morn Bias Dark": {"type": "number"},
+                "End Morn Sky Flats": {"type": "number"},
+                "End Nightly Reset": {"type": "number"},
+                "Eve Bias Dark": {"type": "number"},
+                "Eve Sky Flats": {"type": "number"},
+                "Middle of Night": {"type": "number"},
+                "Moon Rise": {"type": "number"},
+                "Moon Set": {"type": "number"},
+                "Moon Transit": {"type": "number"},
+                "Morn Bias Dark": {"type": "number"},
+                "Morn Sky Flats": {"type": "number"},
+                "Naut Dawn": {"type": "number"},
+                "Naut Dusk": {"type": "number"},
+                "Nightly Reset": {"type": "number"},
+                "Observing Begins": {"type": "number"},
+                "Observing Ends": {"type": "number"},
+                "Ops Window Closes": {"type": "number"},
+                "Ops Window Start": {"type": "number"},
+                "Prior Moon Rise": {"type": "number"},
+                "Prior Moon Set": {"type": "number"},
+                "Prior Moon Transit": {"type": "number"},
+                "Sun Rise": {"type": "number"},
+                "Sun Set": {"type": "number"},
+                "use_by": {"type": "number"}
+            },
             "required": [
                 "Astro Dark",
                 "Civil Dawn",
@@ -113,14 +145,12 @@ wema_config_schema = {
         "device_types",
         "enclosure",
         "events",
-        "name",
-        "observatory_elevation",
-        "observatory_id",
-        "observatory_latitude",
-        "observatory_location",
-        "observatory_longitude",
-        "observatory_name",
-        "observatory_state",
+        "site_elevation",
+        "site_id",
+        "site_latitude",
+        "site_location",
+        "site_longitude",
+        "site_description",
         "observing_conditions",
         "TZ_database_name",
     ]
@@ -173,10 +203,6 @@ platform_config_schema = {
                                 "type": "array",
                                 "items": {"type": "string"}
                             },
-                            "bin_enable": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            },
                             "bin_modes": {
                                 "type": "array",
                                 "items": {
@@ -191,14 +217,7 @@ platform_config_schema = {
                             "CameraYSize": {"type": "integer"},
                             "can_set_gain": {"type": "boolean"},
                             "can_subframe": {"type": "boolean"},
-                            "chan_color": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            },
-                            "coarse_bin": {
-                                "type": "array",
-                                "items": {"type": "integer"}
-                            },
+                            "dark_exposure": {"type": "integer"},
                             "default_area": {"type": "string"},
                             "fullwell_capacity": {"type": "integer"},
                             "has_chiller": {"type": "boolean"},
@@ -215,28 +234,22 @@ platform_config_schema = {
                                 "type": "array",
                                 "items": {"type": "integer"}
                             },
-                            "optimal_bin": {
-                                "type": "array",
-                                "items": {"type": "integer"}
-                            },
+                            "number_of_bias_to_collect": {"type": "integer"},
+                            "number_of_dark_to_collect": {"type": "integer"},
+                            "number_of_flat_to_collect": {"type": "integer"},
                             "pix_scale": {"type": "number"},
                             "saturate": {"type": "integer"}
                         },
                         "required": [
                             "areas_implemented",
-                            "area_sq_deg",
-                            "bin-desc",
-                            "bin_enable",
                             "bin_modes",
                             "CameraXSize",
                             "CameraYSize",
                             "can_set_gain",
                             "can_subframe",
-                            "chan_color",
-                            "coarse_bin",
+                            "dark_exposure",
                             "default_area",
                             "fullwell_capacity",
-                            "has_chiller",
                             "has_darkslide",
                             "has_screen",
                             "is_cmos",
@@ -248,7 +261,9 @@ platform_config_schema = {
                             "min_exposure",
                             "min_flat_exposure",
                             "min_subframe",
-                            "optimal_bin",
+                            "number_of_bias_to_collect",
+                            "number_of_dark_to_collect",
+                            "number_of_flat_to_collect",
                             "pix_scale",
                             "saturate"
                         ]
@@ -276,13 +291,13 @@ platform_config_schema = {
                                         {"type": "string"},
                                         {
                                             "type": "array",
-                                            "items": {"type": "integer"}
+                                            "items": {"type": "number"}
                                         },
-                                        {"type": "integer"},
-                                        {"type": "integer"},
+                                        {"type": "number"},
+                                        {"type": "number"},
                                         {
                                             "type": "array",
-                                            "items": {"type": "integer"}
+                                            "items": {"type": "number"}
                                         },
                                         {"type": "string"}
                                     ]
@@ -435,9 +450,6 @@ platform_config_schema = {
                     "rotator_name",
                     "focuser_name",
                     "screen_name",
-                    "aperture",
-                    "f-ratio",
-                    "focal_length",
                     "has_cover",
                     "has_fans",
                     "has_instrument_selector",

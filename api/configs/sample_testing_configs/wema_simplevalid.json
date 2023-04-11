@@ -1,12 +1,10 @@
 {
-    "observatory_id": "mrco",
-    "name": "mrco",
-    "observatory_name": "Mountain Ranch Camp Observatory",
-    "observatory_location": "Near Santa Barbara CA, USA",
-    "observatory_latitude": 34.459375,
-    "observatory_longitude": -119.681172,
-    "observatory_elevation": 317.75,
-    "observatory_state": "Operational",
+    "site_id": "mrco",
+    "site_description": "Mountain Ranch Camp Observatory",
+    "site_location": "Near Santa Barbara CA, USA",
+    "site_latitude": 34.459375,
+    "site_longitude": -119.681172,
+    "site_elevation": 317.75,
     "TZ_database_name": "America/Los_Angeles",
     "defaults": {
         "enclosure": "enclosure1",

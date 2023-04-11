@@ -69,19 +69,9 @@
                 "CameraYSize": 6422,
                 "can_set_gain": true,
                 "can_subframe": true,
-                "chan_color": [
-                    "col",
-                    "gry",
-                    "gry",
-                    "gry"
-                ],
-                "coarse_bin": [
-                    2,
-                    2
-                ],
+                "dark_exposure": 180,
                 "default_area": "Full",
                 "fullwell_capacity": 80000,
-                "has_chiller": true,
                 "has_darkslide": true,
                 "has_screen": true,
                 "is_cmos": true,
@@ -97,10 +87,9 @@
                     128,
                     128
                 ],
-                "optimal_bin": [
-                    1,
-                    1
-                ],
+                "number_of_bias_to_collect": 63,
+                "number_of_dark_to_collect": 17,
+                "number_of_flat_to_collect": 5,
                 "pix_scale": 0.302597,
                 "saturate": 65535
             }
