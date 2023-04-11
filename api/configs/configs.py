@@ -150,7 +150,7 @@ def get_wema_handler(event, context):
     if wema:
         return {
             'statusCode': HTTPStatus.OK,
-            'body': json_dumps_ddb(wema)
+            'body': json.dumps(wema)
         }
     else:
         return {
@@ -165,7 +165,7 @@ def get_wema_and_all_platforms_handler(event, context):
     if wema:
         return {
             'statusCode': HTTPStatus.OK,  # 200
-            'body': json_dumps_ddb({
+            'body': json.dumps({
                 'wema': wema,
                 'platforms': platforms
             })
@@ -183,7 +183,7 @@ def get_platform_and_associated_wema_handler(event, context):
     if platform:
         return {
             'statusCode': HTTPStatus.OK,  # 200
-            'body': json_dumps_ddb({
+            'body': json.dumps({
                 'platform': platform,
                 'wema': wema
             })
@@ -209,7 +209,7 @@ def write_wema_handler(event, context):
         }
 
     simple_wema_config = filter_json(wema_config, wema_config_schema)
-    write_wema(wema_id, wema_config)
+    write_wema(wema_id, json_dumps_ddb(wema_config))
 
     return {
         'statusCode': HTTPStatus.CREATED,  # 201
@@ -231,7 +231,7 @@ def write_platform_handler(event, context):
             'body': str(e)
         }
 
-    write_platform(platform_id, wema_id, platform_config)
+    write_platform(platform_id, wema_id, json_dumps_ddb(platform_config))
 
     return {
         'statusCode': HTTPStatus.CREATED,  # 201
@@ -243,5 +243,5 @@ def get_all_wemas_handler(event, context):
 
     return {
         'statusCode': HTTPStatus.OK,  # 200
-        'body': json_dumps_ddb(wemas)
+        'body': json.dumps(wemas)
     }
