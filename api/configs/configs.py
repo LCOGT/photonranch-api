@@ -3,11 +3,11 @@ import jsonschema
 from http import HTTPStatus
 import boto3
 
+from api.helpers import dynamodb_r
 from api.configs.validation_schemas import wema_config_schema
 from api.configs.validation_schemas import platform_config_schema
 
-resource = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
-table = resource.Table("WemaPlatformConfigs")
+table = dynamodb_r.Table("WemaPlatformConfigs")
 
 ######################################
 ###### DynamoDB Table Design  ########
