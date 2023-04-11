@@ -9,8 +9,14 @@
   },
   "devDependencies": {
     "serverless-dotenv-plugin": "^4.0.1",
+    "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^8.8.1",
     "serverless-prune-plugin": "^2.0.1",
     "serverless-python-requirements": "^6.0.0"
+  },
+  "overrides": {
+    "serverless-dynamodb-local": {
+      "dynamodb-localhost": "https://github.com/99x/dynamodb-localhost#db30898f8c40932c7177be7b2f1a81360d12876d"
+    }
   }
 }

@@ -16,6 +16,7 @@ plugins:
   - serverless-domain-manager
   - serverless-prune-plugin
   - serverless-offline
+  - serverless-dynamodb-local
 
 custom:
   # This is the 'variable' for the customDomain.basePath value, based on the stage.
@@ -24,6 +25,18 @@ custom:
     prod: api
     dev: dev
     test: test
+
+  dynamodb:
+    stages: 
+      - dev
+      - test
+      - prod
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+  serverless-offline:
+    httpPort: 3000
 
   # Make sure to first run 'serverless create_domain'
   customDomain:
@@ -145,21 +158,22 @@ resources:  # CloudFormation template syntax from here on.
           Ref: 'ApiGatewayRestApi'
         StatusCode: '401'    
         
-functions:
+functions:   
+
   authorizerFunc: 
     handler: api/authorizer.auth
 
   dummyRequiresAuth:
-    handler: api/handler.dummy_requires_auth
-    events:
-      - http:
-          path: dummy-requires-auth
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
+      handler: api/handler.dummy_requires_auth
+      events:
+        - http:
+            path: dummy-requires-auth
+            method: post
+            authorizer:
+              name: authorizerFunc
+              type: request
+              resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
+            cors: true
   home:
     handler: api/handler.default
     events:
@@ -299,6 +313,48 @@ functions:
           path: /all/config
           method: get
           cors: true
+
+  getWEMA:
+    handler: api/configs/configs.get_wema_handler
+    events:
+      - http:
+          path: /wemas/{wema_id}
+          method: get
+
+  getWEMAAndAllPlatforms:
+    handler: api/configs/configs.get_wema_and_all_platforms_handler
+    events:
+      - http:
+          path: /wemas/{wema_id}/platforms
+          method: get
+
+  getPlatformAndAssociatedWEMA:
+    handler: api/configs/configs.get_platform_and_associated_wema_handler
+    events:
+      - http:
+          path: /platforms/{platform_id}
+          method: get
+
+  writeWEMA:
+    handler: api/configs/configs.write_wema_handler
+    events:
+      - http:
+          path: /wemas
+          method: post
+
+  writePlatform:
+    handler: api/configs/configs.write_platform_handler
+    events:
+      - http:
+          path: /platforms
+          method: post
+
+  getAllWemas:
+    handler: api/configs/configs.get_all_wemas_handler
+    events:
+      - http:
+          path: /wemas
+          method: get
 
   ### RemoteHQ api proxy
   newRemoteHQBrowser:

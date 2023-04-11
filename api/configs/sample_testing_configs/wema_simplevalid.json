@@ -1,0 +1,80 @@
+{
+    "site_id": "mrco",
+    "site_description": "Mountain Ranch Camp Observatory",
+    "site_location": "Near Santa Barbara CA, USA",
+    "site_latitude": 34.459375,
+    "site_longitude": -119.681172,
+    "site_elevation": 317.75,
+    "TZ_database_name": "America/Los_Angeles",
+    "defaults": {
+        "enclosure": "enclosure1",
+        "observing_conditions": "observing_conditions1"
+    },
+    "device_types": [
+        "observing_conditions",
+        "enclosure"
+    ],
+    "enclosure": {
+        "enclosure1": {
+            "is_dome": false,
+            "mode": "Automatic",
+            "name": "Megawan",
+            "settings": {
+                "lights": [
+                    "Auto",
+                    "White",
+                    "Red",
+                    "IR",
+                    "Off"
+                ],
+                "roof_shutter": [
+                    "Auto",
+                    "Open",
+                    "Close",
+                    "Lock Closed",
+                    "Unlock"
+                ]
+            }
+        }
+    },
+    "observing_conditions": {
+        "observing_conditions1": {
+            "name": "Weather Station #1"
+        }
+    },
+    "events": {
+        "Astro Dark": 45012.65480418904,
+        "Civil Dawn": 45013.05766663141,
+        "Civil Dusk": 45012.61366586982,
+        "Clock & Auto Focus": 45012.63877557352,
+        "Close and Park": 45013.096067875755,
+        "Cool Down, Open": 45012.55233088672,
+        "End Astro Dark": 45013.016561503275,
+        "End Eve Bias Dark": 45012.55233088673,
+        "End Eve Sky Flats": 45012.62691362467,
+        "End Morn Bias Dark": 45013.17106787575,
+        "End Morn Sky Flats": 45013.09467898687,
+        "End Nightly Reset": 45013.21273454242,
+        "Eve Bias Dark": 45012.46899755339,
+        "Eve Sky Flats": 45012.555803108946,
+        "Middle of Night": 45012.83583619491,
+        "Moon Rise": 45012.26683165318,
+        "Moon Set": 45012.91281496513,
+        "Moon Transit": 45012.59008859649,
+        "Morn Bias Dark": 45013.09745676464,
+        "Morn Sky Flats": 45013.058325687125,
+        "Naut Dawn": 45013.03749235379,
+        "Naut Dusk": 45012.633858069115,
+        "Nightly Reset": 45013.19884565353,
+        "Observing Begins": 45012.64433112908,
+        "Observing Ends": 45013.02702692853,
+        "Ops Window Closes": 45013.09537343131,
+        "Ops Window Start": 45012.555803108946,
+        "Prior Moon Rise": 45011.23270894043,
+        "Prior Moon Set": 45011.876449511365,
+        "Prior Moon Transit": 45011.5535746374,
+        "Sun Rise": 45013.07384565353,
+        "Sun Set": 45012.59746977561,
+        "use_by": 45013.2405123202
+    }
+}

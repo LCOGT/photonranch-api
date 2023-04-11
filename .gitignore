@@ -19,6 +19,7 @@ var/
 
 # Serverless directories
 .serverless
+.dynamodb
 
 # pycache
 __pycache__
