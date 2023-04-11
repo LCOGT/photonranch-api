@@ -31,6 +31,8 @@ class DecimalEncoder(json.JSONEncoder):
                 return int(o)
         return super(DecimalEncoder, self).default(o)
 
+def json_dumps_ddb(o):
+    return json.dumps(o, cls=DecimalEncoder)
 
 def http_response(status_code, body):
     """Returns a given HTTP status code."""

@@ -4,6 +4,8 @@ from http import HTTPStatus
 import boto3
 
 from api.helpers import dynamodb_r
+from api.helpers import DecimalEncoder
+from api.helpers import json_dumps_ddb
 from api.configs.validation_schemas import wema_config_schema
 from api.configs.validation_schemas import platform_config_schema
 
@@ -148,7 +150,7 @@ def get_wema_handler(event, context):
     if wema:
         return {
             'statusCode': HTTPStatus.OK,
-            'body': json.dumps(wema)
+            'body': json_dumps_ddb(wema)
         }
     else:
         return {
@@ -163,7 +165,7 @@ def get_wema_and_all_platforms_handler(event, context):
     if wema:
         return {
             'statusCode': HTTPStatus.OK,  # 200
-            'body': json.dumps({
+            'body': json_dumps_ddb({
                 'wema': wema,
                 'platforms': platforms
             })
@@ -181,7 +183,7 @@ def get_platform_and_associated_wema_handler(event, context):
     if platform:
         return {
             'statusCode': HTTPStatus.OK,  # 200
-            'body': json.dumps({
+            'body': json_dumps_ddb({
                 'platform': platform,
                 'wema': wema
             })
@@ -241,5 +243,5 @@ def get_all_wemas_handler(event, context):
 
     return {
         'statusCode': HTTPStatus.OK,  # 200
-        'body': json.dumps(wemas)
+        'body': json_dumps_ddb(wemas)
     }
