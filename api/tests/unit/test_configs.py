@@ -226,6 +226,27 @@ def test_write_platform_handler_mrc1(mocker):
     serialized_config = json_dumps_ddb(config)
     mocked_write_platform.assert_called_once_with(platform_id, wema_id, serialized_config)
 
+def test_write_platform_handler_mrc2(mocker):
+    mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
+
+    # get the mrc2 config to test
+    config_path = "api/configs/sample_testing_configs/platform_mrc2.json"
+    with open(config_path, "r") as file:
+        config = json.load(file)
+    wema_id = "mrc"
+    platform_id = "mrc2"
+    event = {"body": json.dumps({
+        "wema_id": wema_id,
+        "platform_id": platform_id,
+        "config": config
+    })}
+    context = {}
+
+    response = write_platform_handler(event, context)
+    assert response == {"statusCode": HTTPStatus.CREATED, "body": "Platform created"}
+    serialized_config = json_dumps_ddb(config)
+    mocked_write_platform.assert_called_once_with(platform_id, wema_id, serialized_config)
+
 def test_write_platform_handler_eco1(mocker):
     mocked_write_platform = mocker.patch("api.configs.configs.write_platform")
 

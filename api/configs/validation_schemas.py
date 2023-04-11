@@ -203,16 +203,7 @@ platform_config_schema = {
                                 "type": "array",
                                 "items": {"type": "string"}
                             },
-                            "bin_modes": {
-                                "type": "array",
-                                "items": {
-                                    "type": "array",
-                                    "items": [
-                                        {"type": "string"},
-                                        {"type": "number"}
-                                    ]
-                                }
-                            },
+                            "bin_modes": { "type": "array"},
                             "CameraXSize": {"type": "integer"},
                             "CameraYSize": {"type": "integer"},
                             "can_set_gain": {"type": "boolean"},
@@ -243,17 +234,13 @@ platform_config_schema = {
                         "required": [
                             "areas_implemented",
                             "bin_modes",
-                            "CameraXSize",
-                            "CameraYSize",
                             "can_set_gain",
                             "can_subframe",
                             "dark_exposure",
                             "default_area",
-                            "fullwell_capacity",
                             "has_darkslide",
                             "has_screen",
                             "is_cmos",
-                            "is_color",
                             "is_osc",
                             "max_daytime_exposure",
                             "max_exposure",
