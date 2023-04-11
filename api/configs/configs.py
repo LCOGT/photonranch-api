@@ -91,8 +91,9 @@ def get_wema_and_all_platforms(wema_id):
         }
     )
     wema = get_wema(wema_id)
-    platforms = response.get('Items')
-    return wema, platforms
+    platforms_array = response.get('Items')
+    platforms_dict = {p["ConfigID"]: p["Config"] for p in platforms_array}
+    return wema, platforms_dict
 
 def get_platform_and_associated_wema(platform_id):
     response = table.get_item(

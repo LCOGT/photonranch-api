@@ -76,7 +76,7 @@ def test_get_wema_and_all_platforms(mock_table):
 
     wema, platforms = get_wema_and_all_platforms(wema_id)
     assert wema == wema_dynamodb_json
-    assert platforms == [platform_dynamodb_json]
+    assert platforms == {platform_dynamodb_json["ConfigID"]: platform_dynamodb_json["Config"]}
 
     mock_table.scan.assert_called_once_with(
         FilterExpression="ConfigType = :platform AND WemaID = :wema_id",
@@ -134,12 +134,13 @@ def test_get_wema_handler(mocker):
     mocked_get_wema.assert_called_once_with(wema_id)
 
 def test_get_wema_and_all_platforms_handler(mocker):
-    mocked_get_wema_and_all_platforms = mocker.patch("api.configs.configs.get_wema_and_all_platforms", return_value=(wema_dynamodb_json, [platform_dynamodb_json]))
+    sample_response = (wema_dynamodb_json, {platform_dynamodb_json["ConfigID"]: platform_dynamodb_json["Config"]})
+    mocked_get_wema_and_all_platforms = mocker.patch("api.configs.configs.get_wema_and_all_platforms", return_value=sample_response)
     event = {"pathParameters": {"wema_id": wema_id}}
     context = {}
 
     response = get_wema_and_all_platforms_handler(event, context)
-    assert response == {"statusCode": HTTPStatus.OK, "body": json.dumps({"wema": wema_dynamodb_json, "platforms": [platform_dynamodb_json]})}
+    assert response == {"statusCode": HTTPStatus.OK, "body": json.dumps({"wema": wema_dynamodb_json, "platforms": {platform_dynamodb_json["ConfigID"]: platform_dynamodb_json["Config"]}})}
 
     mocked_get_wema_and_all_platforms.assert_called_once_with(wema_id)
 
