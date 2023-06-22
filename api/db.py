@@ -29,16 +29,16 @@ logger.setLevel(logging.DEBUG)
 Base = declarative_base()
 DB_ADDRESS = get_secret('db-url')
 
+engine = create_engine(DB_ADDRESS)
+db_session = sessionmaker(bind=engine)
 
 @contextmanager
-def get_session(db_address):
+def get_session():
     """Gets a connection to the database.
 
     Returns:
         session: SQLAlchemy Database Session.
     """
-    engine = create_engine(db_address)
-    db_session = sessionmaker(bind=engine)
     session = db_session()
     try:
         yield session
@@ -192,7 +192,7 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
     if user_id:
         query_filters.append(Image.user_id==user_id)
 
-    with get_session(db_address=db_address) as session:
+    with get_session() as session:
         images = session.query(Image)\
             .order_by(Image.sort_date.desc())\
             .filter(*query_filters)\
@@ -212,7 +212,7 @@ def get_latest_image_all_sites():
     print(sites)
     results = {} 
 
-    with get_session(db_address=DB_ADDRESS) as session:
+    with get_session() as session:
         for site in sites:
             print(time.time() - start)
             site_image = session.query(Image)\
@@ -242,7 +242,7 @@ def get_fits_header_from_db(db_address, base_filename):
         dict: The fits header as a dictionary.
     """
 
-    with get_session(db_address=db_address) as session:
+    with get_session() as session:
         header = session.query(Image.header)\
             .filter(Image.base_filename==base_filename)\
             .one()
@@ -268,7 +268,7 @@ def filtered_images_query(db_address: str, query_filters: list):
 
     # Add the condition that the jpg must exist
     query_filters.append(Image.jpg_medium_exists.is_(True))
-    with get_session(db_address=db_address) as session:
+    with get_session() as session:
         images = session.query(Image)\
             .order_by(Image.sort_date.desc())\
             .filter(*query_filters)\
@@ -297,7 +297,7 @@ def get_image_by_filename(db_address, base_filename):
         Image.base_filename == base_filename,  # Match filenames
         Image.jpg_medium_exists.is_(True)      # The jpg must exist
     ]
-    with get_session(db_address=db_address) as session:
+    with get_session() as session:
         image = session.query(Image)\
             .filter(*query_filters)\
             .one()
@@ -312,7 +312,7 @@ def remove_image_by_filename(base_filename):
             Identifies what to delete. Example: saf-ea03-20190621-00000007.
     """
 
-    with get_session(db_address=DB_ADDRESS) as session:
+    with get_session() as session:
         Image.query\
             .filter(Image.base_filename == base_filename)\
             .delete()
@@ -351,7 +351,7 @@ def get_files_within_date_range(site: str, start_timestamp_s: int,
     elif fits_size == "large":
         query_filters.append(Image.fits_01_exists.is_(True))
 
-    with get_session(db_address=DB_ADDRESS) as session:
+    with get_session() as session:
         images = session.query(Image)\
             .filter(*query_filters)\
             .all()
