@@ -114,6 +114,7 @@ class Image(Base):
 
             "username": self.username,
             "user_id": self.user_id,
+            "header": self.header
         }
 
         # Convert to timestamp in milliseconds
