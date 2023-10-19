@@ -115,8 +115,8 @@ class Image(Base):
 
             "username": self.username,
             "user_id": self.user_id,
-            "SMARTSTK": header_dictionary["SMARTSTK"] if self.header is not None else '',
-            "SSTKNUM": header_dictionary["SSTKNUM"] if self.header is not None else ''
+            "SMARTSTK": header_dictionary.get("SMARTSTK", '') if self.header is not None else '',
+            "SSTKNUM": header_dictionary.get("SSTKNUM", '') if self.header is not None else ''
         }
 
         # Convert to timestamp in milliseconds
