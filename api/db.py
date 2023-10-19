@@ -114,7 +114,8 @@ class Image(Base):
 
             "username": self.username,
             "user_id": self.user_id,
-            "header": json.loads(self.header) if self.header is not None else self.header
+            "SMARTSTK": self.header.SMARTSTK if self.header is not None else '',
+            "SSTKNUM": self.header.SSTKNUM if self.header is not None else ''
         }
 
         # Convert to timestamp in milliseconds
