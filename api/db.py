@@ -90,6 +90,7 @@ class Image(Base):
         Notably missing from this is the entire fits header, for smaller 
         payload sizes.
         """
+        header_dictionary = json.loads(self.header) if self.header is not None else None
 
         package = {
             "image_id": self.image_id,
@@ -114,7 +115,8 @@ class Image(Base):
 
             "username": self.username,
             "user_id": self.user_id,
-            "header": json.loads(self.header) if self.header is not None else self.header
+            "SMARTSTK": header_dictionary.get("SMARTSTK", '') if header_dictionary is not None else '',
+            "SSTKNUM": header_dictionary.get("SSTKNUM", '') if header_dictionary is not None else ''
         }
 
         # Convert to timestamp in milliseconds
