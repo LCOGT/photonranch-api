@@ -96,9 +96,9 @@ class Image(Base):
         fits_filename = ''
         fits_path = ''
         if header_dictionary:
-            fits_path = header_dictionary.get('SITEID') + '/' + header_dictionary.get('INSTRUME')
-            fits_path += '/' + header_dictionary.get('DAY-OBS') + '/raw'
-            fits_filename = header_dictionary.get('ORIGNAME')
+            fits_path = header_dictionary.get('SITEID', '') + '/' + header_dictionary.get('INSTRUME', '')
+            fits_path += '/' + header_dictionary.get('DAY-OBS', '') + '/raw'
+            fits_filename = header_dictionary.get('ORIGNAME', '')
 
         package = {
             "image_id": self.image_id,
