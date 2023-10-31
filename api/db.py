@@ -92,6 +92,14 @@ class Image(Base):
         """
         header_dictionary = json.loads(self.header) if self.header is not None else None
 
+        # Attempt to reconstruct the fits filename and archive file path from the header data
+        fits_filename = ''
+        fits_path = ''
+        if header_dictionary:
+            fits_path = header_dictionary.get('SITEID', '') + '/' + header_dictionary.get('INSTRUME', '')
+            fits_path += '/' + header_dictionary.get('DAY-OBS', '') + '/raw'
+            fits_filename = header_dictionary.get('ORIGNAME', '')
+
         package = {
             "image_id": self.image_id,
             "base_filename": self.base_filename,
@@ -115,6 +123,8 @@ class Image(Base):
 
             "username": self.username,
             "user_id": self.user_id,
+            "fits_filename": fits_filename,
+            "fits_path": fits_path,
             "SMARTSTK": header_dictionary.get("SMARTSTK", '') if header_dictionary is not None else '',
             "SSTKNUM": header_dictionary.get("SSTKNUM", '') if header_dictionary is not None else ''
         }
