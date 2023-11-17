@@ -288,8 +288,17 @@ def filtered_images_query(db_address: str, query_filters: list):
             .all()
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
+    image_pkgs = list(filter(filter_img_pkgs_final_sstack, image_pkgs))
     return image_pkgs
 
+# Filter removes intermediate smart stacks to reduce the size of payload sent to the ui
+def filter_img_pkgs_final_sstack(img_pkg):
+    try:
+        if img_pkg["SMARTSTK"] == 'no' or img_pkg["SMARTSTK"] == img_pkg["SSTKNUM"]:
+            return True
+        return False
+    except KeyError :
+        return True
 
 def get_image_by_filename(db_address, base_filename):
     """Gets the image package for the image specified by the filename.
