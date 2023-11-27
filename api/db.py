@@ -291,7 +291,7 @@ def filtered_images_query(db_address: str, query_filters: list):
     image_pkgs = list(filter(filter_img_pkgs_final_sstack, image_pkgs))
     return image_pkgs
 
-# Filter removes intermediate smart stacks to reduce the size of payload sent to the ui
+# Filter smart stacks to reduce the size of ui payload
 def filter_img_pkgs_final_sstack(img_pkg):
     try:
         if img_pkg["SMARTSTK"] == 'no' or img_pkg["SMARTSTK"] == img_pkg["SSTKNUM"]:
