@@ -288,17 +288,34 @@ def filtered_images_query(db_address: str, query_filters: list):
             .all()
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
-    image_pkgs = list(filter(filter_img_pkgs_final_sstack, image_pkgs))
+    image_pkgs = filter_img_pkgs_final_sstack(image_pkgs)
     return image_pkgs
 
 # Filter smart stacks to reduce the size of ui payload
-def filter_img_pkgs_final_sstack(img_pkg):
-    try:
-        if img_pkg["SMARTSTK"] == 'no' or img_pkg["SMARTSTK"] == img_pkg["SSTKNUM"]:
-            return True
-        return False
-    except KeyError :
-        return True
+def filter_img_pkgs_final_sstack(image_pkgs):
+    # dict containing max stknum for each unique smartstack
+    max_sstk_nums = {}
+
+    for img_pkg in image_pkgs:
+        smart_stk = img_pkg.get('SMARTSTK')
+        sstk_num = img_pkg.get('SSTKNUM')
+
+        if smart_stk is None or smart_stk == 'no':
+            continue
+        
+        if smart_stk not in max_sstk_nums or sstk_num > max_sstk_nums[smart_stk]:
+            max_sstk_nums[smart_stk] = sstk_num
+    
+    # keep non intermediate img_pkgs, non smart stack img_pkgs, and img_pkgs missing smart stack keys
+    filtered_arr = [
+        img_pkg for img_pkg in image_pkgs
+        if img_pkg.get('SMARTSTK') is None
+        or img_pkg.get('SSTKNUM') is None
+        or img_pkg.get('SMARTSTK') == 'no'
+        or img_pkg['SSTKNUM'] >= max_sstk_nums.get(img_pkg.get('SMARTSTK'), 0)
+    ]
+
+    return filtered_arr
 
 def get_image_by_filename(db_address, base_filename):
     """Gets the image package for the image specified by the filename.
