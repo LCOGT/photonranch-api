@@ -289,6 +289,9 @@ def filtered_images_query(db_address: str, query_filters: list):
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
     image_pkgs = filter_img_pkgs_final_sstack(image_pkgs)
+    # Debugging statement for cloudwatch logs
+    sstk_list = [(img_pkg["SMARTSTK"], img_pkg["SSTKNUM"]) for img_pkg in image_pkgs if img_pkg.get('SMARTSTK') is not None or img_pkg.get('SMARTSTK') != 'no']
+    print("DEBUG: filtered list of smart stacks ", sstk_list)
     return image_pkgs
 
 # Filter smart stacks to reduce the size of ui payload
