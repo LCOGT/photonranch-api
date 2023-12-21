@@ -289,9 +289,6 @@ def filtered_images_query(db_address: str, query_filters: list):
         session.expunge_all()
     image_pkgs = [image.get_image_pkg() for image in images]
     image_pkgs = filter_img_pkgs_final_sstack(image_pkgs)
-    # Debugging statement for cloudwatch logs
-    sstk_list = [(img_pkg["SMARTSTK"], img_pkg["SSTKNUM"]) for img_pkg in image_pkgs if img_pkg.get('SMARTSTK') is not None or img_pkg.get('SMARTSTK') != 'no']
-    print("DEBUG: filtered list of smart stacks ", sstk_list)
     return image_pkgs
 
 # Filter smart stacks to reduce the size of ui payload
@@ -301,7 +298,7 @@ def filter_img_pkgs_final_sstack(image_pkgs):
 
     for img_pkg in image_pkgs:
         smart_stk = img_pkg.get('SMARTSTK')
-        sstk_num = img_pkg.get('SSTKNUM')
+        sstk_num = int(img_pkg.get('SSTKNUM'), 0)
 
         if smart_stk is None or smart_stk == 'no':
             continue
@@ -315,7 +312,7 @@ def filter_img_pkgs_final_sstack(image_pkgs):
         if img_pkg.get('SMARTSTK') is None
         or img_pkg.get('SSTKNUM') is None
         or img_pkg.get('SMARTSTK') == 'no'
-        or img_pkg['SSTKNUM'] >= max_sstk_nums.get(img_pkg.get('SMARTSTK'), 0)
+        or int(img_pkg.get('SSTKNUM', 0)) >= max_sstk_nums.get(img_pkg.get('SMARTSTK'), 0)
     ]
 
     return filtered_arr
