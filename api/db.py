@@ -291,14 +291,17 @@ def filtered_images_query(db_address: str, query_filters: list):
     image_pkgs = filter_img_pkgs_final_sstack(image_pkgs)
     return image_pkgs
 
-# Filter smart stacks to reduce the size of ui payload
+# Filter out intermediate smart stacks to reduce the size of ui payload
 def filter_img_pkgs_final_sstack(image_pkgs):
     # dict containing max stknum for each unique smartstack
     max_sstk_nums = {}
 
     for img_pkg in image_pkgs:
+        if not img_pkg.get('SSTKNUM', 0).isdigit():
+            continue
+
         smart_stk = img_pkg.get('SMARTSTK')
-        sstk_num = int(img_pkg.get('SSTKNUM'), 0)
+        sstk_num = int(img_pkg.get('SSTKNUM', 0))
 
         if smart_stk is None or smart_stk == 'no':
             continue
@@ -312,6 +315,7 @@ def filter_img_pkgs_final_sstack(image_pkgs):
         if img_pkg.get('SMARTSTK') is None
         or img_pkg.get('SSTKNUM') is None
         or img_pkg.get('SMARTSTK') == 'no'
+        or not img_pkg.get('SMARTSTK').isdigit()
         or int(img_pkg.get('SSTKNUM', 0)) >= max_sstk_nums.get(img_pkg.get('SMARTSTK'), 0)
     ]
 
