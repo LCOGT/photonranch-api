@@ -1,0 +1,1082 @@
+{
+  "site": "mrc1",
+  "admin_aliases": [
+   "ANS",
+   "WER",
+   "TELOPS",
+   "TB",
+   "DH",
+   "KVH",
+   "KC"
+  ],
+  "admin_owner_commands_only": false,
+  "airport_code": "SBA",
+  "alt_path": "Q:/ptr/",
+  "archive_age": -99.9,
+  "archive_path": "Q:/ptr/",
+  "automatic_detail_default": "Enclosure is set to Automatic mode.",
+  "auto_eve_bias_dark": true,
+  "auto_eve_sky_flat": true,
+  "auto_midnight_moonless_bias_dark": false,
+  "auto_morn_bias_dark": true,
+  "auto_morn_sky_flat": true,
+  "aux_archive_path": null,
+  "camera": {
+   "camera_1_1": {
+    "desc": "QHY 600C Pro",
+    "detector": "Sony IMX455 Color",
+    "driver": "QHYCCD_Direct_Control",
+    "file_mode_path": "Q:/archive/sq01/maxim/",
+    "manufacturer": "QHY",
+    "name": "sq001cs",
+    "parent": "telescope1",
+    "settings": {
+     "areas_implemented": [
+      "Big sq.",
+      "Full",
+      "Small sq.",
+      "70.7%",
+      "50%",
+      "35%",
+      "25%",
+      "18%"
+     ],
+     "area_sq_deg": 0.4318,
+     "bias_sec": [
+      "[1:22, 1:6388]",
+      "[1:11, 1:3194]",
+      "[1:7, 1:2129]",
+      "[1:5, 1:1597]"
+     ],
+     "bin-desc": [
+      "1x1",
+      "2x2",
+      "3x3",
+      "4x4"
+     ],
+     "bin_enable": [
+      "1 1"
+     ],
+     "bin_for_focus": true,
+     "bin_for_platesolve": true,
+     "bin_for_sep": true,
+     "bin_modes": [
+      [
+       "Optimal",
+       0.91
+      ],
+      [
+       "Fine",
+       0.61
+      ],
+      [
+       "Coarse",
+       1.2
+      ],
+      [
+       "Eng",
+       0.3
+      ]
+     ],
+     "calib_setpoints": [
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20,
+      -20
+     ],
+     "CameraXSize": 9600,
+     "CameraYSize": 6422,
+     "cam_needs_NumXY_init": true,
+     "can_set_gain": true,
+     "can_subframe": true,
+     "ccd_sec": "[1:9600, 1:6422]",
+     "coarse_bin": [
+      2,
+      2
+     ],
+     "cooler_on": true,
+     "corner_everlap": null,
+     "crop_preview": false,
+     "crop_preview_xleft": 2,
+     "crop_preview_xright": 2,
+     "crop_preview_ybottom": 2,
+     "crop_preview_ytop": 2,
+     "cycle_time": 0,
+     "darkslide_com": "COM15",
+     "dark_exposure": 180,
+     "data_sec": [
+      "[25:9600, 1:6388]",
+      "[13:4800, 1:3194]",
+      "[9:3200, 1:2129]",
+      "[7:2400, 1:1597]"
+     ],
+     "day_warm": false,
+     "day_warm_degrees": 8,
+     "default_area": "Full",
+     "default_rotation": 0,
+     "det_sec": [
+      "[25:9600, 1:6388]",
+      "[13:4800, 1:3194]",
+      "[9:3200, 1:2129]",
+      "[7:2400, 1:1597]"
+     ],
+     "det_size": "[1:9600, 1:6422]",
+     "direct_qhy_gain": 26,
+     "direct_qhy_offset": 60,
+     "direct_qhy_readout_mode": 3,
+     "direct_qhy_usb_speed": 60,
+     "do_cosmics": false,
+     "east_offset": 0,
+     "eng_bin": [
+      4,
+      4
+     ],
+     "fine_bin": [
+      1,
+      1
+     ],
+     "flat_count": 5,
+     "flipx_fits": false,
+     "flipx_jpeg": false,
+     "flipy_fits": false,
+     "flipy_jpeg": false,
+     "focus_image_crop_height": 0,
+     "focus_image_crop_width": 0,
+     "fullwell_capacity": 80000,
+     "has_chiller": true,
+     "has_darkslide": true,
+     "has_screen": true,
+     "hold_flats_in_memory": false,
+     "interpolate_for_focus": false,
+     "interpolate_for_sep": false,
+     "is_cmos": true,
+     "is_color": true,
+     "is_osc": true,
+     "max_daytime_exposure": 0.0001,
+     "max_exposure": 180,
+     "max_flat_exposure": 20,
+     "max_linearity": 60000,
+     "min_exposure": 0.0001,
+     "min_flat_exposure": 0.0001,
+     "min_subframe": [
+      128,
+      128
+     ],
+     "north_offset": 0,
+     "number_of_bias_to_collect": 63,
+     "number_of_bias_to_store": 128,
+     "number_of_dark_to_collect": 17,
+     "number_of_dark_to_store": 128,
+     "number_of_flat_to_collect": 5,
+     "number_of_flat_to_store": 128,
+     "optimal_bin": [
+      1,
+      1
+     ],
+     "osc_background_cut": 25,
+     "osc_bayer": "RGGB",
+     "osc_brightness_enhance": 1,
+     "osc_colour_enhance": 1.7,
+     "osc_contrast_enhance": 1.5,
+     "osc_saturation_enhance": 2.5,
+     "osc_sharpness_enhance": 1.5,
+     "overscan_x": 24,
+     "overscan_y": 34,
+     "pix_scale": 0.302597,
+     "platesolve_image_crop": 0,
+     "post_bias_available": true,
+     "pre_bias_available": false,
+     "rbi_delay": 0,
+     "readout_mode": "Normal",
+     "readout_seconds": 6,
+     "readout_speed": 50,
+     "read_mode": "Normal",
+     "reference_dark": 0.2,
+     "reference_gain": 1.3,
+     "reference_noise": 6,
+     "reference_offset": 611,
+     "rotate180_fits": false,
+     "rotate180_jpeg": false,
+     "rotate270_fits": false,
+     "rotate270_jpeg": false,
+     "rotate90_fits": false,
+     "rotate90_jpeg": false,
+     "rotation": 0,
+     "saturate": 65535,
+     "screen_settings": {
+      "screen_saturation": 157,
+      "screen_x0": 8.683,
+      "screen_x1": 0.1258,
+      "screen_x2": -0.00009,
+      "screen_x3": 0.00000003,
+      "screen_x4": -0.000000000004
+     },
+     "sep_image_crop_height": 0,
+     "sep_image_crop_width": 0,
+     "shutter_type": "Electronic",
+     "smart_stack_exposure_time": 30,
+     "square_detector": false,
+     "square_pixels": true,
+     "squash_on_x_axis": true,
+     "StartX": 1,
+     "StartY": 1,
+     "temp_setpoint": -5,
+     "transpose_fits": false,
+     "transpose_jpeg": false,
+     "trim_sec": [
+      "[1:9576, 1:6388]",
+      "[1:4788, 1:3194]",
+      "[1:3192, 1:2129]",
+      "[1:2394, 1:1597]"
+     ],
+     "x_active": 9576,
+     "x_bias_end": null,
+     "x_bias_line": true,
+     "x_bias_start": 9577,
+     "x_chip": 9576,
+     "x_field_deg": 0.8042,
+     "x_pixel": 3.76,
+     "x_start": 0,
+     "x_trim_offset": 8,
+     "x_width": 9576,
+     "y_active": 6388,
+     "y_bias_line": true,
+     "y_bias_send": null,
+     "y_bias_start": 6389,
+     "y_chip": 6388,
+     "y_field_deg": 0.5369,
+     "y_pixel": 3.76,
+     "y_start": 0,
+     "y_trim_offset": 8,
+     "y_width": 6388
+    },
+    "use_file_mode": false
+   }
+  },
+  "check_time": 300,
+  "client_hostname": "MRC-0m35",
+  "client_path": "Q:/ptr/",
+  "client_read_share_path": "Q:/ptr/",
+  "client_write_share_path": "Q:/ptr/",
+  "closest_distance_to_the_moon": 10,
+  "closest_distance_to_the_sun": 45,
+  "debug_duration_sec": 20000,
+  "debug_flag": true,
+  "debug_mode": true,
+  "debug_site_mode": true,
+  "defaults": {
+   "camera": "camera_1_1",
+   "enclosure": "enclosure1",
+   "filter_wheel": "filter_wheel1",
+   "focuser": "focuser1",
+   "mount": "mount1",
+   "observing_conditions": "observing_conditions1",
+   "rotator": "rotator1",
+   "screen": "screen1",
+   "selector": "selector1",
+   "sequencer": "sequencer1",
+   "telescope": "telescope1"
+  },
+  "description": "\n                    Now is the time for all good persons\n                    to get out and vote early and often lest\n                    we lose charge of our democracy.\n                    ",
+  "device_types": [
+   "observing_conditions",
+   "enclosure",
+   "mount",
+   "telescope",
+   "rotator",
+   "focuser",
+   "selector",
+   "filter_wheel",
+   "camera",
+   "sequencer"
+  ],
+  "dome_on_wema": true,
+  "elevation": 317.75,
+  "enclosure": {
+   "enclosure1": {
+    "controlled_by": [
+     "mnt1",
+     "mnt2"
+    ],
+    "cool_down": -65,
+    "directly_connected": false,
+    "driver": "ASCOM.SkyRoofHub.Dome",
+    "enc_is_specific": false,
+    "eve_bias_dark_dur": 2,
+    "eve_cooldown_offset": -0.99,
+    "eve_screen_flat_dur": 1,
+    "eve_sky_flat_offset": 0.5,
+    "has_lights": true,
+    "hostIP": "10.15.0.65",
+    "is_dome": false,
+    "mode": "Automatic",
+    "morning_close_offset": 0.41,
+    "morn_sky_flat_offset": 0.4,
+    "name": "Megawan",
+    "operations_begin": -1,
+    "operations_end": 0.42,
+    "parent": "site",
+    "recover_script": null,
+    "redis_ip": "10.15.0.109",
+    "settings": {
+     "lights": [
+      "Auto",
+      "White",
+      "Red",
+      "IR",
+      "Off"
+     ],
+     "roof_shutter": [
+      "Auto",
+      "Open",
+      "Close",
+      "Lock Closed",
+      "Unlock"
+     ]
+    },
+    "shutdown_script": null,
+    "startup_script": null
+   }
+  },
+  "enclosure_check_period": 5,
+  "enc_types": [
+   "enclosure"
+  ],
+  "events": {
+   "Astro Dark": 45025.663476649184,
+   "Civil Dawn": 45026.04516812259,
+   "Civil Dusk": 45025.62099096982,
+   "Clock & Auto Focus": 45025.64704482708,
+   "Close and Park": 45026.083874672346,
+   "Cool Down, Open": 45025.569773191935,
+   "day_directory": "20230410",
+   "End Astro Dark": 45026.00270411158,
+   "End Eve Bias Dark": 45025.569773191935,
+   "End Eve Sky Flats": 45025.63477967164,
+   "End Morn Bias Dark": 45026.15887467234,
+   "End Morn Sky Flats": 45026.08248578346,
+   "End Nightly Reset": 45026.200541339014,
+   "Eve Bias Dark": 45025.4864398586,
+   "Eve Sky Flats": 45025.573245414154,
+   "Middle of Night": 45025.83324004898,
+   "Moon Rise": 45025.81620497049,
+   "Moon Set": 45026.22102315722,
+   "Moon Transit": 45026.019173750225,
+   "Morn Bias Dark": 45026.08526356123,
+   "Morn Sky Flats": 45026.04528005297,
+   "Naut Dawn": 45026.02444671963,
+   "Naut Dusk": 45025.64172411609,
+   "Nightly Reset": 45026.186652450124,
+   "Observing Begins": 45025.65260038264,
+   "Observing Ends": 45026.01357541561,
+   "Ops Window Closes": 45026.0831802279,
+   "Ops Window Start": 45025.573245414154,
+   "Prior Moon Rise": 45024.76927755058,
+   "Prior Moon Set": 45025.18378885949,
+   "Prior Moon Transit": 45024.977935964635,
+   "Sun Rise": 45026.061652450124,
+   "Sun Set": 45025.604495414154,
+   "use_by": 45026.22831911679
+  },
+  "eve_cool_down_open": -50,
+  "eve_sky_flat_sunset_offset": -45,
+  "filter_wheel": {
+   "filter_wheel1": {
+    "alias": "Dual filter wheel",
+    "desc": "FLI Centerline Custom Dual 50mm sq.",
+    "driver": "Maxim.CCDCamera",
+    "dual_wheel": true,
+    "ip_string": "",
+    "name": "RGGB",
+    "parent": "telescope1",
+    "settings": {
+     "auto_color_options": [
+      "OSC"
+     ],
+     "default_filter": "w",
+     "filter_data": [
+      [
+       "air",
+       [
+        0,
+        0
+       ],
+       -1000,
+       20,
+       [
+        2,
+        17
+       ],
+       "ai"
+      ],
+      [
+       "dif",
+       [
+        4,
+        0
+       ],
+       0,
+       16,
+       [
+        2,
+        17
+       ],
+       "df"
+      ],
+      [
+       "w",
+       [
+        2,
+        0
+       ],
+       0,
+       17.468,
+       [
+        2,
+        17
+       ],
+       "w "
+      ],
+      [
+       "PL",
+       [
+        0,
+        4
+       ],
+       0,
+       16,
+       [
+        2,
+        17
+       ],
+       "PL"
+      ],
+      [
+       "gp",
+       [
+        0,
+        6
+       ],
+       0,
+       14.87,
+       [
+        2,
+        17
+       ],
+       "gp"
+      ],
+      [
+       "PB",
+       [
+        0,
+        1
+       ],
+       0,
+       10.25,
+       [
+        2,
+        17
+       ],
+       "PB"
+      ],
+      [
+       "rp",
+       [
+        0,
+        7
+       ],
+       0,
+       3.853,
+       [
+        2,
+        17
+       ],
+       "rp"
+      ],
+      [
+       "PG",
+       [
+        0,
+        2
+       ],
+       0,
+       11.048,
+       [
+        2,
+        17
+       ],
+       "PG"
+      ],
+      [
+       "PR",
+       [
+        0,
+        3
+       ],
+       0,
+       1.336,
+       [
+        2,
+        17
+       ],
+       "PR"
+      ],
+      [
+       "ip",
+       [
+        0,
+        8
+       ],
+       0,
+       4.741,
+       [
+        2,
+        17
+       ],
+       "ip"
+      ],
+      [
+       "z",
+       [
+        5,
+        0
+       ],
+       0,
+       2.147,
+       [
+        2,
+        17
+       ],
+       "z"
+      ],
+      [
+       "O3",
+       [
+        7,
+        0
+       ],
+       0,
+       1.151,
+       [
+        2,
+        17
+       ],
+       "03"
+      ],
+      [
+       "up",
+       [
+        0,
+        5
+       ],
+       0,
+       1.506,
+       [
+        1,
+        17
+       ],
+       "up"
+      ],
+      [
+       "N2",
+       [
+        3,
+        0
+       ],
+       0,
+       0.126,
+       [
+        2,
+        17
+       ],
+       "N2"
+      ],
+      [
+       "CR",
+       [
+        1,
+        0
+       ],
+       0,
+       0.2,
+       [
+        2,
+        17
+       ],
+       "CR"
+      ],
+      [
+       "S2",
+       [
+        8,
+        0
+       ],
+       0,
+       0.137,
+       [
+        2,
+        17
+       ],
+       "S2"
+      ],
+      [
+       "HA",
+       [
+        6,
+        0
+       ],
+       0,
+       0.124,
+       [
+        2,
+        17
+       ],
+       "HA"
+      ],
+      [
+       "focus",
+       [
+        2,
+        0
+       ],
+       0,
+       16,
+       [
+        2,
+        17
+       ],
+       "fo"
+      ],
+      [
+       "dark",
+       [
+        8,
+        5
+       ],
+       0,
+       0,
+       [
+        2,
+        17
+       ],
+       "dk"
+      ]
+     ],
+     "filter_screen_sort": [
+      "air",
+      "w",
+      "PL",
+      "gp",
+      "PB",
+      "rp",
+      "PG",
+      "PR",
+      "ip",
+      "O3",
+      "N2",
+      "CR",
+      "S2",
+      "HA"
+     ],
+     "filter_sky_sort": [
+      "S2",
+      "N2",
+      "O3",
+      "HA",
+      "z",
+      "PR",
+      "PG",
+      "PB",
+      "gp",
+      "rp",
+      "ip",
+      "w",
+      "PL",
+      "focus",
+      "air"
+     ],
+     "mono_Narrowband_colour_filters": [
+      "ha",
+      "o3",
+      "s2"
+     ],
+     "mono_Narrowband_relative_weights": [
+      1,
+      2,
+      2.5
+     ],
+     "mono_RGB_colour_filters": [
+      "pb",
+      "pg",
+      "pr"
+     ],
+     "mono_RGB_relative_weights": [
+      1.2,
+      1,
+      0.8
+     ]
+    }
+   }
+  },
+  "focuser": {
+   "focuser1": {
+    "backlash": 0,
+    "coef_0": 7355,
+    "coef_c": -8.583,
+    "coef_date": "20230220",
+    "desc": "Optec Gemini",
+    "driver": "ASCOM.OptecGemini.Focuser",
+    "has_dial_indicator": false,
+    "maximum": 12700,
+    "minimum": 0,
+    "name": "focuser",
+    "parent": "telescope1",
+    "reference": 7250,
+    "ref_temp": 10,
+    "start_at_config_reference": false,
+    "step_size": 1,
+    "throw": 250,
+    "unit": "micron",
+    "unit_conversion": 9.09090909091,
+    "use_focuser_temperature": true,
+    "use_local_temp": true,
+    "z_coef_date": "20221002",
+    "z_compression": 0
+   }
+  },
+  "focus_exposure_time": 10,
+  "focus_trigger": 0.75,
+  "host_wema_site_name": "MRC",
+  "keep_focus_images_on_disk": true,
+  "keep_reduced_on_disk": true,
+  "lamp_box": {
+   "lamp_box1": {
+    "desc": "None",
+    "driver": "None",
+    "name": "None",
+    "parent": "camera_1",
+    "spectrograph": "None",
+    "switches": "None"
+   }
+  },
+  "latitude": 34.459375,
+  "location": "Near Santa Barbara CA,  USA",
+  "location _pole_monitor": null,
+  "location_day_allsky": null,
+  "location_night_allsky": null,
+  "location_seeing_report": null,
+  "longitude": -119.681172,
+  "lowest_requestable_altitude": -5,
+  "maximum_roof_opens_per_evening": 4,
+  "minimum_realistic_seeing": 1,
+  "mount": {
+   "mount1": {
+    "alignment": "Alt-Az",
+    "default_zenith_avoid": 7,
+    "desc": "Planewave L500 AltAz",
+    "driver": "ASCOM.PWI4.Telescope",
+    "east_flip_dec_correction": 0,
+    "east_flip_ra_correction": 0,
+    "has_ascom_altaz": true,
+    "has_paddle": false,
+    "home_after_unpark": false,
+    "home_before_park": false,
+    "hostIP": "10.15.0.30",
+    "hostname": "eastpier",
+    "lowest_acceptable_altitude": -2,
+    "name": "eastpier",
+    "parent": "enclosure1",
+    "permissive_mount_reset": "yes",
+    "pointing_tel": "tel1",
+    "recover_script": null,
+    "Selector": {
+     "available": false
+    },
+    "settings": {
+     "elevation_offset": 0,
+     "fixed_screen _altitude": 0.54,
+     "fixed_screen_azimuth": 167.25,
+     "home_altitude": 60,
+     "home_azimuth": 359,
+     "home_park_altitude": 0,
+     "home_park_azimuth": 180,
+     "horizon": 20,
+     "horizon_detail": {
+      "0": 32,
+      "30": 35,
+      "43": 28.6,
+      "59": 32.7,
+      "62": 28.6,
+      "65": 25.2,
+      "74": 22.6,
+      "82": 20,
+      "130": 12,
+      "150": 20,
+      "172": 28,
+      "191": 25,
+      "213": 20,
+      "235": 15.3,
+      "260": 11,
+      "272": 17,
+      "294": 16.5,
+      "303": 20.6,
+      "309": 27,
+      "315": 32,
+      "360": 32,
+      "101.5": 14,
+      "107.5": 12,
+      "298.5": 18.6,
+      "36.5": 39,
+      "95.5": 20
+     },
+     "latitude_offset": 0,
+     "longitude_offset": 0,
+     "model": {
+      "ACEC": 0,
+      "ACES": 0,
+      "AE": 0,
+      "AN": 0,
+      "CA": 0,
+      "CH": 0,
+      "DCEC": 0,
+      "DCES": 0,
+      "ECEC": 0,
+      "ECES": 0,
+      "HCEC": 0,
+      "HCES": 0,
+      "IA": 0,
+      "ID": 0,
+      "IE": 0,
+      "IH": 0,
+      "MA": 0,
+      "ME": 0,
+      "NP": 0,
+      "NPAE": 0,
+      "TF": 0,
+      "TX": 0,
+      "WD": 0,
+      "WH": 0
+     },
+     "model_on": true,
+     "rates_on": true,
+     "refraction_on": true
+    },
+    "shutdown_script": null,
+    "startup_script": null,
+    "tel_id": "0m35",
+    "time_inactive_until_park": 3600,
+    "west_clutch_dec_correction": 0,
+    "west_clutch_ra_correction": 0
+   }
+  },
+  "mpc_code": "ZZ23",
+  "name": "Mountain Ranch Camp Observatory 0m35f7.2",
+  "observatory_location": "SBA",
+  "observatory_logo": null,
+  "observatory_url": "https://starz-r-us.sky/clearskies",
+  "observing_check_period": 5,
+  "observing_conditions": {
+   "observing_conditions1": {
+    "driver": "ASCOM.SkyAlert.ObservingConditions",
+    "driver_2": "ASCOM.SkyAlert.SafetyMonitor",
+    "driver_3": null,
+    "has_unihedron": false,
+    "have_local_unihedron": false,
+    "name": "Weather Station #1",
+    "ocn_has_unihedron": false,
+    "ocn_is_specific": false,
+    "parent": "site",
+    "redis_ip": "10.15.0.109",
+    "share_path_name": null,
+    "unihedron_port": 10,
+    "uni_driver": "ASCOM.SQM.serial.ObservingConditions"
+   }
+  },
+  "obsid_allowed_to_open_roof": false,
+  "obsid_in_automatic_default": "Automatic",
+  "obsid_is_generic": false,
+  "obsid_is_specific": false,
+  "obsid_roof_control": false,
+  "obs_id": "mrc1",
+  "only_scope_that_controls_the_roof": false,
+  "owner": [
+   "google-oauth2|112401903840371673242"
+  ],
+  "owner_alias": [
+   "WER",
+   "TELOPS"
+  ],
+  "periodic_focus_time": 0.5,
+  "period_of_time_to_wait_for_roof_to_open": 50,
+  "plog_path": "Q:/ptr/mrc1/",
+  "pointing_calibration_on_startup": false,
+  "pointing_exposure_time": 20,
+  "re-calibrate_on_solve": true,
+  "redis_ip": "10.15.0.109",
+  "reference_ambient": 10,
+  "reference_pressure": 977.83,
+  "roof_open_safety_base_time": 15,
+  "rotator": {
+   "rotator1": {
+    "backlash": 0,
+    "com_port": null,
+    "desc": "Opetc Gemini",
+    "driver": "ASCOM.AltAzDS.Rotator",
+    "has_rotator": true,
+    "maximum": 360,
+    "minimum": -180,
+    "name": "rotator",
+    "parent": "telescope1",
+    "step_size": 0.0001,
+    "unit": "degree"
+   }
+  },
+  "save_raw_to_disk": true,
+  "save_to_alt_path": "no",
+  "screen": {
+   "screen1": {
+    "com_port": "COM10",
+    "desc": "Optec Alnitak 24\"",
+    "driver": "COM13",
+    "minimum": 5,
+    "name": "screen",
+    "parent": "telescope1",
+    "saturate": 170
+   }
+  },
+  "selector": {
+   "selector1": {
+    "cameras": [
+     "camera_1_1"
+    ],
+    "com_port": null,
+    "default": 0,
+    "desc": "Null Changer",
+    "driver": null,
+    "guiders": [
+     null
+    ],
+    "instruments": [
+     "Main_camera"
+    ],
+    "name": "None",
+    "parent": "telescope1",
+    "ports": 1,
+    "recover_script": null,
+    "shutdown_script": null,
+    "startup_script": null
+   }
+  },
+  "send_files_at_end_of_night": "no",
+  "sequencer": {
+   "sequencer1": {
+    "desc": "Automation Control",
+    "driver": null,
+    "name": "Sequencer",
+    "parent": "site",
+    "recover_script": null,
+    "shutdown_script": null,
+    "startup_script": null
+   }
+  },
+  "server": {
+   "server1": {
+    "name": "QNAP",
+    "recover_script": null,
+    "redis": "(host=10.15.0.15, port=6379, db=0, decode_responses=True)",
+    "shutdown_script": null,
+    "startup_script": null,
+    "win_url": "archive (\\10.15.0.82) (Q:)"
+   }
+  },
+  "short_status_devices": [
+   "mount",
+   "telescope",
+   "rotator",
+   "focuser",
+   "selector",
+   "filter_wheel",
+   "camera",
+   "sequencer"
+  ],
+  "site_id": "mrc1",
+  "site_IPC_mechanism": "redis",
+  "solve_nth_image": 1,
+  "solve_timer": 0.05,
+  "stdev_fwhm": 0.5,
+  "telescope": {
+   "telescope1": {
+    "aperture": 356,
+    "camera_name": "camera_1_1",
+    "collecting_area": 76147,
+    "configuration": {
+     "position1": [
+      "darkslide1",
+      "filter_wheel1",
+      "filter_wheel2",
+      "camera1"
+     ]
+    },
+    "driver": "None",
+    "f-ratio": 7.2,
+    "filter_wheel_name": "filter_wheel1",
+    "focal_length": 2563,
+    "focuser_name": "focuser1",
+    "has_cover": false,
+    "has_fans": true,
+    "has_instrument_selector": false,
+    "instrument aliases": [
+     "QHY600Mono"
+    ],
+    "instrument names": [
+     "camera_1_1"
+    ],
+    "name": "Main OTA",
+    "obscuration": 23.5,
+    "parent": "mount1",
+    "ptrtel": "Planewave CDK 0.35m f7.2",
+    "recover_script": null,
+    "rotator_name": "rotator1",
+    "screen_name": "screen1",
+    "selector_positions": 1,
+    "settings": {
+     "fans": [
+      "Auto",
+      "High",
+      "Low",
+      "Off"
+     ],
+     "offset_collimation": 0,
+     "offset_declination": 0,
+     "offset_flexure": 0,
+     "west_flip_ca_offset": 0,
+     "west_flip_dec_offset": 0,
+     "west_flip_ha_offset": 0
+    },
+    "shutdown_script": null,
+    "startup_script": null,
+    "telescop": "mrc1"
+   }
+  },
+  "telescope_description": "0m35 f7.2 Planewave CDK",
+  "threshold_mount_update": 100,
+  "timezone": "PDT",
+  "time_offset": -7,
+  "TZ_database_name": "America/Los_Angeles",
+  "wema_hostname": "MRC-WMS-ENC",
+  "wema_is_active": true,
+  "wema_path": "Q:/ptr/",
+  "wema_types": [
+   "observing_conditions",
+   "enclosure"
+  ],
+  "wema_write_share_path": "Q:/ptr/"
+ }

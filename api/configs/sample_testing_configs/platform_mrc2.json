@@ -1,0 +1,1093 @@
+{
+    "site": "mrc2",
+    "admin_aliases": [
+        "ANS",
+        "WER",
+        "TELOPS",
+        "TB",
+        "DH",
+        "KVH",
+        "KC"
+    ],
+    "admin_owner_commands_only": true,
+    "airport_code": "SBA",
+    "alt_path": "Q:/ptr/",
+    "archive_age": -99.9,
+    "archive_path": "Q:/ptr/",
+    "automatic_detail_default": "Enclosure is initially set to Automatic mode.",
+    "auto_eve_bias_dark": true,
+    "auto_eve_sky_flat": true,
+    "auto_midnight_moonless_bias_dark": false,
+    "auto_morn_bias_dark": true,
+    "auto_morn_sky_flat": true,
+    "camera": {
+        "camera_1_1": {
+            "desc": "QHY 600Pro Monochrome",
+            "detector": "Sony IMX455",
+            "driver": "QHYCCD_Direct_Control",
+            "file_mode_path": "Q:/000ptr_saf/archive/kf01/autosaves/",
+            "manufacturer": "QHY",
+            "name": "sq004ms",
+            "parent": "telescope1",
+            "service_date": "20230301",
+            "settings": {
+                "areas_implemented": [
+                    "600%",
+                    "300%",
+                    "220%",
+                    "150%",
+                    "Full",
+                    "Sqr",
+                    "71%",
+                    "50%",
+                    "35%",
+                    "25%",
+                    "12%"
+                ],
+                "bias_dark_bin_spec": [
+                    "1,1",
+                    "2,2",
+                    "3,3",
+                    "4,4"
+                ],
+                "bias_sec": "[1:22, 1:6388], [1:11, 1:3194], [1:7, 1:2129], [1:5, 1:1597]",
+                "bin_enable": [
+                    "1,1",
+                    "2,2",
+                    "3,3",
+                    "4,4"
+                ],
+                "bin_modes": [
+                    [
+                        2,
+                        2,
+                        0.937
+                    ],
+                    [
+                        1,
+                        1,
+                        0.469
+                    ],
+                    [
+                        3,
+                        3,
+                        1.407
+                    ],
+                    [
+                        4,
+                        4,
+                        1.876
+                    ]
+                ],
+                "calib_setpoints": [
+                    3,
+                    5,
+                    7
+                ],
+                "cam_needs_NumXY_init": true,
+                "can_set_gain": false,
+                "can_subframe": true,
+                "ccd_sec": "[1:9600, 1:6422]",
+                "chiller_ref_temp": 16,
+                "cooler_on": true,
+                "cosmics_at_default": "no",
+                "cosmics_at_maximum": "yes",
+                "crop_preview": false,
+                "crop_preview_xleft": 1,
+                "crop_preview_xright": 1,
+                "crop_preview_ybottom": 1,
+                "crop_preview_ytop": 1,
+                "cycle_time": 0,
+                "dark_exposure": 180,
+                "dark_length": 900,
+                "data_sec": "[25:9600, 1:6388], [13:4800, 1:3194], [9:3200, 1:2129], [7:2400, 1:1597]",
+                "day_warm": false,
+                "day_warm_degrees": 8,
+                "default_area": "Full",
+                "default_rotation": 0,
+                "det_sec": "[25:9600, 1:6388], [13:4800, 1:3194], [9:3200, 1:2129], [7:2400, 1:1597]",
+                "det_size": "[1:9600, 1:6422]",
+                "direct_qhy_gain": 26,
+                "direct_qhy_offset": 60,
+                "direct_qhy_readout_mode": 3,
+                "direct_qhy_usb_speed": 60,
+                "do_cosmics": false,
+                "east_offset": 0,
+                "field_area_sq_amin": 1023,
+                "flat_bin_spec": [
+                    "1,1",
+                    "2,2",
+                    "3,3",
+                    "4,4"
+                ],
+                "flat_count": 5,
+                "flipx_fits": false,
+                "flipx_jpeg": false,
+                "flipy_fits": false,
+                "flipy_jpeg": false,
+                "fullwell_capacity": 85000,
+                "has_chiller": true,
+                "has_darkslide": false,
+                "has_screen": true,
+                "is_cmos": false,
+                "is_osc": false,
+                "long_dark": 360,
+                "max_daytime_exposure": 10,
+                "max_exposure": 360,
+                "max_flat_exposure": 40,
+                "max_linearity": 55000,
+                "max_res_bin": [
+                    1,
+                    1,
+                    0.469
+                ],
+                "min_exposure": 0.001,
+                "min_flat_exposure": 0.01,
+                "min_subframe": [
+                    128,
+                    128
+                ],
+                "north_offset": 0,
+                "number_of_bias_to_collect": 63,
+                "number_of_bias_to_store": 127,
+                "number_of_dark_to_collect": 13,
+                "number_of_dark_to_store": 127,
+                "number_of_flat_to_collect": 7,
+                "number_of_flat_to_store": 127,
+                "optimal_bin": [
+                    2,
+                    2,
+                    0.937
+                ],
+                "osc_bayer": "RGGB",
+                "overscan_x": 0,
+                "overscan_y": 0,
+                "pix_scale": 0.198,
+                "post_bias_available": true,
+                "pre_bias_available": false,
+                "rbi_delay": 0,
+                "readout_mode": "Normal",
+                "readout_seconds": 0.6,
+                "readout_speed": 50,
+                "read_mode": "Normal",
+                "reference_dark": 2,
+                "reference_gain": 2.5,
+                "reference_noise": 4.3,
+                "ref_dark": 180,
+                "rotate180_fits": false,
+                "rotate180_jpeg": false,
+                "rotate270_fits": false,
+                "rotate270_jpeg": false,
+                "rotate90_fits": false,
+                "rotate90_jpeg": true,
+                "rotation": 0,
+                "saturate": 65000,
+                "screen_settings": {
+                    "screen_saturation": 157,
+                    "screen_x0": 8.683,
+                    "screen_x1": 0.1258,
+                    "screen_x2": -0.00009,
+                    "screen_x3": 0.00000003,
+                    "screen_x4": -0.000000000004
+                },
+                "shutter_compensation_available": true,
+                "shutter_type": "6-Blade",
+                "smart_stack_exposure_time": 30,
+                "square_detector": true,
+                "squash_on_x_axis": true,
+                "StartX": 1,
+                "StartY": 1,
+                "temp_setpoint": -5,
+                "transpose_fits": false,
+                "transpose_jpeg": false,
+                "trim_sec": "[1:9576, 1:6388], [1:4788, 1:3194], [1:3192, 1:2129], [1:2394, 1:1597]",
+                "x_active": 9576,
+                "x_bias_line": true,
+                "x_bias_start": 9577,
+                "x_chip": 9576,
+                "x_field_deg": 0.5331,
+                "x_pixel": 3.76,
+                "x_start": 24,
+                "x_trim_offset": 8,
+                "x_width": 9576,
+                "y_active": 6388,
+                "y_bias_line": true,
+                "y_bias_start": 6389,
+                "y_chip": 6388,
+                "y_field_deg": 0.5331,
+                "y_pixel": 3.76,
+                "y_start": 0,
+                "y_trim_offset": 8,
+                "y_width": 6388
+            },
+            "use_file_mode": false
+        }
+    },
+    "check_time": 300,
+    "client_hostname": "mr2-0m60",
+    "client_path": "Q:/ptr/",
+    "client_read_share_path": "Q:/ptr/",
+    "client_write_share_path": "Q:/ptr/",
+    "closest_distance_to_the_moon": 10,
+    "closest_distance_to_the_sun": 45,
+    "debug_duration_sec": 1800,
+    "debug_mode": false,
+    "debug_site_mode": false,
+    "defaults": {
+        "camera": "camera_1_1",
+        "enclosure": "enclosure1",
+        "filter_wheel": "filter_wheel1",
+        "focuser": "focuser1",
+        "mount": "mount1",
+        "observing_conditions": "observing_conditions1",
+        "rotator": "rotator1",
+        "screen": "screen1",
+        "selector": "selector1",
+        "sequencer": "sequencer1",
+        "telescope": "telescope1"
+    },
+    "description": "\n                    Now is the time for all good persons\n                    to get out and vote early and often lest\n                    we lose charge of our democracy.\n                    ",
+    "device_types": [
+        "observing_conditions",
+        "enclosure",
+        "mount",
+        "telescope",
+        "rotator",
+        "focuser",
+        "selector",
+        "filter_wheel",
+        "camera",
+        "sequencer"
+    ],
+    "dome_on_wema": true,
+    "elevation": 317.75,
+    "enclosure": {
+        "enclosure1": {
+            "controlled_by": [
+                "mount1",
+                "mount2"
+            ],
+            "directly_connected": false,
+            "driver": "Windows_share",
+            "enc_is_specific": false,
+            "eve_bias_dark_dur": 2,
+            "eve_cooldown_offset": -0.99,
+            "eve_screen_flat_dur": 1,
+            "eve_sky_flat_offset": 0.5,
+            "has_lights": true,
+            "hostIP": "10.15.0.30",
+            "is_dome": false,
+            "mode": "Automatic",
+            "morning_close_offset": 0.41,
+            "morn_sky_flat_offset": 0.4,
+            "name": "Megawan",
+            "operations_begin": -1,
+            "operations_end": 0.42,
+            "parent": "site",
+            "settings": {
+                "lights": [
+                    "Auto",
+                    "White",
+                    "Red",
+                    "IR",
+                    "Off"
+                ],
+                "roof_shutter": [
+                    "Auto",
+                    "Open",
+                    "Close",
+                    "Lock Closed",
+                    "Unlock"
+                ]
+            }
+        }
+    },
+    "enclosure_check_period": 2,
+    "enc_types": [
+        "enclosure"
+    ],
+    "events": {
+        "Astro Dark": 45025.66330570668,
+        "Civil Dawn": 45026.045274299344,
+        "Civil Dusk": 45025.621456263376,
+        "Clock & Auto Focus": 45025.64990740741,
+        "Close and Park": 45026.08399609918,
+        "Cool Down, Open": 45025.56324863785,
+        "day_directory": "20230410",
+        "End Astro Dark": 45026.00287542023,
+        "End Eve Bias Dark": 45025.559776415634,
+        "End Eve Sky Flats": 45025.63527027681,
+        "End Morn Bias Dark": 45026.15899609918,
+        "End Morn Sky Flats": 45026.082607210294,
+        "End Nightly Reset": 45026.20066276585,
+        "Eve Bias Dark": 45025.4764430823,
+        "Eve Sky Flats": 45025.56324863785,
+        "Middle of Night": 45025.83323988202,
+        "Moon Rise": 45025.81599693183,
+        "Moon Set": 45026.221231469724,
+        "Moon Transit": 45026.019172629356,
+        "Morn Bias Dark": 45026.085384988066,
+        "Morn Sky Flats": 45026.04541225961,
+        "Naut Dawn": 45026.02457892628,
+        "Naut Dusk": 45025.64221472126,
+        "Nightly Reset": 45026.18677387696,
+        "Observing Begins": 45025.65546296297,
+        "Observing Ends": 45026.01372717325,
+        "Ops Window Closes": 45026.08330165473,
+        "Ops Window Start": 45025.56324863785,
+        "Prior Moon Rise": 45024.76909759284,
+        "Prior Moon Set": 45025.18397816479,
+        "Prior Moon Transit": 45024.977934893504,
+        "Sun Rise": 45026.06177387696,
+        "Sun Set": 45025.60491530452,
+        "use_by": 45026.22844054362
+    },
+    "eve_cool_down_open": -60,
+    "eve_sky_flat_sunset_offset": -60,
+    "filter_wheel": {
+        "filter_wheel1": {
+            "alias": "Dual filter wheel",
+            "desc": "Dual Apogee custom Dual 50mm sq.",
+            "driver": "Maxim.CCDcamera",
+            "dual_wheel": true,
+            "ip_string": "http://127.0.0.1",
+            "parent": "tel1",
+            "service_date": "20180101",
+            "settings": {
+                "auto_color_options": [
+                    "manual",
+                    "RGB",
+                    "NB",
+                    "RGBHA",
+                    "RGBNB"
+                ],
+                "default_filter": "w",
+                "filter_data": [
+                    [
+                        "air",
+                        [
+                            0,
+                            0
+                        ],
+                        -1000,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "ai"
+                    ],
+                    [
+                        "Lum",
+                        [
+                            1,
+                            0
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "w "
+                    ],
+                    [
+                        "Red",
+                        [
+                            0,
+                            4
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "r "
+                    ],
+                    [
+                        "Green",
+                        [
+                            0,
+                            3
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "V "
+                    ],
+                    [
+                        "Blue",
+                        [
+                            0,
+                            1
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "B "
+                    ],
+                    [
+                        "w",
+                        [
+                            1,
+                            0
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "w "
+                    ],
+                    [
+                        "dif",
+                        [
+                            2,
+                            0
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "df"
+                    ],
+                    [
+                        "O3",
+                        [
+                            3,
+                            0
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "O3"
+                    ],
+                    [
+                        "HA",
+                        [
+                            4,
+                            0
+                        ],
+                        0,
+                        4,
+                        [
+                            2,
+                            17
+                        ],
+                        "HA"
+                    ],
+                    [
+                        "N2",
+                        [
+                            5,
+                            5
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "S2"
+                    ],
+                    [
+                        "S2",
+                        [
+                            6,
+                            6
+                        ],
+                        0,
+                        0.735,
+                        [
+                            2,
+                            17
+                        ],
+                        "N2"
+                    ],
+                    [
+                        "JB",
+                        [
+                            0,
+                            1
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "B "
+                    ],
+                    [
+                        "gp",
+                        [
+                            0,
+                            2
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "g "
+                    ],
+                    [
+                        "JV",
+                        [
+                            0,
+                            3
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "V "
+                    ],
+                    [
+                        "rp",
+                        [
+                            0,
+                            4
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "r "
+                    ],
+                    [
+                        "ip",
+                        [
+                            0,
+                            5
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "i "
+                    ],
+                    [
+                        "EXO",
+                        [
+                            0,
+                            6
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "EX"
+                    ],
+                    [
+                        "dif-JB",
+                        [
+                            2,
+                            1
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "Ha"
+                    ],
+                    [
+                        "dif-gp",
+                        [
+                            2,
+                            2
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "dg"
+                    ],
+                    [
+                        "dif-JV",
+                        [
+                            2,
+                            3
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "dV"
+                    ],
+                    [
+                        "dif-rp",
+                        [
+                            2,
+                            5
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "dr"
+                    ],
+                    [
+                        "dif-ip",
+                        [
+                            2,
+                            6
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "di"
+                    ],
+                    [
+                        "dif-exo",
+                        [
+                            2,
+                            0
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "dE"
+                    ],
+                    [
+                        "dark",
+                        [
+                            4,
+                            1
+                        ],
+                        0,
+                        0.5,
+                        [
+                            2,
+                            17
+                        ],
+                        "dk"
+                    ]
+                ],
+                "filter_screen_sort": [
+                    "0",
+                    "1",
+                    "2",
+                    "10",
+                    "7",
+                    "6",
+                    "18",
+                    "12",
+                    "11",
+                    "13",
+                    "8",
+                    "3",
+                    "14",
+                    "15",
+                    "4",
+                    "16"
+                ],
+                "filter_sky_sort": [
+                    "S2",
+                    "N2",
+                    "O3",
+                    "i",
+                    "r",
+                    "g",
+                    "JV",
+                    "JB",
+                    "EXO",
+                    "dif",
+                    "w",
+                    "air"
+                ],
+                "mono_Narrowband_colour_filters": [
+                    "ha",
+                    "o3",
+                    "s2"
+                ],
+                "mono_Narrowband_relative_weights": [
+                    1,
+                    2,
+                    2.5
+                ],
+                "mono_RGB_colour_filters": [
+                    "jb",
+                    "jv",
+                    "r"
+                ],
+                "mono_RGB_relative_weights": [
+                    1.2,
+                    1,
+                    0.8
+                ]
+            }
+        }
+    },
+    "focuser": {
+        "focuser1": {
+            "backlash": 0,
+            "coef_0": 5870,
+            "coef_c": 0,
+            "coef_date": "20230305",
+            "desc": "Optec Gemini",
+            "driver": "ASCOM.OptecGemini.Focuser",
+            "has_dial_indicator": false,
+            "maximum": 12700,
+            "minimum": 0,
+            "name": "focuser",
+            "parent": "telescope1",
+            "reference": 5870,
+            "ref_temp": 10,
+            "start_at_config_reference": true,
+            "step_size": 1,
+            "throw": 400,
+            "unit": "steps",
+            "unit_conversion": 9.090909090909092,
+            "use_focuser_temperature": false,
+            "use_local_temp": false,
+            "z_coef_date": "20221002",
+            "z_compression": 0
+        }
+    },
+    "focus_exposure_time": 15,
+    "focus_trigger": 5,
+    "host_wema_site_name": "mrc",
+    "keep_focus_images_on_disk": true,
+    "keep_reduced_on_disk": true,
+    "lamp_box": {
+        "lamp_box1": {
+            "desc": "None",
+            "driver": "None",
+            "name": "None",
+            "parent": "camera_1",
+            "spectrograph": "None",
+            "switches": "None"
+        }
+    },
+    "latitude": 34.34595969,
+    "location": "Santa Barbara, California,  USA",
+    "longitude": -119.6811323955,
+    "lowest_requestable_altitude": -5,
+    "maximum_roof_opens_per_evening": 4,
+    "minimum_realistic_seeing": 1,
+    "mount": {
+        "mount1": {
+            "alignment": "Alt-Az",
+            "default_zenith_avoid": 7,
+            "desc": "Planewave L600 AltAz",
+            "driver": "ASCOM.PWI4.Telescope",
+            "east_flip_dec_correction": 0,
+            "east_flip_ra_correction": 0,
+            "has_ascom_altaz": true,
+            "has_paddle": false,
+            "home_after_unpark": false,
+            "home_altitude": 0,
+            "home_azimuth": 210,
+            "home_before_park": false,
+            "hostIP": "10.15.0.40",
+            "hostname": "westpier",
+            "lowest_acceptable_altitude": -5,
+            "name": "westpier",
+            "parent": "enclosure1",
+            "permissive_mount_reset": "yes",
+            "pointing_tel": "tel1",
+            "Selector": {
+                "available": false
+            },
+            "settings": {
+                "elevation_offset": 0.5,
+                "fixed_screen _altitude": 0.54,
+                "home_park_altitude": 0,
+                "home_park_azimuth": 195,
+                "horizon": 15,
+                "horizon_detail": {
+                    "0": 32,
+                    "30": 35,
+                    "43": 28.6,
+                    "59": 32.7,
+                    "62": 28.6,
+                    "65": 25.2,
+                    "74": 22.6,
+                    "82": 20,
+                    "130": 12,
+                    "150": 20,
+                    "172": 28,
+                    "191": 25,
+                    "213": 20,
+                    "235": 15.3,
+                    "260": 11,
+                    "272": 17,
+                    "294": 16.5,
+                    "303": 20.6,
+                    "309": 27,
+                    "315": 32,
+                    "360": 32,
+                    "101.5": 14,
+                    "107.5": 12,
+                    "298.5": 18.6,
+                    "36.5": 39,
+                    "95.5": 20
+                },
+                "latitude_offset": 0.025,
+                "longitude_offset": 0.25,
+                "model": {
+                    "ACEC": 0,
+                    "ACES": 0,
+                    "AE": 0,
+                    "AN": 0,
+                    "CA": 0,
+                    "CH": 0,
+                    "DCEC": 0,
+                    "DCES": 0,
+                    "ECEC": 0,
+                    "ECES": 0,
+                    "HCEC": 0,
+                    "HCES": 0,
+                    "IA": 0,
+                    "ID": 0,
+                    "IE": 0,
+                    "IH": 0,
+                    "MA": 0,
+                    "ME": 0,
+                    "NP": 0,
+                    "NPAE": 0,
+                    "TF": 0,
+                    "TX": 0,
+                    "WD": 0,
+                    "WH": 0
+                },
+                "model_on": true,
+                "rates_on": true,
+                "refraction_on": true
+            },
+            "tel_id": "0m35",
+            "time_inactive_until_park": 3600,
+            "west_clutch_dec_correction": 0,
+            "west_clutch_ra_correction": 0
+        }
+    },
+    "mpc_code": "ZZ23",
+    "name": "Mountain Ranch Camp Observatory 0m6f6.8",
+    "observatory_location": "mrc",
+    "observatory_url": "https://starz-r-us.sky/clearskies",
+    "observing_check_period": 2,
+    "observing_conditions": {
+        "observing_conditions1": {
+            "driver": "Windows.Share",
+            "have_local_unihedron": false,
+            "name": "SRO File",
+            "ocn_has_unihedron": false,
+            "ocn_is_specific": true,
+            "parent": "site",
+            "share_path_name": "F:/ptr/",
+            "unihedron_port": 10,
+            "uni_driver": "ASCOM.SQM.serial.ObservingConditions"
+        }
+    },
+    "obsid_allowed_to_open_roof": false,
+    "obsid_in_automatic_default": "Automatic",
+    "obsid_is_generic": false,
+    "obsid_is_specific": false,
+    "obsid_roof_control": false,
+    "obs_id": "mrc2",
+    "only_scope_that_controls_the_roof": false,
+    "owner": [
+        "google-oauth2|112401903840371673242"
+    ],
+    "owner_alias": [
+        "WER",
+        "TELOPS"
+    ],
+    "periodic_focus_time": 0.5,
+    "period_of_time_to_wait_for_roof_to_open": 50,
+    "pointing_calibration_on_startup": false,
+    "re-calibrate_on_solve": true,
+    "redis_ip": "10.15.0.109",
+    "reference_ambient": 15,
+    "reference_pressure": 977.83,
+    "roof_open_safety_base_time": 15,
+    "rotator": {
+        "rotator1": {
+            "backlash": 0,
+            "com_port": "COM9",
+            "desc": "Opetc Gemini",
+            "driver": "ASCOM.AltAzDS.Rotator",
+            "maximum": 360,
+            "minimum": -180,
+            "name": "rotator",
+            "parent": "telescope1",
+            "recover_script": "None",
+            "shutdown_script": "None",
+            "startup_script": "None",
+            "step_size": 0.0001,
+            "unit": "degree"
+        }
+    },
+    "save_raw_to_disk": true,
+    "save_to_alt_path": "no",
+    "screen": {
+        "screen1": {
+            "desc": "Optec Alnitak 30\"",
+            "driver": "COM6",
+            "minimum": 5,
+            "name": "screen",
+            "parent": "telescope1",
+            "saturate": 170
+        }
+    },
+    "selector": {
+        "selector1": {
+            "cameras": [
+                "camera_1_1",
+                "camera_1_2",
+                "camera_1_4"
+            ],
+            "com_port": "COM31",
+            "default": 0,
+            "desc": "Optec Perseus",
+            "driver": "ASCOM.PerseusServer.Switch",
+            "guiders": [
+                "ag_1_2",
+                "ag_1_4"
+            ],
+            "instruments": [
+                "Main_camera",
+                "eShell_spect",
+                "Planet_camera",
+                "UVEX_spect"
+            ],
+            "name": "Selector",
+            "parent": "telescope1",
+            "ports": 4
+        }
+    },
+    "send_files_at_end_of_night": "no",
+    "sequencer": {
+        "sequencer1": {
+            "desc": "Automation Control",
+            "name": "Sequencer",
+            "parent": "site"
+        }
+    },
+    "server": {
+        "server1": {
+            "name": "QNAP",
+            "redis": "(host=10.15.0.15, port=6379, db=0, decode_responses=true)",
+            "win_url": "archive (\\10.15.0.82) (Q:)"
+        }
+    },
+    "short_status_devices": [
+        "mount",
+        "telescope",
+        "rotator",
+        "focuser",
+        "selector",
+        "filter_wheel",
+        "camera",
+        "sequencer"
+    ],
+    "site_id": "mrc2",
+    "site_IPC_mechanism": "redis",
+    "site_path": "Q:/",
+    "solve_nth_image": 10,
+    "solve_timer": 5,
+    "stdev_fwhm": 1,
+    "telescope": {
+        "telescope1": {
+            "aperture": 610,
+            "camera_name": "camera_1_1",
+            "collecting_area": 128039,
+            "configuration": {
+                "position1": [
+                    "darkslide1",
+                    "filter_wheel1",
+                    "filter_wheel2",
+                    "camera1"
+                ]
+            },
+            "desc": "Planewave CDK 600 F6.8",
+            "f-ratio": 6.8,
+            "filter_wheel_name": "filter_wheel1",
+            "focal_length": 3962,
+            "focuser_name": "focuser1",
+            "has_cover": true,
+            "has_dew_heater": true,
+            "has_fans": true,
+            "has_instrument_selector": false,
+            "instrument aliases": [
+                "QHY600Mono"
+            ],
+            "instrument names": [
+                "camera_1_1"
+            ],
+            "name": "Main OTA",
+            "obscuration": 47,
+            "parent": "mount2",
+            "ptrtel": "mrc2",
+            "rotator_name": "rotator1",
+            "screen_name": "screen1",
+            "selector_positions": 1,
+            "settings": {
+                "fans": [
+                    "Auto",
+                    "High",
+                    "Low",
+                    "Off"
+                ],
+                "offset_collimation": 0,
+                "offset_declination": 0,
+                "offset_flexure": 0,
+                "west_flip_ca_offset": 0,
+                "west_flip_dec_offset": 0,
+                "west_flip_ha_offset": 0
+            },
+            "telescop": "mrc2",
+            "tel_has_unihedron": false
+        }
+    },
+    "telescope_description": "0m61 f6.8 Planewave CDK",
+    "threshold_mount_update": 10,
+    "timezone": "PDT",
+    "time_offset": -7,
+    "TZ_database_name": "America/Los_Angeles",
+    "wema_hostname": "MRC-WMS-ENC",
+    "wema_is_active": true,
+    "wema_path": "Q:/ptr/",
+    "wema_types": [
+        "observing_conditions",
+        "enclosure"
+    ],
+    "wema_write_share_path": "Q:/ptr/"
+}
