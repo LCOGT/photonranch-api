@@ -95,9 +95,7 @@ jobs:
 
     # Install serverless
     - name: Install Serverless
-      run: |
-        npm install -g serverless &&
-        npm install --save serverless-python-requirements
+      run: npm install -g serverless
 
     # Install Node dependencies
     - name: Set up Environment
