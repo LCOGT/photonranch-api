@@ -20,25 +20,25 @@ jobs:
         aws-secret-access-key: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    # Set up Python 3.9 environment 
+    # Set up Python 3.9 environment
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9 
+        python-version: 3.9
 
-    # Install Python dependencies    
+    # Install Python dependencies
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     # Run tests
-    - name: Run tests 
+    - name: Run tests
       run: python -m pytest
 
 
   deploy:
-    needs: 
+    needs:
       - run-tests
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
         ${{ secrets.AUTH0_PUBLIC_KEY }}
         -----END CERTIFICATE-----
         EOF
-        
+
     - name: Create Auth0 secrets file
       run: |
         cat > /home/runner/work/photonranch-api/photonranch-api/secrets.json << EOF
@@ -76,13 +76,13 @@ jobs:
     - name: Set up Node
       uses: actions/setup-node@v3
       with:
-        node-version: 16.x
+        node-version: 18.x
 
     # Set up Python 3.9 environment
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9 
+        python-version: 3.9
 
     # Install serverless
     - name: Install Serverless
@@ -95,12 +95,12 @@ jobs:
     # Install Serverless plugins
     - name: Install Plugins
       run: |
-        serverless plugin install --name serverless-python-requirements && 
-        serverless plugin install --name serverless-domain-manager && 
-        serverless plugin install --name serverless-prune-plugin && 
+        serverless plugin install --name serverless-python-requirements &&
+        serverless plugin install --name serverless-domain-manager &&
+        serverless plugin install --name serverless-prune-plugin &&
         serverless plugin install --name serverless-offline
-      
-    # Deploy to stage 
+
+    # Deploy to stage
     - name: Serverless Deploy
       run: serverless deploy --stage $DEPLOY_STAGE
       env:
