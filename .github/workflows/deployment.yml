@@ -83,8 +83,8 @@ jobs:
       run: |
         {
           echo "PUBLIC_KEY=$(cat ./public_key)" << EOF
-          echo EOF
         } >> $GITHUB_ENV
+        echo $GITHUB_ENV
 
     # Set up Python 3.9 environment
     - name: Set up Python
