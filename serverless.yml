@@ -1,5 +1,5 @@
 # serverless.yml
-org: photonadmin 
+org: photonadmin
 app: photonranch
 
 service: photonranch-api
@@ -38,8 +38,8 @@ custom:
     useStaticCache: false
     slim: true
 
-  # Serverless prune plugin automatically prunes function versions older than 
-  # the last 3. This prevents the lambda function from exceeding storage limits. 
+  # Serverless prune plugin automatically prunes function versions older than
+  # the last 3. This prevents the lambda function from exceeding storage limits.
   prune:
     automatic: true
     number: 3
@@ -49,7 +49,7 @@ provider:
   stage: ${opt:stage, "test"}
   runtime: python3.9
   region: us-east-1
-  environment: 
+  environment:
     S3_BUCKET_NAME: 'photonranch-001'
     CONFIG_TABLE_NAME: site_configurations
     UPLOADS_LOG_TABLE_NAME: recent-uploads-log
@@ -58,18 +58,18 @@ provider:
     REMOTEHQ_ROOMS_TABLE: 'remotehq-control-rooms'
     NIGHT_LOG_TABLE: 'night-log'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
-    AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
+    AUTH0_CLIENT_PUBLIC_KEY: ${PUBLIC_KEY}
 
   iam:
     role:
-      statements: 
-        - Effect: Allow 
-          Action: 
+      statements:
+        - Effect: Allow
+          Action:
             - s3:GetObject
             - s3:PutObject
             - s3:ListBucket
             - s3:ListBucketVersions
-          Resource: 
+          Resource:
             - "arn:aws:s3:::photonranch-001/*"
             - "arn:aws:s3:::photonranch-001"
 
@@ -78,8 +78,8 @@ provider:
             - ssm:GetParameter
           Resource: "arn:aws:ssm:${self:provider.region}:*:parameter/*"
 
-        - Effect: Allow 
-          Action: 
+        - Effect: Allow
+          Action:
             - "dynamodb:PutItem"
             - "dynamodb:GetItem"
             - "dynamodb:UpdateItem"
@@ -97,7 +97,7 @@ provider:
         - Effect: Allow
           Action:
             - "lambda:InvokeFunction"
-          Resource: 
+          Resource:
             - "arn:aws:lambda:us-east-1:306389350997:function:zip-downloads-dev-zip"
 
 resources:  # CloudFormation template syntax from here on.
@@ -143,10 +143,10 @@ resources:  # CloudFormation template syntax from here on.
         ResponseType: UNAUTHORIZED
         RestApiId:
           Ref: 'ApiGatewayRestApi'
-        StatusCode: '401'    
-        
+        StatusCode: '401'
+
 functions:
-  authorizerFunc: 
+  authorizerFunc:
     handler: api/authorizer.auth
 
   dummyRequiresAuth:
@@ -177,7 +177,7 @@ functions:
   download:
     handler: api/handler.download
     memorySize: 2024
-    timeout: 30 
+    timeout: 30
     events:
       - http:
           path: download
@@ -187,17 +187,17 @@ functions:
   downloadzip:
     handler: api/handler.download_zip
     memorySize: 1024
-    timeout: 30 
+    timeout: 30
     events:
       - http:
           path: downloadzip
           method: post
           cors: true
 
-  getRecentUploads: 
+  getRecentUploads:
     handler: api/handler.get_recent_uploads
     memorySize: 2024
-    timeout: 30 
+    timeout: 30
     events:
       - http:
           path: recentuploads
@@ -225,11 +225,11 @@ functions:
           method: get
           cors: true
 
-  # List of image packages for last k images at the given site 
+  # List of image packages for last k images at the given site
   latestImages:
     handler: api/db.get_latest_site_images_handler
     memorySize: 2024
-    timeout: 30 
+    timeout: 30
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
@@ -261,7 +261,7 @@ functions:
   filteredImageQuery:
     handler: api/db.filtered_images_query_handler
     memorySize: 2024
-    timeout: 30 
+    timeout: 30
     layers:
       - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-SQLAlchemy:10
     events:
@@ -303,7 +303,7 @@ functions:
   ### RemoteHQ api proxy
   newRemoteHQBrowser:
     handler: api/remotehq_helpers.handle_new_remotehq_browser
-    events: 
+    events:
       - http:
           path: /new_remotehq_browser
           method: post
@@ -315,7 +315,7 @@ functions:
 
   getControlRoom:
     handler: api/control_rooms.get_control_room
-    events: 
+    events:
       - http:
           path: /control_room/{site}
           method: get
@@ -323,7 +323,7 @@ functions:
 
   deleteControlRoom:
     handler: api/control_rooms.delete_control_room
-    events: 
+    events:
       - http:
           path: /control_room/{site}
           method: delete
@@ -331,7 +331,7 @@ functions:
 
   restartControlRoom:
     handler: api/control_rooms.restart_control_room_handler
-    events: 
+    events:
       - http:
           path: /control_room/{site}/restart
           method: get
@@ -340,13 +340,13 @@ functions:
   restartAllRooms:
     handler: api/control_rooms.restart_all_rooms_handler
     events:
-      - schedule: 
+      - schedule:
           rate: cron(0 * * * ? *)  # Run once every hour
 
   ### Night Log Endpoints
   getNightLogNote:
     handler: api/night_log.get_note_handler
-    events: 
+    events:
       - http:
           path: /nightlog/{site}
           method: get
@@ -354,7 +354,7 @@ functions:
 
   createNightLogNote:
     handler: api/night_log.create_note_handler
-    events: 
+    events:
       - http:
           path: /nightlog/{site}
           method: post
@@ -366,7 +366,7 @@ functions:
 
   deleteNightLogNote:
     handler: api/night_log.delete_note_handler
-    events: 
+    events:
       - http:
           path: /nightlog/{site}
           method: delete
