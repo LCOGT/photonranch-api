@@ -85,9 +85,9 @@ class Image(Base):
         """A dictionary representation of common image metadata.
 
         This is the format that is used and expected by the frontend when it
-        queries this api for images. 
+        queries this api for images.
 
-        Notably missing from this is the entire fits header, for smaller 
+        Notably missing from this is the entire fits header, for smaller
         payload sizes.
         """
         header_dictionary = json.loads(self.header) if self.header is not None else None
@@ -104,12 +104,12 @@ class Image(Base):
             "image_id": self.image_id,
             "base_filename": self.base_filename,
             "data_type": self.data_type,
-            "site": self.site, 
+            "site": self.site,
 
             "exposure_time": self.exposure_time,
             "filter_used": self.filter_used,
-            "right_ascension": self.right_ascension, 
-            "declination": self.declination, 
+            "right_ascension": self.right_ascension,
+            "declination": self.declination,
             "azimuth": self.azimuth,
             "altitude": self.altitude,
             "airmass": self.airmass,
@@ -147,7 +147,7 @@ class Image(Base):
             package["jpg_thumbnail_url"] = url
 
         return package
-    
+
 
     def get_jpg_url(self):
         """Returns the s3 URL to the medium jpg at AWS."""
@@ -171,10 +171,10 @@ class Image(Base):
         If there is no fits file available, return an empty string.
         """
 
-        if self.fits_01_exists: 
+        if self.fits_01_exists:
             return f"{self.base_filename}-{self.data_type}01.fits.fz"
 
-        elif self.fits_10_exists: 
+        elif self.fits_10_exists:
             return f"{self.base_filename}-{self.data_type}10.fits.fz"
 
         else: return ''
@@ -183,9 +183,9 @@ class Image(Base):
 def get_latest_site_images(db_address, site, number_of_images, user_id=None):
     """Gets the n latest images from a site.
 
-    Note: Only returns sucessfully if the jpg preview exists. 
+    Note: Only returns sucessfully if the jpg preview exists.
 
-    Args: 
+    Args:
         db_address (str): Address for the database to query.
         site (str): 3-letter site code.
         number_of_images (int): Number of images to return.
@@ -218,12 +218,12 @@ def get_latest_site_images(db_address, site, number_of_images, user_id=None):
 
 def get_latest_image_all_sites():
     """Gets the latest images at all sites."""
-    
+
     start = time.time()
     sites = get_all_sites()
     print(time.time() - start)
     print(sites)
-    results = {} 
+    results = {}
 
     with get_session() as session:
         for site in sites:
@@ -245,7 +245,7 @@ def get_latest_image_all_sites():
 def get_fits_header_from_db(db_address, base_filename):
     """Returns the fits header as a dictionary for the given fits file.
 
-    Args: 
+    Args:
         db_address (str): Address for the database to query.
         base_filename (str):
             The filename (without the ex-version or .extension)
@@ -259,17 +259,17 @@ def get_fits_header_from_db(db_address, base_filename):
         header = session.query(Image.header)\
             .filter(Image.base_filename==base_filename)\
             .one()
-    header_dict = json.loads(header[0])
+    header_dict = json.loads(header[0]) if header[0] is not None else {}
     return header_dict
 
 
-def filtered_images_query(db_address: str, query_filters: list): 
-    """Gets images that satisfy the specified filters. 
+def filtered_images_query(db_address: str, query_filters: list):
+    """Gets images that satisfy the specified filters.
 
-    Common query filters include exposure duration, site, capture date, 
+    Common query filters include exposure duration, site, capture date,
     image filter, etc...
 
-    Args: 
+    Args:
         db_address (str): Address for the database to query.
         query_filters (list):
             All the filter expressions. These will be sent in the
@@ -326,11 +326,11 @@ def get_image_by_filename(db_address, base_filename):
 
     Note: Only returns sucessfully if the jpg preview exists.
 
-    Args: 
+    Args:
         db_address (str): Address for the database to query.
         base_filename (str):
             The filename (without the ex-version or .extension)
-            for identifying the header we want. 
+            for identifying the header we want.
 
     Returns:
         dict: The image package representing the image with common metadata.
@@ -362,7 +362,7 @@ def remove_image_by_filename(base_filename):
         session.commit()
 
 
-def get_files_within_date_range(site: str, start_timestamp_s: int, 
+def get_files_within_date_range(site: str, start_timestamp_s: int,
         end_timestamp_s: int, fits_size: str):
     """Queries for files at a given site within a date range.
 
@@ -389,7 +389,7 @@ def get_files_within_date_range(site: str, start_timestamp_s: int,
         Image.capture_date >= start_datetime,
         Image.capture_date <= end_datetime,
     ]
-    if fits_size == "small": 
+    if fits_size == "small":
         query_filters.append(Image.fits_10_exists.is_(True))
     elif fits_size == "large":
         query_filters.append(Image.fits_01_exists.is_(True))
@@ -400,13 +400,13 @@ def get_files_within_date_range(site: str, start_timestamp_s: int,
             .all()
         session.expunge_all()
 
-    if fits_size == "small": 
+    if fits_size == "small":
         return [image.get_small_fits_filename() for image in images]
 
-    elif fits_size == "large": 
+    elif fits_size == "large":
         return [image.get_large_fits_filename() for image in images]
 
-    elif fits_size == "best": 
+    elif fits_size == "best":
         return [image.get_best_fits_filename() for image in images]
 
 
@@ -446,7 +446,7 @@ def get_latest_site_images_handler(event, context):
 
 
 def get_latest_images_all_sites_handler(event, context):
-    images = get_latest_image_all_sites() 
+    images = get_latest_image_all_sites()
     return http_response(HTTPStatus.OK, images)
 
 
@@ -454,7 +454,7 @@ def get_fits_header_from_db_handler(event, context):
     """Handler for retrieving the header from a specified fits file.
 
     Args:
-        event.body.base_filename: 
+        event.body.base_filename:
             The filename (without the ex-version or .extension)
             for identifying the header we want.
 
@@ -490,14 +490,14 @@ def get_image_by_filename_handler(event, context):
 
     base_filename = event['pathParameters']['base_filename']
 
-    try: 
+    try:
         image = get_image_by_filename(DB_ADDRESS, base_filename)
 
     except NoResultFound:
         error_msg = f"No results found for {base_filename}"
         logger.exception(error_msg)
         return http_response(HTTPStatus.NOT_FOUND, error_msg)
-        
+
     except MultipleResultsFound:
         error_msg = f"Multiple images found for {base_filename}"
         logger.exception(error_msg)
@@ -508,7 +508,7 @@ def get_image_by_filename_handler(event, context):
 
 def filtered_images_query_handler(event, context):
     """Handler for querying images based on specified filters.
-    
+
     Requests may query based on username, user_id, site, filter
     (as in imaging), min and max exposure times, start and end
     dates, or filename.
@@ -525,7 +525,7 @@ def filtered_images_query_handler(event, context):
     query_filters = []
     if "username" in filter_params:
         query_filters.append(Image.username==filter_params["username"])
-    if "user_id" in filter_params: 
+    if "user_id" in filter_params:
         query_filters.append(Image.user_id==filter_params["user_id"])
     if "site" in filter_params:
         query_filters.append(Image.site==filter_params["site"])
@@ -542,7 +542,7 @@ def filtered_images_query_handler(event, context):
     if "filename" in filter_params:
         query_filters.append(Image.base_filename.like(filter_params["filename"]))
 
-    try: 
+    try:
         images = filtered_images_query(DB_ADDRESS, query_filters)
     except ArgumentError:
         error_msg = "Invalid query filter. "
@@ -560,7 +560,7 @@ def remove_image_by_filename_handler(event, context):
 
     Args:
         event.body.base_filename: Filename (without the 'EX' or .extension).
-    
+
     Returns:
         200 status code with successful removal of image.
         404 status code if exception occurs during attempted removal.
@@ -568,7 +568,7 @@ def remove_image_by_filename_handler(event, context):
 
     base_filename = event['pathParameters']['base_filename']
 
-    try: 
+    try:
         remove_image_by_filename(base_filename)
     except Exception as e:
         error_msg = f"Could not delete {base_filename}. Error: {e}"
@@ -576,4 +576,3 @@ def remove_image_by_filename_handler(event, context):
         return http_response(HTTPStatus.NOT_FOUND, e)
 
     return http_response(HTTPStatus.OK, f'Successfully removed {base_filename}')
-
