@@ -80,7 +80,11 @@ jobs:
 
     # Read public key
     - name: Read Public Key
-      run: echo "PUBLIC_KEY=$(cat ./public_key)" >> $GITHUB_ENV
+      run: |
+        {
+          echo "PUBLIC_KEY=$(cat ./public_key)"
+          echo EOF
+        } >> $GITHUB_ENV
 
     # Set up Python 3.9 environment
     - name: Set up Python
