@@ -99,7 +99,7 @@ jobs:
 
     # Install Node dependencies
     - name: Set up Environment
-      run: npm ci
+      run: npm ci --include=dev
 
     # Install Serverless plugins
     - name: Install Plugins
@@ -111,7 +111,7 @@ jobs:
 
     # Deploy to stage
     - name: Serverless Deploy
-      run: serverless deploy --stage $DEPLOY_STAGE --debug
+      run: sls deploy --stage $DEPLOY_STAGE --debug
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
