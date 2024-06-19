@@ -103,7 +103,7 @@ jobs:
 
     # Deploy to stage
     - name: Serverless Deploy
-      run: sls deploy --stage $DEPLOY_STAGE --debug
+      run: sls deploy --stage $DEPLOY_STAGE
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.SLS_SECRET_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
