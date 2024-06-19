@@ -95,9 +95,7 @@ jobs:
 
     # Install serverless
     - name: Install Serverless
-      run: |
-        npm install -g serverless &&
-        npm install --save serverless-python-requirements
+      run: npm install -g serverless
 
     # Install Node dependencies
     - name: Set up Environment
@@ -106,10 +104,10 @@ jobs:
     # Install Serverless plugins
     - name: Install Plugins
       run: |
-        serverless plugin install --name serverless-python-requirements &&
-        serverless plugin install --name serverless-domain-manager &&
-        serverless plugin install --name serverless-prune-plugin &&
-        serverless plugin install --name serverless-offline
+        sls plugin install --name serverless-python-requirements &&
+        sls plugin install --name serverless-domain-manager &&
+        sls plugin install --name serverless-prune-plugin &&
+        sls plugin install --name serverless-offline
 
     # Deploy to stage
     - name: Serverless Deploy
