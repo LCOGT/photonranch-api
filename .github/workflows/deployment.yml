@@ -82,7 +82,7 @@ jobs:
     - name: Read Public Key
       run: |
         {
-          echo "PUBLIC_KEY=$(cat ./public_key)"
+          echo "PUBLIC_KEY=$(cat ./public_key)" << EOF
           echo EOF
         } >> $GITHUB_ENV
 
