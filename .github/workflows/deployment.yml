@@ -101,14 +101,6 @@ jobs:
     - name: Set up Environment
       run: npm ci --include=dev
 
-    # Install Serverless plugins
-    - name: Install Plugins
-      run: |
-        sls plugin install --name serverless-python-requirements &&
-        sls plugin install --name serverless-domain-manager &&
-        sls plugin install --name serverless-prune-plugin &&
-        sls plugin install --name serverless-offline
-
     # Deploy to stage
     - name: Serverless Deploy
       run: sls deploy --stage $DEPLOY_STAGE --debug
