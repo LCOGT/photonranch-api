@@ -78,15 +78,6 @@ jobs:
       with:
         node-version: 18.x
 
-    # Read public key
-    - name: Read Public Key
-      run: |
-        {
-          echo "PUBLIC_KEY<<EOF"
-          cat ./public_key
-          echo EOF
-        } >> $GITHUB_ENV
-
     # Set up Python 3.9 environment
     - name: Set up Python
       uses: actions/setup-python@v4

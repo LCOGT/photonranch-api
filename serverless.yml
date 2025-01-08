@@ -58,7 +58,7 @@ provider:
     REMOTEHQ_ROOMS_TABLE: 'remotehq-control-rooms'
     NIGHT_LOG_TABLE: 'night-log'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
-    AUTH0_CLIENT_PUBLIC_KEY: ${PUBLIC_KEY}
+    AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
 
   iam:
     role:
