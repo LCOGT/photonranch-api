@@ -9,6 +9,28 @@ from boto3.dynamodb.conditions import Key, Attr
 
 from api.helpers import http_response, _get_body, dynamodb_r
 
+# Serverless.yml dynamodb table definition, for reference
+# Removed from serverless.yml after it was created to avoid duplication errors
+# in subsequent deployments.
+#
+# PipeQueueTable:
+#   Type: AWS::DynamoDB::Table
+#   Properties:
+#     TableName: ${self:provider.environment.PIPE_QUEUE_TABLE_NAME}
+#     BillingMode: PAY_PER_REQUEST
+#     AttributeDefinitions:
+#       - AttributeName: pk
+#         AttributeType: S
+#       - AttributeName: sk
+#         AttributeType: S
+#     KeySchema:
+#       - AttributeName: pk
+#         KeyType: HASH
+#       - AttributeName: sk
+#         KeyType: RANGE
+#     StreamSpecification:
+#       StreamViewType: NEW_AND_OLD_IMAGES
+
 # Configure logging
 log = logging.getLogger()
 log.setLevel(logging.INFO)

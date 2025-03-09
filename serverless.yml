@@ -103,23 +103,6 @@ provider:
 
 resources:  # CloudFormation template syntax from here on.
   Resources:
-    PipeQueueTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.PIPE_QUEUE_TABLE_NAME}
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: pk
-            AttributeType: S
-          - AttributeName: sk
-            AttributeType: S
-        KeySchema:
-          - AttributeName: pk
-            KeyType: HASH
-          - AttributeName: sk
-            KeyType: RANGE
-        StreamSpecification:
-          StreamViewType: NEW_AND_OLD_IMAGES
 
     # Configure API gateway "Gateway Responses" to work with CORS restrictions
     GatewayResponseDefault4XX:
