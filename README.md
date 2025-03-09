@@ -19,6 +19,7 @@ This repository is home to the backend services for several APIs as opposed to a
 - **events**: Retrieves events such as moonrise, moonset, sunrise, observing windows, and other information about nightly events at a given site.
 
 For more on the multifile zipping and downloading process, see the [photonranch-downloads](https://github.com/LCOGT/photonranch-downloads) repository.
+
 ## Dependencies
 
 This application currently runs under Python 3.9. Dependencies for the Python Lambda functions are zipped with the `serverless-python-requirements` plugin. Special note for psycopg2 (Python postgres library): make sure `requirements.txt` lists 'psycopg2-binary', and not 'psycopg2'. This is required for the dependency to run in the Lambda environment.
@@ -29,7 +30,7 @@ To update npm dependencies, run `npm update`. This will update the package versi
 
 Clone the repository to your local machine:
 
-```
+```bash
 git clone https://github.com/LCOGT/photonranch-api.git
 cd photonranch-api
 ```
@@ -42,20 +43,21 @@ You will need the [Serverless Framework](https://www.serverless.com/framework/do
 
 Changes pushed to the test, dev, and main branches are automatically deployed to the corresponding test, dev, and production stages with Github Actions. For manual deployment on your local machine, you'll first need to fill out the `public_key` and `secrets.json` with the required information, as well as install packages:
 
-```
+```bash
 npm install
 serverless plugin install --name serverless-python-requirements
 ```
 
 To deploy, run:
 
-```
+```bash
 serverless deploy --stage {stage}
 ```
 
 In the case that a Serverless or AWS key has been reset, you will need to update these manually in this repository's settings for Github Actions to continue deploying. You must be a repository collaborator to edit these.
 
 ### Testing
+
 Integration tests as well as unit tests for db, events, handler, and info images are automatically run before each deployment with Github Actions. Deployment will fail if any tests are not passed. To manually run tests on your machine, run the following in your photonranch-api directory:
 
 `python -m pytest`
@@ -137,7 +139,7 @@ Requests for all services in this repository are handled at the base URL `https:
   - Description: Retrieves the header from a specified FITS file.
   - Authorization required: No.
   - Query parameters
-    -  base_filename (string): Filename without the 'EX' or .extension included.
+    - base_filename (string): Filename without the 'EX' or .extension included.
   - Responses:
     - 200: Succesfully retrieved header.
     - 404: No file with base_filename found.
@@ -259,6 +261,7 @@ events = requests.get(url).json()
 ```
 
 To retrieve a list of yesterday's site events:
+
 ```python
 import requests, time
 sitecode = "saf"
@@ -346,67 +349,154 @@ The PIPE Queue service provides FIFO (First-In-First-Out) queues and status trac
 
 ### Example Usage
 
+Recall the base url depends on the environment:
+
+- prod: https://api.photonranch.org/api
+- dev: https://api.photonranch.org/dev
+
 #### Creating a Queue
 
-```bash
-curl -X POST \
-  https://api.photonranch.org/api/pipe/queue \
-  -H 'Content-Type: application/json' \
-  -d '{"queue_name": "image-processing"}'
+```python
+def create_queue(queue_name):
+    """Create a new queue."""
+    url = f"{BASE_URL}/pipe/queue"
+    payload = {"queue_name": queue_name}
+
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        print(f"Queue created: {queue_name}")
+        return response.json()
+    else:
+        print(f"Error creating queue: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 #### Enqueuing an Item
 
-```bash
-curl -X POST \
-  https://api.photonranch.org/api/pipe/enqueue \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "queue_name": "image-processing",
-    "payload": {
-      "image_path": "s3://bucket/path/to/image.fits",
-      "process_type": "calibration"
-    },
-    "sender": "observatory-controller"
-  }'
+```python
+def enqueue_item(queue_name, payload, sender="python-client"):
+    """Add an item to a queue."""
+    url = f"{BASE_URL}/pipe/enqueue"
+    data = {
+        "queue_name": queue_name,
+        "payload": payload,
+        "sender": sender
+    }
+
+    response = requests.post(url, json=data)
+
+    if response.status_code == 200:
+        print(f"Item added to queue: {queue_name}")
+        return response.json()
+    else:
+        print(f"Error adding item to queue: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 #### Viewing Queue Items
 
-```bash
-curl -X GET \
-  'https://api.photonranch.org/api/pipe/queue/image-processing?limit=5'
+```python
+def peek_queue(queue_name, limit=5):
+    """View items in a queue without removing them."""
+    url = f"{BASE_URL}/pipe/queue/{queue_name}"
+    params = {"limit": limit}
+
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        items = response.json()
+        print(f"Found {len(items)} items in queue: {queue_name}")
+        return items
+    else:
+        print(f"Error viewing queue: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 #### Dequeuing an Item
 
-```bash
-curl -X POST \
-  https://api.photonranch.org/api/pipe/queue/image-processing/dequeue
+```python
+def dequeue_item(queue_name):
+    """Remove and return the oldest item from a queue."""
+    url = f"{BASE_URL}/pipe/queue/{queue_name}/dequeue"
+
+    response = requests.post(url)
+
+    if response.status_code == 200:
+        print(f"Item dequeued from: {queue_name}")
+        return response.json()
+    elif response.status_code == 404:
+        print(f"Queue is empty or not found: {queue_name}")
+        return None
+    else:
+        print(f"Error dequeuing item: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 #### Setting PIPE Status
 
-```bash
-curl -X POST \
-  https://api.photonranch.org/api/pipe/status \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "pipe_id": "pipe-instance-1",
-    "status": "online",
-    "details": {
-      "cpu_usage": "32%",
-      "memory_usage": "2.4GB",
-      "processing_job": "image-calibration-123"
+```python
+def set_pipe_status(pipe_id, status, details=None):
+    """Set the status of a PIPE machine."""
+    url = f"{BASE_URL}/pipe/status"
+    data = {
+        "pipe_id": pipe_id,
+        "status": status,
+        "details": details or {}
     }
-  }'
+
+    response = requests.post(url, json=data)
+
+    if response.status_code == 200:
+        print(f"Status set for PIPE: {pipe_id}")
+        return response.json()
+    else:
+        print(f"Error setting status: {response.status_code}")
+        print(response.text)
+        return None
+```
+
+#### Getting PIPE Status
+
+```python
+def get_pipe_status(pipe_id):
+    """Get the status of a specific PIPE machine."""
+    url = f"{BASE_URL}/pipe/status/{pipe_id}"
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        return response.json()
+    elif response.status_code == 404:
+        print(f"PIPE not found: {pipe_id}")
+        return None
+    else:
+        print(f"Error getting status: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 #### Getting Status of All PIPE Machines
 
-```bash
-curl -X GET \
-  https://api.photonranch.org/api/pipe/statuses
+```python
+def get_all_pipe_statuses():
+    """Get the status of all PIPE machines."""
+    url = f"{BASE_URL}/pipe/statuses"
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        statuses = response.json()
+        print(f"Found {len(statuses)} PIPE machines")
+        return statuses
+    else:
+        print(f"Error getting statuses: {response.status_code}")
+        print(response.text)
+        return None
 ```
 
 ### DynamoDB Table Design
@@ -428,31 +518,8 @@ The service uses a single DynamoDB table with the following structure:
   - `sk`: `"INFO"`
   - Additional attributes: `item_type`, `status`, `last_updated`, `details`
 
-### Implementation Notes
+### Misc. Notes
 
 - Queue items use timestamp-prefixed IDs to ensure FIFO ordering
-- All endpoints include appropriate error handling and validation
-- The service is designed to be low-cost and scale with your needs
-- All API responses follow the same format as other Photon Ranch APIs
-
-### Troubleshooting
-
-#### Common Issues
-
-1. **Queue Not Found**: Ensure the queue has been created before trying to enqueue or dequeue
-2. **Empty Queue**: The dequeue operation will return a 404 error if the queue is empty
-3. **Permissions**: Make sure your AWS Lambda execution role has proper permissions for DynamoDB
-
-#### Monitoring
-
-- The service logs all operations to CloudWatch Logs
-- Common errors and warnings are clearly identified in the logs
-- You can create CloudWatch Alarms to monitor queue lengths or errors
-
-#### Performance Tuning
-
-For higher throughput requirements:
-
-- Increase the memory allocation for Lambda functions in serverless.yml
-- Consider enabling DynamoDB Auto Scaling if you expect high queue volume
-- For very high throughput, consider adding a Global Secondary Index on `created_at`
+- Ensure the queue has been created before trying to enqueue or dequeue
+- The dequeue operation will return a 404 error if the queue is empty
