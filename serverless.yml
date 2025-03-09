@@ -394,75 +394,75 @@ functions:
           method: get
           cors: true
 
-### PIPE Queue Endpoints
-createQueue:
-  handler: api/pipe_queue.create_queue
-  events:
-    - http:
-        path: /pipe/queue
-        method: post
-        cors: true
+  ### PIPE Queue Endpoints
+  createQueue:
+    handler: api/pipe_queue.create_queue
+    events:
+      - http:
+          path: /pipe/queue
+          method: post
+          cors: true
 
-enqueueItem:
-  handler: api/pipe_queue.enqueue_item
-  events:
-    - http:
-        path: /pipe/enqueue
-        method: post
-        cors: true
+  enqueueItem:
+    handler: api/pipe_queue.enqueue_item
+    events:
+      - http:
+          path: /pipe/enqueue
+          method: post
+          cors: true
 
-peekQueue:
-  handler: api/pipe_queue.peek_queue
-  events:
-    - http:
-        path: /pipe/queue/{queue_name}
-        method: get
-        cors: true
+  peekQueue:
+    handler: api/pipe_queue.peek_queue
+    events:
+      - http:
+          path: /pipe/queue/{queue_name}
+          method: get
+          cors: true
 
-dequeueItem:
-  handler: api/pipe_queue.dequeue_item
-  events:
-    - http:
-        path: /pipe/queue/{queue_name}/dequeue
-        method: post
-        cors: true
+  dequeueItem:
+    handler: api/pipe_queue.dequeue_item
+    events:
+      - http:
+          path: /pipe/queue/{queue_name}/dequeue
+          method: post
+          cors: true
 
-deleteQueue:
-  handler: api/pipe_queue.delete_queue
-  events:
-    - http:
-        path: /pipe/queue/{queue_name}
-        method: delete
-        cors: true
+  deleteQueue:
+    handler: api/pipe_queue.delete_queue
+    events:
+      - http:
+          path: /pipe/queue/{queue_name}
+          method: delete
+          cors: true
 
-listQueues:
-  handler: api/pipe_queue.list_queues
-  events:
-    - http:
-        path: /pipe/queues
-        method: get
-        cors: true
+  listQueues:
+    handler: api/pipe_queue.list_queues
+    events:
+      - http:
+          path: /pipe/queues
+          method: get
+          cors: true
 
-setPipeStatus:
-  handler: api/pipe_queue.set_pipe_status
-  events:
-    - http:
-        path: /pipe/status
-        method: post
-        cors: true
+  setPipeStatus:
+    handler: api/pipe_queue.set_pipe_status
+    events:
+      - http:
+          path: /pipe/status
+          method: post
+          cors: true
 
-getPipeStatus:
-  handler: api/pipe_queue.get_pipe_status_handler
-  events:
-    - http:
-        path: /pipe/status/{pipe_id}
-        method: get
-        cors: true
+  getPipeStatus:
+    handler: api/pipe_queue.get_pipe_status_handler
+    events:
+      - http:
+          path: /pipe/status/{pipe_id}
+          method: get
+          cors: true
 
-getAllPipeStatuses:
-  handler: api/pipe_queue.get_all_pipe_statuses_handler
-  events:
-    - http:
-        path: /pipe/statuses
-        method: get
-        cors: true
+  getAllPipeStatuses:
+    handler: api/pipe_queue.get_all_pipe_statuses_handler
+    events:
+      - http:
+          path: /pipe/statuses
+          method: get
+          cors: true
