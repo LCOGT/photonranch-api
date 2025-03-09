@@ -65,7 +65,7 @@ Integration tests as well as unit tests for db, events, handler, and info images
 Requests for all services in this repository are handled at the base URL `https://api.photonranch.org/{stage}`.
 
 - POST `/upload`
-  - Description: Generates a presigned URL to upload files at AWS. 
+  - Description: Generates a presigned URL to upload files at AWS.
   - Authorization required: No.
   - Request body:
     - s3_directory (string): Name of the S3 directory to upload to in ["data", "info-images", "allsky", "test"].
@@ -153,21 +153,21 @@ Requests for all services in this repository are handled at the base URL `https:
 - GET `/{site}/config`
   - Description: Retrieves the config file details from a specified site.
   - Authorization required: No.
-  - Query parameters: 
+  - Query parameters:
     - site (string): Sitecode.
-  - Responses: 
+  - Responses:
     - 200: Successfully retrieved config file.
 - PUT `/{site}/config`
   - Description: Adds a new config file to a specified site.
   - Authorization required: No.
-  - Query parameters: 
+  - Query parameters:
     - site (string): Sitecode.
   - Responses:
     - 200: Successfully added site config file.
 - DELETE `/{site}/config`
   - Description: Deletes the config details for a specified site.
   - Authorization required: No.
-  - Query parameters: 
+  - Query parameters:
     - site (string): Sitecode.
   - Responses:
     - 200: Successfully deleted config file.
@@ -312,4 +312,147 @@ The full JSON of site events is a dictionary with the following contents and syn
 
 where `<julian-days>` is a float representing the TAI time in Julian days. These details can be retrieved at the GET `/events` endpoint following the previously specified details.
 
-## License
+## PIPE Queue Service
+
+The PIPE Queue service provides FIFO (First-In-First-Out) queues and status tracking for PIPE computers that process observatory data. This service allows the observatory to notify PIPE machines of new jobs and enables PIPE machines to communicate processing results back to the observatory.
+
+### Queue and Status Management
+
+- Multiple FIFO queues can be created and managed
+- Each PIPE machine's status (online/offline) can be tracked
+- RESTful API for all queue and status operations
+- Single DynamoDB table for both queues and status tracking
+
+### Endpoints
+
+#### Queue Operations
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| POST | `/pipe/queue` | Create a new queue | `{"queue_name": "string"}` | `{"message": "Queue created: queue_name"}` |
+| POST | `/pipe/enqueue` | Add item to a queue | `{"queue_name": "string", "payload": {}, "sender": "string"}` | Item details |
+| GET | `/pipe/queue/{queue_name}?limit=10` | View items without removing | N/A | Array of queue items |
+| POST | `/pipe/queue/{queue_name}/dequeue` | Remove and return oldest item | N/A | Dequeued item |
+| DELETE | `/pipe/queue/{queue_name}` | Delete a queue and all its items | N/A | `{"message": "Queue deleted: queue_name"}` |
+| GET | `/pipe/queues` | List all queues with item counts | N/A | `{"queue1": count, "queue2": count, ...}` |
+
+#### Status Operations
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| POST | `/pipe/status` | Set status for a PIPE machine | `{"pipe_id": "string", "status": "string", "details": {}}` | Status details |
+| GET | `/pipe/status/{pipe_id}` | Get status of a specific PIPE machine | N/A | Status details |
+| GET | `/pipe/statuses` | Get status of all PIPE machines | N/A | Array of statuses |
+
+### Example Usage
+
+#### Creating a Queue
+
+```bash
+curl -X POST \
+  https://api.photonranch.org/api/pipe/queue \
+  -H 'Content-Type: application/json' \
+  -d '{"queue_name": "image-processing"}'
+```
+
+#### Enqueuing an Item
+
+```bash
+curl -X POST \
+  https://api.photonranch.org/api/pipe/enqueue \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "queue_name": "image-processing",
+    "payload": {
+      "image_path": "s3://bucket/path/to/image.fits",
+      "process_type": "calibration"
+    },
+    "sender": "observatory-controller"
+  }'
+```
+
+#### Viewing Queue Items
+
+```bash
+curl -X GET \
+  'https://api.photonranch.org/api/pipe/queue/image-processing?limit=5'
+```
+
+#### Dequeuing an Item
+
+```bash
+curl -X POST \
+  https://api.photonranch.org/api/pipe/queue/image-processing/dequeue
+```
+
+#### Setting PIPE Status
+
+```bash
+curl -X POST \
+  https://api.photonranch.org/api/pipe/status \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "pipe_id": "pipe-instance-1",
+    "status": "online",
+    "details": {
+      "cpu_usage": "32%",
+      "memory_usage": "2.4GB",
+      "processing_job": "image-calibration-123"
+    }
+  }'
+```
+
+#### Getting Status of All PIPE Machines
+
+```bash
+curl -X GET \
+  https://api.photonranch.org/api/pipe/statuses
+```
+
+### DynamoDB Table Design
+
+The service uses a single DynamoDB table with the following structure:
+
+- **Table Name**: `pipe-queue-table`
+- **Primary Key**: Composite key of `pk` (partition key) and `sk` (sort key)
+- **Queue Items**:
+  - `pk`: `"QUEUE#{queue_name}"`
+  - `sk`: `"ITEM#{item_id}"`
+  - Additional attributes: `id`, `item_type`, `payload`, `created_at`, `sender`
+- **Queue Metadata**:
+  - `pk`: `"QUEUE#{queue_name}"`
+  - `sk`: `"METADATA"`
+  - Additional attributes: `item_type`, `created_at`, `queue_name`
+- **Status Items**:
+  - `pk`: `"STATUS#{pipe_id}"`
+  - `sk`: `"INFO"`
+  - Additional attributes: `item_type`, `status`, `last_updated`, `details`
+
+### Implementation Notes
+
+- Queue items use timestamp-prefixed IDs to ensure FIFO ordering
+- All endpoints include appropriate error handling and validation
+- The service is designed to be low-cost and scale with your needs
+- All API responses follow the same format as other Photon Ranch APIs
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Queue Not Found**: Ensure the queue has been created before trying to enqueue or dequeue
+2. **Empty Queue**: The dequeue operation will return a 404 error if the queue is empty
+3. **Permissions**: Make sure your AWS Lambda execution role has proper permissions for DynamoDB
+
+#### Monitoring
+
+- The service logs all operations to CloudWatch Logs
+- Common errors and warnings are clearly identified in the logs
+- You can create CloudWatch Alarms to monitor queue lengths or errors
+
+#### Performance Tuning
+
+For higher throughput requirements:
+
+- Increase the memory allocation for Lambda functions in serverless.yml
+- Consider enabling DynamoDB Auto Scaling if you expect high queue volume
+- For very high throughput, consider adding a Global Secondary Index on `created_at`

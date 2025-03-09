@@ -53,6 +53,7 @@ provider:
     S3_BUCKET_NAME: 'photonranch-001'
     CONFIG_TABLE_NAME: site_configurations
     UPLOADS_LOG_TABLE_NAME: recent-uploads-log
+    PIPE_QUEUE_TABLE_NAME: 'pipe-queue-table'
     REGION: ${self:provider.region}
     INFO_IMAGES_TABLE: 'info-images'
     REMOTEHQ_ROOMS_TABLE: 'remotehq-control-rooms'
@@ -102,6 +103,23 @@ provider:
 
 resources:  # CloudFormation template syntax from here on.
   Resources:
+    PipeQueueTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.PIPE_QUEUE_TABLE_NAME}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     # Configure API gateway "Gateway Responses" to work with CORS restrictions
     GatewayResponseDefault4XX:
@@ -392,3 +410,76 @@ functions:
           path: /events/moon/rise-set-illum
           method: get
           cors: true
+
+### PIPE Queue Endpoints
+createQueue:
+  handler: api/pipe_queue.create_queue
+  events:
+    - http:
+        path: /pipe/queue
+        method: post
+        cors: true
+
+enqueueItem:
+  handler: api/pipe_queue.enqueue_item
+  events:
+    - http:
+        path: /pipe/enqueue
+        method: post
+        cors: true
+
+peekQueue:
+  handler: api/pipe_queue.peek_queue
+  events:
+    - http:
+        path: /pipe/queue/{queue_name}
+        method: get
+        cors: true
+
+dequeueItem:
+  handler: api/pipe_queue.dequeue_item
+  events:
+    - http:
+        path: /pipe/queue/{queue_name}/dequeue
+        method: post
+        cors: true
+
+deleteQueue:
+  handler: api/pipe_queue.delete_queue
+  events:
+    - http:
+        path: /pipe/queue/{queue_name}
+        method: delete
+        cors: true
+
+listQueues:
+  handler: api/pipe_queue.list_queues
+  events:
+    - http:
+        path: /pipe/queues
+        method: get
+        cors: true
+
+setPipeStatus:
+  handler: api/pipe_queue.set_pipe_status
+  events:
+    - http:
+        path: /pipe/status
+        method: post
+        cors: true
+
+getPipeStatus:
+  handler: api/pipe_queue.get_pipe_status_handler
+  events:
+    - http:
+        path: /pipe/status/{pipe_id}
+        method: get
+        cors: true
+
+getAllPipeStatuses:
+  handler: api/pipe_queue.get_all_pipe_statuses_handler
+  events:
+    - http:
+        path: /pipe/statuses
+        method: get
+        cors: true
