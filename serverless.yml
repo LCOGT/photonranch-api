@@ -56,7 +56,6 @@ provider:
     PIPE_QUEUE_TABLE_NAME: 'pipe-queue-table'
     REGION: ${self:provider.region}
     INFO_IMAGES_TABLE: 'info-images'
-    REMOTEHQ_ROOMS_TABLE: 'remotehq-control-rooms'
     NIGHT_LOG_TABLE: 'night-log'
     AUTH0_CLIENT_ID: ${file(./secrets.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
@@ -301,49 +300,6 @@ functions:
           path: /all/config
           method: get
           cors: true
-
-  ### RemoteHQ api proxy
-  newRemoteHQBrowser:
-    handler: api/remotehq_helpers.handle_new_remotehq_browser
-    events:
-      - http:
-          path: /new_remotehq_browser
-          method: post
-          authorizer:
-            name: authorizerFunc
-            type: request
-            resultTtlInSeconds: 0  # Don't cache the policy or other tasks will fail!
-          cors: true
-
-  getControlRoom:
-    handler: api/control_rooms.get_control_room
-    events:
-      - http:
-          path: /control_room/{site}
-          method: get
-          cors: true
-
-  deleteControlRoom:
-    handler: api/control_rooms.delete_control_room
-    events:
-      - http:
-          path: /control_room/{site}
-          method: delete
-          cors: true
-
-  restartControlRoom:
-    handler: api/control_rooms.restart_control_room_handler
-    events:
-      - http:
-          path: /control_room/{site}/restart
-          method: get
-          cors: true
-
-  restartAllRooms:
-    handler: api/control_rooms.restart_all_rooms_handler
-    events:
-      - schedule:
-          rate: cron(0 * * * ? *)  # Run once every hour
 
   ### Night Log Endpoints
   getNightLogNote:

@@ -14,9 +14,9 @@ This repository is home to the backend services for several APIs as opposed to a
 - **info_images**: For retrieving the info image package for a single image at a given site.
 - **db**: Handles image database queries, such as retrieving the latest images at a site or across all sites, retrieving FITS headers, and filtering images.
 - **site_configs**: Handles uploading, retrieving, or deleting a site config file, as well as getting all site config files.
-- **remotehq**: Handles creating, getting, restarting, and deleting RemoteHQ control rooms.
 - **night_log**: Creates and retrieves night log notes at a given site.
 - **events**: Retrieves events such as moonrise, moonset, sunrise, observing windows, and other information about nightly events at a given site.
+- **pipe queue**: Handles the job queue for PIPE machines processing observatory data
 
 For more on the multifile zipping and downloading process, see the [photonranch-downloads](https://github.com/LCOGT/photonranch-downloads) repository.
 
@@ -178,37 +178,6 @@ Requests for all services in this repository are handled at the base URL `https:
   - Authorization required: No.
   - Responses:
     - 200: Successfully retrieved all site config files.
-- POST `/new_remotehq_browser`
-  - Description: Queries RemoteHQ API to create an embeddable remote browser instance.
-  - Authorization required: Yes.
-  - Responses:
-    - 200: Successfully created browser instance.
-- GET `/control_room/{site}`
-  - Description: Creates or retrieves the details of a RemoteHQ room at a specified site.
-  - Authorization required: No.
-  - Request body:
-    - site (string): Sitecode.
-  - Responses:
-    - 200: Successfully retrieved RHQ room details.
-    - 200: Successfully created RHQ room (if not found).
-    - 500: Failed to create or retrieve room details.
-- DELETE `/control_room/{site}`
-  - Description: Deletes a RemoteHQ control room from a specified site.
-  - Authorization required: No.
-  - Request body:
-    - site (string): Sitecode.
-  - Responses:
-    - 200: Room successfully deleted.
-    - 200: No such room found.
-- GET `/control_room/{site}/restart`
-  - Description: Restarts a RemoteHQ control room at a specified site.
-  - Authorization required: No.
-  - Request body:
-    - site (string): Sitecode.
-  - Responses:
-    - 200: Successfully restarted requested room.
-    - 404: Requested room cannot be found.
-    - 500: Internal server error during room modification.
 - GET `/nightlog/{site}`
   - Description: Retrieves a note (log) from a specified site.
   - Authorization required: No.
