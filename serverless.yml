@@ -452,6 +452,14 @@ functions:
           method: post
           cors: true
 
+  deletePipeStatus:
+    handler: api/pipe_queue.delete_pipe_status
+    events:
+      - http:
+          path: /pipe/status/{pipe_id}
+          method: delete
+          cors: true
+
   getPipeStatus:
     handler: api/pipe_queue.get_pipe_status_handler
     events:

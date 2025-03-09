@@ -427,6 +427,37 @@ def set_pipe_status(event, context):
 
     return http_response(HTTPStatus.OK, status_info)
 
+def delete_pipe_status(event, context):
+    """Deletes the status of a PIPE machine.
+
+    Args:
+        event.pathParameters.pipe_id (str): Identifier for the PIPE machine
+
+    Returns:
+        200 status code if successful or if the PIPE status doesn't exist
+        400 status code if the pipe_id is missing
+    """
+    pipe_id = event['pathParameters']['pipe_id']
+
+    if not pipe_id:
+        log.error("Missing required field: pipe_id")
+        return http_response(
+            HTTPStatus.BAD_REQUEST,
+            "Missing required field: pipe_id"
+        )
+
+    # Delete the status item
+    PIPE_QUEUE_TABLE.delete_item(
+        Key={
+            'pk': f"STATUS#{pipe_id}",
+            'sk': 'INFO'
+        }
+    )
+
+    return http_response(
+        HTTPStatus.OK,
+        {"message": f"Status deleted for PIPE: {pipe_id}"}
+    )
 
 def get_pipe_status_handler(event, context):
     """Gets the status of a PIPE machine.

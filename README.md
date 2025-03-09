@@ -346,6 +346,8 @@ The PIPE Queue service provides FIFO (First-In-First-Out) queues and status trac
 | POST | `/pipe/status` | Set status for a PIPE machine | `{"pipe_id": "string", "status": "string", "details": {}}` | Status details |
 | GET | `/pipe/status/{pipe_id}` | Get status of a specific PIPE machine | N/A | Status details |
 | GET | `/pipe/statuses` | Get status of all PIPE machines | N/A | Array of statuses |
+| DELETE | `/pipe/status/{pipe_id}` | Delete status of a specific PIPE machine | N/A | `{"message": "Status deleted for PIPE: pipe_id"}` |
+
 
 ### Example Usage
 
