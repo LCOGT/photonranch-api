@@ -13,7 +13,7 @@ import argparse
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Test the PIPE Queue Service')
-parser.add_argument('--base-url', default='https://api.photonranch.org/api',
+parser.add_argument('--base-url', default='https://api.photonranch.org/dev',
                     help='Base URL for the API (default: https://api.photonranch.org/api)')
 parser.add_argument('--verbose', '-v', action='store_true',
                     help='Enable verbose output')
