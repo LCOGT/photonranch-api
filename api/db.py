@@ -29,7 +29,7 @@ images_table = dynamodb.Table(os.environ['IMAGES_TABLE'])
 info_images_table = dynamodb.Table(os.environ['INFO_IMAGES_TABLE'])
 
 # Constants
-BUCKET_NAME = os.environ['BUCKET_NAME']
+BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 
 def format_image_response(item):
     """Formats a DynamoDB item as an image response."""

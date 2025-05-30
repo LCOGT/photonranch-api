@@ -4,6 +4,7 @@ import os
 import boto3
 import time
 from http import HTTPStatus
+from datetime import datetime
 
 from api.helpers import BUCKET_NAME, REGION, S3_PUT_TTL, get_base_filename_from_full_filename, http_response, _get_body, DecimalEncoder
 
@@ -24,7 +25,7 @@ def upload(event, context):
 
     Args:
         event.body.s3_directory (str): Name of the s3 bucket to use.
-        event.body.filename (str): Name of the file to upload.
+        event.body.object_name (str): Name of the file to upload.
         event.body.header_data (dict, optional): Metadata for the image.
         event.body.info_channel (int, optional): Channel for info images.
 
@@ -142,9 +143,13 @@ def get_capture_timestamp(header_data):
             # Replace 'T' with space if present
             date_obs = date_obs.replace('T', ' ')
 
-            # Parse the timestamp
-            from datetime import datetime
-            dt = datetime.strptime(date_obs, '%Y-%m-%d %H:%M:%S')
+            # Try parsing with fractional seconds first
+            try:
+                # Handle fractional seconds (microseconds)
+                dt = datetime.strptime(date_obs, '%Y-%m-%d %H:%M:%S.%f')
+            except ValueError:
+                # Fallback to format without fractional seconds
+                dt = datetime.strptime(date_obs, '%Y-%m-%d %H:%M:%S')
 
             # Convert to milliseconds
             return int(dt.timestamp() * 1000)
