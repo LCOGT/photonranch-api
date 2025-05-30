@@ -3,7 +3,7 @@ import pytest, json
 from http import HTTPStatus
 
 from api.handler import info_images_table
-from api.handler import upload 
+from api.upload import upload
 from api.handler import get_recent_uploads
 
 from api.helpers import get_base_filename_from_full_filename

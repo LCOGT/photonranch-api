@@ -28,6 +28,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 info_images_table = dynamodb_r.Table(os.getenv('INFO_IMAGES_TABLE'))
+images_table = dynamodb_r.Table(os.getenv('IMAGES_TABLE'))
 recent_uploads_table = dynamodb_r.Table(os.getenv('UPLOADS_LOG_TABLE_NAME'))
 s3 = boto3.client('s3', REGION, config=Config(signature_version='s3v4'))
 lambda_client = boto3.client('lambda', REGION)
@@ -45,116 +46,115 @@ def default(event, context):
     log.info(json.dumps(event, indent=2))
     return http_response(HTTPStatus.OK, "New photon ranch API")
 
+# def upload(event, context):
+#     """Generates a presigned URL to upload files at AWS.
 
-def upload(event, context):
-    """Generates a presigned URL to upload files at AWS.
+#     A request for a presigned post URL requires the name of the object.
+#     This is sent in a single string under the key 'object_name' in the
+#     json-string body of the request.
 
-    A request for a presigned post URL requires the name of the object.
-    This is sent in a single string under the key 'object_name' in the
-    json-string body of the request.
+#     Args:
+#         event.body.s3_directory (str): Name of the s3 bucket to use.
+#         event.body.filename (str): Name of the file to upload.
 
-    Args:
-        event.body.s3_directory (str): Name of the s3 bucket to use.
-        event.body.filename (str): Name of the file to upload.
+#     Returns:
+#         204 status code with presigned upload URL string if successful.
+#         403 status code if incorrect s3 bucket or info channel supplied.
 
-    Returns:
-        204 status code with presigned upload URL string if successful.
-        403 status code if incorrect s3 bucket or info channel supplied.
+#     Example request body:
+#         '{"object_name":"a_file.txt", "s3_directory": "data"}'
+#     This request will save an image into the main s3 bucket as:
+#         MAIN_BUCKET_NAME/data/a_file.txt
 
-    Example request body:
-        '{"object_name":"a_file.txt", "s3_directory": "data"}'
-    This request will save an image into the main s3 bucket as:
-        MAIN_BUCKET_NAME/data/a_file.txt
+#     * * *
 
-    * * *
+#     Another example Python program using the presigned URL to upload a file:
 
-    Another example Python program using the presigned URL to upload a file:
+#         with open(object_name, 'rb') as f:
+#             files = {'file': (object_name, f)}
+#             http_response = requests.post(
+#                     response['url'], data=response['fields'], files=files)
+#         # If successful, returns HTTP status code 204
+#         log.info(f'File upload HTTP status code: {http_response.status_code}')
 
-        with open(object_name, 'rb') as f:
-            files = {'file': (object_name, f)}
-            http_response = requests.post(
-                    response['url'], data=response['fields'], files=files)
-        # If successful, returns HTTP status code 204
-        log.info(f'File upload HTTP status code: {http_response.status_code}')
+#     * * *
 
-    * * *
+#     If the upload URL is to be used with an info image, then
+#     the request must include 'info_channel' with a value of 1, 2, or 3.
+#     This will prompt an update to the info-images table, where it will
+#     store the provided base_filename in the row with pk=={site}#metadata,
+#     under the attribute channel{n}.
 
-    If the upload URL is to be used with an info image, then
-    the request must include 'info_channel' with a value of 1, 2, or 3.
-    This will prompt an update to the info-images table, where it will
-    store the provided base_filename in the row with pk=={site}#metadata,
-    under the attribute channel{n}.
+#     For example, the request body:
+#         {
+#             "object_name": "tst-inst-20211231-00000001-EX10.jpg",
+#             "s3_directory": "info-images",
+#             "info_channel": 2
+#         }
+#     will result in the info-images table being updated with:
+#         {
+#             "pk": "tst#metadata",
+#             "channel2": "tst-inst-20211231-00000001",
+#             ...
+#         }
+#     The URL returned by this endpoint will allow a POST request
+#     to s3 with the actual file. The code that processes new s3 objects
+#     will see that it is an info image, then query the info-images table
+#     to find which channel to use, and finally update the info-images
+#     table with an entry like:
+#         {
+#             "pk": "tst#2",
+#             "jpg_10_exists": true,
+#             ...
+#         }
+#     This is the object that is queried to find the info image at
+#     site 'tst', channel 2.
+#     """
 
-    For example, the request body:
-        {
-            "object_name": "tst-inst-20211231-00000001-EX10.jpg",
-            "s3_directory": "info-images",
-            "info_channel": 2
-        }
-    will result in the info-images table being updated with:
-        {
-            "pk": "tst#metadata",
-            "channel2": "tst-inst-20211231-00000001",
-            ...
-        }
-    The URL returned by this endpoint will allow a POST request
-    to s3 with the actual file. The code that processes new s3 objects
-    will see that it is an info image, then query the info-images table
-    to find which channel to use, and finally update the info-images
-    table with an entry like:
-        {
-            "pk": "tst#2",
-            "jpg_10_exists": true,
-            ...
-        }
-    This is the object that is queried to find the info image at
-    site 'tst', channel 2.
-    """
+#     log.info(json.dumps(event, indent=2))
+#     body = _get_body(event)
 
-    log.info(json.dumps(event, indent=2))
-    body = _get_body(event)
+#     # Retrieve and validate the s3_directory
+#     s3_directory = body.get('s3_directory', 'data')
+#     filename = body.get('object_name')
+#     if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
+#         error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
+#         log.warning(error_msg)
+#         return http_response(HTTPStatus.FORBIDDEN, error_msg)
 
-    # Retrieve and validate the s3_directory
-    s3_directory = body.get('s3_directory', 'data')
-    filename = body.get('object_name')
-    if s3_directory not in ['data', 'info-images', 'allsky', 'test']:
-        error_msg = "s3_directory must be either 'data', 'info-images', or 'allsky'."
-        log.warning(error_msg)
-        return http_response(HTTPStatus.FORBIDDEN, error_msg)
+#     # If info image: get the channel number to use
+#     if s3_directory == 'info-images':
 
-    # If info image: get the channel number to use
-    if s3_directory == 'info-images':
+#         site = filename.split('-')[0]
+#         base_filename = get_base_filename_from_full_filename(filename)
+#         channel = int(body.get('info_channel', 1))
+#         if channel not in [1,2,3]:
+#             error_msg = f"Value for info_channel must be either 1, 2, or 3. Received {channel} instead."
+#             log.warning(error_msg)
+#             return http_response(HTTPStatus.FORBIDDEN, error_msg)
 
-        site = filename.split('-')[0]
-        base_filename = get_base_filename_from_full_filename(filename)
-        channel = int(body.get('info_channel', 1))
-        if channel not in [1,2,3]:
-            error_msg = f"Value for info_channel must be either 1, 2, or 3. Received {channel} instead."
-            log.warning(error_msg)
-            return http_response(HTTPStatus.FORBIDDEN, error_msg)
+#         # Create an entry to track metadata for the next info image that will be uploaded
+#         info_images_table.update_item(
+#             Key={ 'pk': f'{site}#metadata' },
+#             UpdateExpression=f"set channel{channel}=:basefilename",
+#             ExpressionAttributeValues={':basefilename': base_filename}
+#         )
 
-        # Create an entry to track metadata for the next info image that will be uploaded
-        info_images_table.update_item(
-            Key={ 'pk': f'{site}#metadata' },
-            UpdateExpression=f"set channel{channel}=:basefilename",
-            ExpressionAttributeValues={':basefilename': base_filename}
-        )
+#     # Get upload metadata
+#     metadata = body.get('metadata', None)
+#     if metadata is not None:
+#         metadata = json.dumps(json.loads(metadata), cls=DecimalEncoder)
 
-    # Get upload metadata
-    metadata = body.get('metadata', None)
-    if metadata is not None:
-        metadata = json.dumps(json.loads(metadata), cls=DecimalEncoder)
+#     # TODO: if applicable, add metadata to database
 
-    # TODO: if applicable, add metadata to database
-
-    key = f"{s3_directory}/{body['object_name']}"
-    url = s3.generate_presigned_post(
-        Bucket = BUCKET_NAME,
-        Key = key,
-        ExpiresIn = S3_PUT_TTL
-    )
-    log.info(f"Presigned upload url: {url}")
-    return http_response(HTTPStatus.OK, url)
+#     key = f"{s3_directory}/{body['object_name']}"
+#     url = s3.generate_presigned_post(
+#         Bucket = BUCKET_NAME,
+#         Key = key,
+#         ExpiresIn = S3_PUT_TTL
+#     )
+#     log.info(f"Presigned upload url: {url}")
+#     return http_response(HTTPStatus.OK, url)
 
 
 def download(event, context):

@@ -172,7 +172,7 @@ functions:
           method: get
           cors: true
   upload:
-    handler: api/handler.upload
+    handler: api/upload.upload
     events:
       - http:
           path: upload
