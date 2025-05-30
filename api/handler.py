@@ -1,7 +1,7 @@
 
-import json 
-import os 
-import boto3 
+import json
+import os
+import boto3
 import base64
 from pprint import pprint
 import psycopg2
@@ -18,7 +18,6 @@ from api.helpers import get_base_filename_from_full_filename
 from api.helpers import get_s3_file_url
 from api.s3_helpers import save_tiff_to_s3
 from api.s3_helpers import save_fz_to_fits
-from api.db import get_files_within_date_range
 
 db_host = get_secret('db-host')
 db_database = get_secret('db-database')
@@ -47,11 +46,11 @@ def default(event, context):
     return http_response(HTTPStatus.OK, "New photon ranch API")
 
 
-def upload(event, context): 
+def upload(event, context):
     """Generates a presigned URL to upload files at AWS.
 
     A request for a presigned post URL requires the name of the object.
-    This is sent in a single string under the key 'object_name' in the 
+    This is sent in a single string under the key 'object_name' in the
     json-string body of the request.
 
     Args:
@@ -109,12 +108,12 @@ def upload(event, context):
             ...
         }
     This is the object that is queried to find the info image at
-    site 'tst', channel 2. 
+    site 'tst', channel 2.
     """
 
     log.info(json.dumps(event, indent=2))
     body = _get_body(event)
-    
+
     # Retrieve and validate the s3_directory
     s3_directory = body.get('s3_directory', 'data')
     filename = body.get('object_name')
@@ -145,7 +144,7 @@ def upload(event, context):
     metadata = body.get('metadata', None)
     if metadata is not None:
         metadata = json.dumps(json.loads(metadata), cls=DecimalEncoder)
-    
+
     # TODO: if applicable, add metadata to database
 
     key = f"{s3_directory}/{body['object_name']}"
@@ -158,9 +157,9 @@ def upload(event, context):
     return http_response(HTTPStatus.OK, url)
 
 
-def download(event, context): 
+def download(event, context):
     """Handles requests to download individual data files.
-    
+
     Args:
         s3_directory (str):
             data | info-images | allsky | test,
@@ -170,7 +169,7 @@ def download(event, context):
             The full filename of the requested file. Appending this to the end
             of s3_directory should specify the full key for the object in s3.
         image_type (str):
-            tif | fits, used if the requester wants a tif file created 
+            tif | fits, used if the requester wants a tif file created
             from the underlying fits image. If so, the tif file is
             created on the fly. Default is 'fits'.
         stretch (str):
@@ -198,11 +197,11 @@ def download(event, context):
         "Bucket": BUCKET_NAME,
         "Key": key,
     }
-    
+
     image_type = body.get('image_type', 'fits')  # Assume FITS if not otherwise specified
 
     # Routine if TIFF file is specified
-    if image_type in ['tif', 'tiff']:   
+    if image_type in ['tif', 'tiff']:
         stretch = body.get('stretch', 'arcsinh')
         #s3_destination_key = f"downloads/tif/{body['object_name']}"
         s3_destination_key = save_tiff_to_s3(BUCKET_NAME, key, stretch)
@@ -215,10 +214,10 @@ def download(event, context):
         s3_destination_key = save_fz_to_fits(BUCKET_NAME, key)
         url = get_s3_file_url(s3_destination_key)
         log.info(f"Presigned download url: {url}")
-        return http_response(HTTPStatus.OK, str(url))  
+        return http_response(HTTPStatus.OK, str(url))
 
     # If TIFF file not requested, just get the file as-is from s3
-    else: 
+    else:
         url = s3.generate_presigned_url(
             ClientMethod='get_object',
             Params=params,
@@ -226,70 +225,6 @@ def download(event, context):
         )
         log.info(f"Presigned download url: {url}")
         return http_response(HTTPStatus.OK, str(url))
-
-
-def download_zip(event, context):
-    """Returns a link to download a zip of multiple images in FITS format.
-
-    First, get a list of files to be zipped based on
-    the query parameters specified. Next, call a Lambda function
-    (defined in the repository photonranch-downloads) that creates a zip
-    from the list of specified files and uploads that back to s3,
-    returning a presigned download URL. Finally, return the URL
-    in the HTTP response to the requester.
-
-    Args:
-        event.body.start_timestamp_s (str):
-            UTC datestring of starting time to query.
-        event.body.end_timestamp_s (str): 
-            UTC datestring of ending time to query.
-        event.body.fits_size (str):
-            Size of the FITS file (eg. 'small', 'large').
-        event.body.site (str): Sitecode to zip files from.
-
-    Returns:
-        200 status code with requested presigned URL at AWS.
-        Otherwise, 404 status code if no images match the query.
-    """
-
-    body = _get_body(event)
-    pprint(body)
-
-    start_timestamp_s = int(body.get('start_timestamp_s'))
-    end_timestamp_s = int(body.get('end_timestamp_s'))
-    fits_size = body.get('fits_size')  # small | large | best
-    site = body.get('site')
-
-    files = get_files_within_date_range(site, start_timestamp_s, end_timestamp_s, fits_size)
-
-    # Return 404 if no images fit the query.
-    if len(files) == 0:
-        return http_response(HTTPStatus.NOT_FOUND, 'No images exist for the given query.')
-
-    print('number of files: ', len(files))
-    print('first file: ', files[0])
-
-    payload = json.dumps({
-        'filenames': files
-        }).encode('utf-8')
-
-    response = lambda_client.invoke(
-        FunctionName='zip-downloads-dev-zip',
-        InvocationType='RequestResponse',
-        LogType='Tail',
-        Payload=payload
-    )
-    lambda_response = response['Payload'].read()
-
-    zip_url = json.loads(json.loads(lambda_response)['body'])
-    print(zip_url)
-
-    log_response = base64.b64decode(response['LogResult']).decode('utf-8')
-    pprint(log_response)
-
-    logs = log_response.splitlines()
-    pprint(logs)
-    return http_response(HTTPStatus.OK, zip_url)
 
 
 def get_recent_uploads(event, context):
@@ -303,24 +238,24 @@ def get_recent_uploads(event, context):
 
     Args:
         event.body.site: Sitecode to query recent files from.
-        
+
     Returns:
         200 status code with list of recent files if successful.
         Otherwise, 404 status code if missing sitecode in request.
     """
 
     print("Query string params: ", event['queryStringParameters'])
-    try: 
+    try:
         site = event['queryStringParameters']['site']
-    except: 
+    except:
         msg = "Please be sure to include the sitecode query parameter."
         return http_response(HTTPStatus.NOT_FOUND, msg)
 
     # Results from across all sites
-    if site == 'all': 
+    if site == 'all':
         response = recent_uploads_table.scan()
         results = response['Items']
-    
+
     # Results for specific site
     else:
         response = recent_uploads_table.query(
@@ -328,5 +263,4 @@ def get_recent_uploads(event, context):
         )
         results = response['Items']
 
-    return http_response(HTTPStatus.OK, results) 
-    
+    return http_response(HTTPStatus.OK, results)

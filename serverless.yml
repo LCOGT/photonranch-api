@@ -188,16 +188,6 @@ functions:
           method: post
           cors: true
 
-  downloadzip:
-    handler: api/handler.download_zip
-    memorySize: 1024
-    timeout: 30
-    events:
-      - http:
-          path: downloadzip
-          method: post
-          cors: true
-
   getRecentUploads:
     handler: api/handler.get_recent_uploads
     memorySize: 2024
