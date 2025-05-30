@@ -50,7 +50,7 @@ provider:
   runtime: python3.9
   region: us-east-1
   environment:
-    S3_BUCKET_NAME: 'photonranch-001'
+    S3_BUCKET_NAME: 'photonranch-jpgs'
     CONFIG_TABLE_NAME: site_configurations
     UPLOADS_LOG_TABLE_NAME: recent-uploads-log
     PIPE_QUEUE_TABLE_NAME: 'pipe-queue-table'
@@ -70,6 +70,8 @@ provider:
             - s3:ListBucket
             - s3:ListBucketVersions
           Resource:
+            - "arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*"
+            - "arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}"
             - "arn:aws:s3:::photonranch-001/*"
             - "arn:aws:s3:::photonranch-001"
 
